@@ -1,9 +1,7 @@
-// import { useContext } from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { server } from "../lib/config";
-import { getAllCategories, getAllCategoriesTree } from "../lib/fetch";
-// import { LayoutContext } from "../contexts/LayoutContext";
+import { getAllCategories, getAllCategoriesTree, ensureSerializable } from "../lib/fetch";
 import Meta from "../components/core/meta";
 import Layout from "../components/layouts/LayoutSecondary";
 import BookmarkContent from "../components/bookmark/page";
@@ -16,92 +14,127 @@ export default function Bookmark() {
   const [isExists, setExists] = useState(true);
   const [bookmarksData, setBookmarksData] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedBookmarks = localStorage.getItem("bookmarks");
-    const bookmarks = JSON.parse(savedBookmarks);
+    const checkMobile = () => {
+      const x = window.matchMedia("(min-width: 1024px)");
+      return !x.matches;
+    };
 
-    const queryKey = "key";
-    const keyMatcher = router.asPath.match(
-      new RegExp(`[&?]${queryKey}=(.*?)(&|$)`)
-    );
+    const loadBookmarks = () => {
+      try {
+        const savedBookmarks = localStorage.getItem("bookmarks");
+        if (!savedBookmarks) {
+          router.push("/404");
+          return;
+        }
 
-    const x = window.matchMedia("(min-width: 1024px)");
+        const bookmarks = JSON.parse(savedBookmarks);
+        const queryKey = "key";
+        const keyMatcher = router.asPath.match(
+          new RegExp(`[&?]${queryKey}=(.*?)(&|$)`)
+        );
 
-    if (!x.matches && !keyMatcher && !key) {
-      setIsMobile(true);
-      return;
-    } else {
-      setIsMobile(false);
-    }
+        const mobileView = checkMobile();
 
-    if (!keyMatcher) {
-      router.push("/404");
-      return <></>;
-    }
+        if (mobileView && !keyMatcher && !key) {
+          setIsMobile(true);
+          setIsLoading(false);
+          return;
+        } else {
+          setIsMobile(false);
+        }
 
-    if (!key) {
-      return <></>;
-    }
+        if (!keyMatcher && !key) {
+          router.push("/404");
+          return;
+        }
 
-    if (!bookmarks[key]) {
-      router.push("/404");
-      return <></>;
-    }
+        const currentKey = key || (keyMatcher ? keyMatcher[1] : null);
+        
+        if (!currentKey) {
+          setIsLoading(false);
+          return;
+        }
 
-    setBookmarkName(bookmarks[key].name);
+        if (!bookmarks[currentKey]) {
+          router.push("/404");
+          return;
+        }
 
-    if (bookmarks.hasOwnProperty(key)) {
-      if (bookmarks[key]["entry"].length > 0) {
-        setBookmarksData(bookmarks[key]["entry"]);
-      } else {
-        setExists(false);
+        setBookmarkName(bookmarks[currentKey].name);
+
+        if (bookmarks.hasOwnProperty(currentKey)) {
+          if (bookmarks[currentKey]["entry"] && bookmarks[currentKey]["entry"].length > 0) {
+            setBookmarksData(bookmarks[currentKey]["entry"]);
+          } else {
+            setExists(false);
+          }
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error loading bookmarks:", error);
+        setIsLoading(false);
       }
+    };
+
+    // Wait for router to be ready
+    if (router.isReady) {
+      loadBookmarks();
     }
-  }, [key]);
+  }, [router, key]);
 
   const updateBookmarksData = (id) => {
-    let updatedBookmarksData = bookmarksData.filter((item) => !(item.id == id));
+    const updatedBookmarksData = bookmarksData.filter((item) => item.id !== id);
     setBookmarksData(updatedBookmarksData);
   };
 
-  // const { contentTitle, changeContentTitle } = useContext(LayoutContext);
-
-  if (isMobile) {
-    // changeContentTitle("Bookmarks & Pin");
+  if (isLoading) {
     return (
-      <>
+      <div className="loading">
         <Meta
-          title={`Bookmark ${bookmarkName}`}
-          description={`Bookmark ${bookmarkName}. Hadith application in Vietnamese.`}
+          title="Loading..."
+          description="Loading bookmarks..."
           url={`${server}/bookmarks`}
           image={`${server}/img/s_logo.png`}
           type="website"
         />
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
-        <BookmarkMobile key={key} />
+  if (isMobile) {
+    return (
+      <>
+        <Meta
+          title="Bookmarks"
+          description="Bookmarks. Hadith application in Vietnamese."
+          url={`${server}/bookmarks`}
+          image={`${server}/img/s_logo.png`}
+          type="website"
+        />
+        <BookmarkMobile />
       </>
     );
   }
 
-  // changeContentTitle(bookmarkName);
-
   return (
     <>
       <Meta
-        title={`Bookmark ${bookmarkName}`}
-        description={`Bookmark ${bookmarkName}. Hadith application in Vietnamese.`}
-        url={`${server}/bookmarks?key=favorites`}
+        title={`Bookmark ${bookmarkName || 'Favorites'}`}
+        description={`Bookmark ${bookmarkName || 'Favorites'}. Hadith application in Vietnamese.`}
+        url={`${server}/bookmarks?key=${key || 'favorites'}`}
         image={`${server}/img/s_logo.png`}
         type="website"
       />
-
-      <BookmarkContent //
+      <BookmarkContent
         name={bookmarkName}
         data={bookmarksData}
         exist={isExists}
         isBookmarkPage={true}
-        key={key}
         queryKey={key}
         updateBookmarksData={updateBookmarksData}
       />
@@ -113,23 +146,27 @@ Bookmark.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
-export async function getStaticProps(context) {
-  const categoryList = await getAllCategories();
-  const categoryTree = await getAllCategoriesTree();
+export async function getStaticProps() {
+  try {
+    const categoryListData = await getAllCategories();
+    const categoryList = categoryListData?.categories || [];
+    const categoryTree = await getAllCategoriesTree();
 
-  if (!categoryList || !categoryTree) {
     return {
-      notFound: true,
+      props: ensureSerializable({
+        categoryList: categoryList || [],
+        categoryTree: categoryTree || [],
+        selectedCategoryId: null,
+      }),
+    };
+  } catch (error) {
+    console.error("Error in getStaticProps:", error);
+    return {
+      props: {
+        categoryList: [],
+        categoryTree: [],
+        selectedCategoryId: null,
+      },
     };
   }
-
-  return {
-    props: {
-      categoryList,
-      categoryTree,
-      selectedCategoryId: null,
-      // contentTitle: "Bookmarks & Pin", // mobile
-      // contentTitle: {bookmarkName}, // web
-    },
-  };
 }

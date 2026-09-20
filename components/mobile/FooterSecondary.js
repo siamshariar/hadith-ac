@@ -12,10 +12,10 @@ export default function FooterMobile() {
       <Container>
         <ul className={styles.menu}>
           <li>
-            <Link href="/" legacyBehavior>
-              <a>
-                <MenuBookIcon />
-              </a>
+            <Link href="/">
+
+              <MenuBookIcon />
+
             </Link>
           </li>
           <li>

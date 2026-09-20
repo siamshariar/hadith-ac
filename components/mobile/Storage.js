@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useContext } from "react";
 import { SidenavContext } from "../../contexts/SidenavContext";
 import Tabs from '@mui/material/Tabs';
@@ -28,8 +30,8 @@ function TabPanel(props) {
 
 TabPanel.propTypes = {
   children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
 };
 
 function a11yProps(index) {
@@ -42,15 +44,32 @@ function a11yProps(index) {
 export default function Save() {
   const { bookmarkOpen, changeBookmarkOpen } = useContext(SidenavContext);
   const [value, setValue] = useState(0);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    bookmarkOpen == false ? setValue(0) : setValue(bookmarkOpen - 1);
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (bookmarkOpen === false) {
+      setValue(0);
+    } else {
+      setValue(bookmarkOpen - 1);
+    }
   }, [bookmarkOpen]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    changeBookmarkOpen(newValue == 0 ? false : newValue + 1);
+    changeBookmarkOpen(newValue === 0 ? false : newValue + 1);
   };
+
+  if (!isClient) {
+    return (
+      <div className={styles.wrapper}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrapper}>

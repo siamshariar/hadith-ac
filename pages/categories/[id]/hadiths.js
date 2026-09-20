@@ -1,26 +1,44 @@
 import { server } from "../../../lib/config";
 import {
-  getAllCategories,
   getAllCategoriesTree,
   getCategoryById,
-  getHadithsByCategory,
+  getAllHadithsByCategory,
+  getSubcategories,
+  ensureSerializable,
 } from "../../../lib/fetch";
 import Meta from "../../../components/core/meta";
 import Layout from "../../../components/layouts/LayoutSecondary";
 import CategoryContent from "../../../components/content/Category";
 
-export default function Categories({ category, hadiths }) {
+export default function Categories({ 
+  category, 
+  hadiths, 
+  categoryId, 
+  categoryTree, 
+  subcategories,
+  initialHadiths
+}) {
+  const title = category ? (category.title || category.name_en || `Category ${categoryId}`) : `Category ${categoryId}`;
+  const description = `${title}. Hadith application in Vietnamese.`;
+  const url = `${server}/categories/${categoryId}/hadiths`;
+
   return (
     <>
       <Meta
-        title={`Category ${category.title}`}
-        description={`Category ${category.title}. Hadith application in Vietnamese.`}
-        url={`${server}/categories/${category.id}/hadiths`}
+        title={title}
+        description={description}
+        url={url}
         image={`${server}/img/s_logo.png`}
         type="website"
       />
 
-      <CategoryContent hadiths={hadiths} category={category} />
+      <CategoryContent 
+        hadiths={hadiths || initialHadiths || []}
+        category={category} 
+        categoryId={categoryId} 
+        subcategories={subcategories || []}
+        categoryTree={categoryTree || []}
+      />
     </>
   );
 }
@@ -32,52 +50,64 @@ Categories.getLayout = function getLayout(page) {
 export async function getStaticProps(context) {
   const id = encodeURI(context.params.id);
   const categoryId = parseInt(id);
-  const hadiths = await getHadithsByCategory(categoryId);
-  const categoryList = await getAllCategories();
-  const categoryTree = await getAllCategoriesTree();
-  const category = await getCategoryById(categoryId);
 
-  if (!hadiths || !categoryList || !categoryTree) {
+  try {
+    // Get category data from API with limited hadiths for initial page
+    const [category, categoryTree, subcategories] = await Promise.all([
+      getCategoryById(categoryId),
+      getAllCategoriesTree(),
+      getSubcategories(categoryId),
+    ]);
+
+    // Fetch first page of hadiths only
+    const hadiths = await getAllHadithsByCategory(categoryId);
+
     return {
-      notFound: true,
+      props: ensureSerializable({
+        categoryTree: categoryTree || [],
+        categoryId,
+        category: category || null,
+        hadiths: hadiths || [],
+        initialHadiths: hadiths || [],
+        subcategories: subcategories || [],
+        selectedCategoryId: categoryId,
+        backLink: "/",
+      }),
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.error('Error in getStaticProps:', error);
+    
+    return {
+      props: {
+        categoryTree: [],
+        categoryId,
+        category: { 
+          id: categoryId, 
+          title: `Category ${categoryId}`,
+          hadiths_count: 0,
+        },
+        hadiths: [],
+        initialHadiths: [],
+        subcategories: [],
+        selectedCategoryId: categoryId,
+        backLink: "/",
+      },
+      revalidate: 3600,
     };
   }
-
-  return {
-    props: {
-      categoryList,
-      categoryTree,
-      categoryId,
-      category,
-      hadiths,
-      selectedCategoryId: categoryId,
-      // contentTitle: category.title,
-      backLink: "/",
-      key: categoryId,
-    },
-  };
 }
 
 export async function getStaticPaths() {
   let paths = [];
-  // const categories = await getAllCategories();
-  // categories.map((category) => {
-  //   let id = encodeURI(category.id);
-  //   let obj = { params: { id: id } };
-  //   paths.push(obj);
-  // });
-
-  let obj = {
-    params: {
-      id: String(1),
-    },
-  };
-
-  paths.push(obj);
+  
+  // Generate paths for first 50 categories
+  for (let i = 1; i <= 50; i++) {
+    paths.push({ params: { id: i.toString() } });
+  }
 
   return {
     paths: paths,
-    // fallback: false,
-    fallback: "blocking",
+    fallback: 'blocking',
   };
 }

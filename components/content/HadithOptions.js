@@ -1,5 +1,6 @@
+ "use client";
+
 import { useState, useEffect, useContext } from "react";
-import { AudioPlayerContext } from "../../contexts/AudioPlayerContext";
 import { PinContext } from "../../contexts/PinContext";
 import { BookmarkContext } from "../../contexts/BookmarkContext";
 import { server } from "../../lib/config";
@@ -13,16 +14,12 @@ import RemoveBookmark from "../bookmark/remove";
 import BookmarkIcon from "../icons/Bookmark";
 import BookmarkBorder from "../icons/BookmarkBorder";
 import MoreIcon from "../icons/MoreVert";
-import PlayIcon from "../icons/PlayArrow";
-import PauseIcon from "../icons/Pause";
-import FileCopyIcon from "../icons/FileCopy";
-import ShareIcon from "../icons/Share";
-import LinkIcon from "../icons/Link";
-import PrintIcon from "../icons/Print";
 import UnpinIcon from "../icons/Pin";
 import PinIcon from "../icons/PinOutline";
 import Share from "../core/share";
-import { useReactToPrint } from "react-to-print";
+import LinkIcon from "../icons/Link";
+import FileCopyIcon from "../icons/FileCopy";
+import ShareIcon from "../icons/Share";
 
 import styles from "./HadithOptions.module.scss";
 
@@ -103,7 +100,8 @@ const HadithOptions = ({
       //   url = `${server}/chapters/${chapterSlug}/verses/${verseNumber}`;
       // }
 
-      let file = `[Title : ${hadith.title}]\n\nHadith: ${hadith.hadeeth}\n\nAttribution${hadith.attribution}\n\nGrade${hadith.grade}\n\nExplanation: ${hadith.explanation}\n\n${url}`;
+      const translationText = Object.values(hadith.translations || {})[0] || '';
+      let file = `Hadith ${hadith.hadith_number || hadith.id}\n\n${hadith.arabic_text || ''}\n\n${translationText}\n\nGrade: ${hadith.grade || ''}\n\n${url}`;
 
       navigator.clipboard.writeText(file);
       handlePopoverClose();
@@ -131,10 +129,8 @@ const HadithOptions = ({
 
     const url = `${server}/hadiths/${hadith.id}`;
     const title =
-      "Title " +
-      hadith.title +
-      " : Hadith " +
-      hadith.hadeeth +
+      "Hadith " +
+      (hadith.hadith_number || hadith.id) +
       " | Hadith | Hadith in Vietnamese | hadith.vn";
 
     setShareUrl(url);
@@ -147,10 +143,8 @@ const HadithOptions = ({
 
     const url = `${server}/hadiths/${hadith.id}`;
     const title =
-      "Title " +
-      hadith.title +
-      " : Hadith " +
-      hadith.hadeeth +
+      "Hadith " +
+      (hadith.hadith_number || hadith.id) +
       " | Hadith | Hadith in Vietnamese | hadith.vn";
 
     if (navigator.share) {
@@ -158,12 +152,7 @@ const HadithOptions = ({
         title: title,
         url: url,
       });
-      // .then(() => {
-      //     console.log('thanks for sharing')
-      // })
-      // .catch(console.error)
     } else {
-      //console.log('not supported')
       setShareUrl(url);
       setShareTitle(title);
       setShareOpen(true);
@@ -300,6 +289,7 @@ const HadithOptions = ({
             className={styles.more_icon}
             onClick={handlePopoverOpen}
             focusRipple={false}
+            aria-label="Hadith options"
           >
             <MoreIcon />
           </IconButton>

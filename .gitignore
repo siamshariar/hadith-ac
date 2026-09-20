@@ -37,3 +37,6 @@ yarn-error.log*
 
 # editor
 .vscode/
+
+# claude code local state
+/.claude/

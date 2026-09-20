@@ -9,26 +9,26 @@ export default function FooterWeb() {
         <div className={styles.bottom}>
           <p className={styles.copyright}>
             <span>&copy; {new Date().getFullYear()} </span>
-            <Link href="/about" legacyBehavior>
-              <a>Hadith.vn</a>
+            <Link href="/about">
+              Hadith.vn
             </Link>
             <span> All Rights Reserved</span>
           </p>
 
           <ul className={styles.menu}>
             <li>
-              <Link href="/support" legacyBehavior>
-                <a>Support</a>
+              <Link href="/support">
+                Support
               </Link>
             </li>
             <li>
-              <Link href="/grateful" legacyBehavior>
-                <a>Grateful</a>
+              <Link href="/grateful">
+                Grateful
               </Link>
             </li>
             <li>
-              <Link href="/contact" legacyBehavior>
-                <a>Contact</a>
+              <Link href="/contact">
+                Contact
               </Link>
             </li>
           </ul>

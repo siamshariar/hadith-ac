@@ -14,11 +14,13 @@ export default function SettingsModal({
       controller={controller}
       title="Danh mục"
     >
-      <Category
-        categoryList={categoryList}
-        categoryTree={categoryTree}
-        selectedCategoryId={selectedCategoryId}
-      />
+      {open && (
+        <Category
+          categoryList={categoryList}
+          categoryTree={categoryTree}
+          selectedCategoryId={selectedCategoryId}
+        />
+      )}
     </Modal>
   );
 }

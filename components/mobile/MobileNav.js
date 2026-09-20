@@ -130,21 +130,21 @@ export default function MobileNav({
         <div className={styles.wrapper}>
           <div className={styles.menu_ctn}>
             <div className={styles.menu_top}>
-              <Link href="/" legacyBehavior>
-                <a className={styles.logo}>
-                  <Image
-                    src="/img/logo_full_white.png"
-                    alt=""
-                    width={122}
-                    height={26}
-                    loading="eager"
-                  />
-                  <span>
-                    Quran.vn
-                    <br />
-                    v1.0.1
-                  </span>
-                </a>
+              <Link href="/" className={styles.logo}>
+
+                <Image
+                  src="/img/logo_full_white.png"
+                  alt=""
+                  width={122}
+                  height={26}
+                  loading="eager"
+                />
+                <span>
+                  Quran.vn
+                  <br />
+                  v1.0.1
+                </span>
+
               </Link>
             </div>
 
@@ -159,44 +159,44 @@ export default function MobileNav({
               {/*</li>*/}
 
               <li>
-                <Link href="/categories" legacyBehavior>
-                  <a onClick={handleCategoryModal(true)}>
-                    <span className={styles.icon}>
-                      <CategoryIcon />
-                    </span>
-                    <span className={styles.text}>Categories</span>
-                  </a>
+                <Link href="/categories" onClick={handleCategoryModal(true)}>
+
+                  <span className={styles.icon}>
+                    <CategoryIcon />
+                  </span>
+                  <span className={styles.text}>Categories</span>
+
                 </Link>
               </li>
 
               <li>
-                <Link href="/bookmarks" legacyBehavior>
-                  <a onClick={(e) => handleBookmarkPage(e, 1)}>
-                    <span className={styles.icon}>
-                      <BookmarkIcon />
-                    </span>
-                    <span className={styles.text}>Bookmarks</span>
-                  </a>
+                <Link href="/bookmarks" onClick={(e) => handleBookmarkPage(e, 1)}>
+
+                  <span className={styles.icon}>
+                    <BookmarkIcon />
+                  </span>
+                  <span className={styles.text}>Bookmarks</span>
+
                 </Link>
               </li>
               <li>
-                <Link href="/bookmarks" legacyBehavior>
-                  <a onClick={(e) => handleBookmarkPage(e, 2)}>
-                    <span className={styles.icon}>
-                      <PinIcon />
-                    </span>
-                    <span className={styles.text}>Pin</span>
-                  </a>
+                <Link href="/bookmarks" onClick={(e) => handleBookmarkPage(e, 2)}>
+
+                  <span className={styles.icon}>
+                    <PinIcon />
+                  </span>
+                  <span className={styles.text}>Pin</span>
+
                 </Link>
               </li>
               <li>
-                <Link href="/bookmarks" legacyBehavior>
-                  <a onClick={(e) => handleBookmarkPage(e, 3)}>
-                    <span className={styles.icon}>
-                      <AutoStoriesIcon />
-                    </span>
-                    <span className={styles.text}>Last Read</span>
-                  </a>
+                <Link href="/bookmarks" onClick={(e) => handleBookmarkPage(e, 3)}>
+
+                  <span className={styles.icon}>
+                    <AutoStoriesIcon />
+                  </span>
+                  <span className={styles.text}>Last Read</span>
+
                 </Link>
               </li>
               {/* <li>
@@ -211,13 +211,13 @@ export default function MobileNav({
               </li> */}
 
               <li>
-                <Link href="/settings" legacyBehavior>
-                  <a onClick={handleSettingsModal(true)}>
-                    <span className={styles.icon}>
-                      <SettingsIcon />
-                    </span>
-                    <span className={styles.text}>Settings</span>
-                  </a>
+                <Link href="/settings" onClick={handleSettingsModal(true)}>
+
+                  <span className={styles.icon}>
+                    <SettingsIcon />
+                  </span>
+                  <span className={styles.text}>Settings</span>
+
                 </Link>
               </li>
               {/* <li>
@@ -266,23 +266,23 @@ export default function MobileNav({
               {/*	</Link>*/}
               {/*</li>*/}
               <li>
-                <Link href="/support" legacyBehavior>
-                  <a>
-                    <span className={styles.icon}>
-                      <ContactIcon />
-                    </span>
-                    <span className={styles.text}>Support</span>
-                  </a>
+                <Link href="/support">
+
+                  <span className={styles.icon}>
+                    <ContactIcon />
+                  </span>
+                  <span className={styles.text}>Support</span>
+
                 </Link>
               </li>
               <li>
-                <Link href="/grateful" legacyBehavior>
-                  <a>
-                    <span className={styles.icon}>
-                      <FavoriteBorderIcon />
-                    </span>
-                    <span className={styles.text}>Grateful</span>
-                  </a>
+                <Link href="/grateful">
+
+                  <span className={styles.icon}>
+                    <FavoriteBorderIcon />
+                  </span>
+                  <span className={styles.text}>Grateful</span>
+
                 </Link>
               </li>
             </ul>
@@ -291,50 +291,49 @@ export default function MobileNav({
 
             <ul className={styles.menu}>
               <li>
-                <Link href="/about" legacyBehavior>
-                  <a>
-                    <span className={styles.icon}>
-                      <InfoIcon />
-                    </span>
-                    <span className={styles.text}>About</span>
-                  </a>
+                <Link href="/about">
+
+                  <span className={styles.icon}>
+                    <InfoIcon />
+                  </span>
+                  <span className={styles.text}>About</span>
+
                 </Link>
               </li>
               <li>
-                <Link href="/contact" legacyBehavior>
-                  <a>
-                    <span className={styles.icon}>
-                      <ContactIcon />
-                    </span>
-                    <span className={styles.text}>Contact</span>
-                  </a>
+                <Link href="/contact">
+
+                  <span className={styles.icon}>
+                    <ContactIcon />
+                  </span>
+                  <span className={styles.text}>Contact</span>
+
                 </Link>
               </li>
               <li>
-                <Link href="/deeniinfotech" legacyBehavior>
-                  <a>
-                    <span className={styles.icon}>
-                      <InfoIcon />
-                    </span>
-                    <span className={styles.text}>Deeni Info Tech</span>
-                  </a>
+                <Link href="/deeniinfotech">
+
+                  <span className={styles.icon}>
+                    <InfoIcon />
+                  </span>
+                  <span className={styles.text}>Deeni Info Tech</span>
+
                 </Link>
               </li>
               <li>
-                <Link href="/privacy-policy" legacyBehavior>
-                  <a>
-                    <span className={styles.icon}>
-                      <SecurityIcon />
-                    </span>
-                    <span className={styles.text}>Privacy Policy</span>
-                  </a>
+                <Link href="/privacy-policy">
+
+                  <span className={styles.icon}>
+                    <SecurityIcon />
+                  </span>
+                  <span className={styles.text}>Privacy Policy</span>
+
                 </Link>
               </li>
             </ul>
           </div>
         </div>
       </Drawer>
-
       <SettingsModal open={settingsOpen} controller={handleSettingsModal} />
       <CategoryModal
         open={categoriesOpen}
@@ -343,12 +342,10 @@ export default function MobileNav({
         categoryTree={categoryTree}
         selectedCategoryId={selectedCategoryId}
       />
-
       {/* <PinModal
 				open={pinOpen}
 				controller={handlePinModal}
 			/> */}
-
       {/* <BookmarkModal
 				open={bookmarkOpen}
 				controller={handleBookmarkModal}

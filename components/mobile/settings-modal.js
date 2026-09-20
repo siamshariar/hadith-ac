@@ -8,7 +8,7 @@ export default function SettingsModal({ open, controller }) {
       controller={controller}
       title="Settings"
     >
-      <SettingsContent />
+      {open && <SettingsContent />}
     </Modal>
   );
 }

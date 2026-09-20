@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext } from "react";
 import { BookmarkContext } from "../../contexts/BookmarkContext";
 import Modal from "@mui/material/Modal";

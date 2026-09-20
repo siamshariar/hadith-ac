@@ -103,16 +103,18 @@ export default function HeaderMobile({
             </div>
 
             <div className={styles.right}>
-              <Link href="/settings" legacyBehavior>
-                <a className={styles.icon} onClick={handleSettingsModal(true)}>
-                  <TuneIcon />
-                </a>
+              <Link
+                href="/settings"
+                className={styles.icon}
+                onClick={handleSettingsModal(true)}>
+
+                <TuneIcon />
+
               </Link>
             </div>
           </div>
         </Container>
       </div>
-
       <CategoryModal
         open={categoryOpen}
         controller={handleCategoryModal}
@@ -120,7 +122,6 @@ export default function HeaderMobile({
         categoryTree={categoryTree}
         selectedCategoryId={selectedCategoryId}
       />
-
       <SettingsModal open={settingsOpen} controller={handleSettingsModal} />
     </>
   );

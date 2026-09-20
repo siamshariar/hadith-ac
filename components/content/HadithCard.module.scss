@@ -1,56 +1,572 @@
 .wrapper {
-  margin: 1rem 0;
-  border-radius: 5px;
-  border: 1px solid #eaeaea;
+  margin: 1.5rem 0;
+  border-radius: 8px;
   border: 1px solid var(--bdr11);
-  box-shadow: 0 2px 6px rgb(0 0 0 / 15%);
-  transition: box-shadow 0.2s ease;
-  color: #111;
+  box-shadow: var(--bs21);
+  transition: all 0.3s ease;
+  background: var(--bg12);
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: var(--bs11);
+  }
 }
-.title {
-  border-bottom: 1px dotted;
+
+.header {
+  background: var(--bg12);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--bdr11);
   display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 16px;
-  border: none;
-  transition: color 0.2s ease;
-  font-size: 1.1rem;
-  //font-weight: 600;
-  color: #111;
-  color: var(--txt11);
-  margin-top: 0;
-  margin-bottom: 4px;
+  align-items: center;
+  justify-content: space-between;
 }
-.title:hover,
-.title:focus {
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--txt12);
+  flex-wrap: wrap;
+}
+
+.breadcrumb_icon {
+  font-size: 16px;
+}
+
+.breadcrumb_text {
+  display: inline-block;
+}
+
+.breadcrumb_separator {
+  display: inline-block;
+  margin: 0 4px;
+  color: var(--txt13);
+}
+
+.introduction {
+  background: var(--bg12);
+  padding: 16px;
+  border-bottom: 1px solid var(--bdr11);
+  border-left: 4px solid var(--main-color);
+}
+
+.intro_content {
+  display: flex;
+  gap: 12px;
+  font-size: 0.95rem;
+  line-height: 1.6;
   color: var(--txt11);
 }
 
-.wrapper h1 {
-  font-size: 30px;
+.intro_number {
+  font-weight: 600;
+  color: var(--main-color);
+  min-width: 20px;
 }
-.wrapper h2 {
-  font-size: 8px;
+
+.intro_text {
+  flex: 1;
+
+  p {
+    margin: 0;
+  }
 }
-.wrapper h3 {
-  font-size: 20px;
+
+.hadith_header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--bdr11);
+  background: var(--bg12);
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.wrapper h4 {
+
+.hadith_title_section {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.book_icon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.title_wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.book_reference {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--txt11);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.narrator {
+  font-size: 0.9rem;
+  color: var(--txt12);
+  font-style: italic;
+
+  strong {
+    color: var(--txt11);
+  }
+}
+
+.language_selector {
+  margin-top: 8px;
+}
+
+.language_select {
+  padding: 6px 10px;
+  border: 1px solid var(--bdr11);
+  border-radius: 4px;
+  background-color: var(--bg12);
+  color: var(--txt11);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--main-color);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--main-color);
+    box-shadow: var(--bs21);
+  }
+}
+
+.action_buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.verified_button {
+  background: var(--bdr11);
+  color: var(--txt11);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--main-color);
+    opacity: 0.9;
+    box-shadow: var(--bs21);
+    color: var(--bg11);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.icon_button {
+  background: var(--bg11);
+  border: 1px solid var(--bdr11);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
   font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--txt11);
+  
+  &:hover {
+    background: var(--txt11);
+    border-color: var(--bdr13);
+    color: var(--bg11);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
-.wrapper h5 {
+
+// HadithOptions integration styles
+.hadith_options_wrapper {
+  display: flex;
+  align-items: center;
+}
+
+// Style for the pinned indicator
+.pinned_indicator {
+  background: var(--bg11);
+  border: 1px solid var(--bdr11);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--main-color);
+}
+
+.arabic {
+  padding: 24px 16px;
+  border-bottom: 1px solid var(--bdr11);
+  background: var(--bg12);
+}
+
+.arabic_text {
+  margin: 0;
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+  font-size: 1.5rem;
+  line-height: 2.2;
+  text-align: right;
+  direction: rtl;
+  color: var(--txt11);
+  word-spacing: 0.1em;
+}
+
+.translations {
+  padding: 16px;
+  background: var(--bg12);
+  border-bottom: 1px solid var(--bdr11);
+
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--txt11);
+  }
+}
+
+.translation {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--bg12);
+  border-radius: 6px;
+  border: 1px solid var(--bdr11);
+  border-left: 3px solid var(--main-color);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &.active {
+    border-left-color: var(--main-color);
+    background-color: var(--bg22);
+  }
+}
+
+.translation_header {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--bdr11);
+}
+
+.language_name {
+  font-weight: 600;
+  color: var(--main-color);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.translation_text {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--txt11);
+  white-space: pre-line;
+}
+
+.no_translations {
+  padding: 16px;
+  text-align: center;
+  background: var(--bg12);
+  border-radius: 6px;
+  color: var(--txt13);
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+}
+
+.grade {
+  padding: 12px 16px;
+  background: var(--bg12);
+  border-top: 1px solid var(--bdr11);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grade_label {
+  font-weight: 600;
+  color: var(--txt12);
+  font-size: 0.9rem;
+}
+
+.grade_value {
+  color: var(--main-color);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.footer {
+  padding: 8px 16px;
+  background: var(--bg11);
+  border-top: 1px solid var(--bdr11);
+  display: flex;
+  justify-content: center;
+}
+
+.expand_button {
+  background: transparent;
+  border: none;
+  color: var(--main-color);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  &:hover {
+    color: var(--main-color);
+    opacity: 0.8;
+  }
+}
+
+.expand_icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+  fill: var(--main-color);
+  flex-shrink: 0;
+}
+
+.expand_text {
+  color: var(--main-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.expanded .expand_icon {
+  transform: rotate(180deg);
+}
+
+.debug {
+  padding: 16px;
+  background: #f5f5f5;
+  border-top: 1px solid #ddd;
+  font-family: monospace;
   font-size: 12px;
+  max-height: 300px;
+  overflow: auto;
+
+  pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+}
+
+.loading, .no_content, .no_translations {
+  padding: 16px;
+  text-align: center;
+  color: var(--txt12);
+  font-style: italic;
+}
+
+// Responsive design
+@media screen and (max-width: 640px) {
+  .hadith_header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .action_buttons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .arabic_text {
+    font-size: 1.3rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.8rem;
+  }
+
+  .language_selector {
+    width: 100%;
+    margin-top: 8px;
+    
+    .language_select {
+      width: 100%;
+    }
+  }
 }
 
 @media screen and (min-width: 1024px) {
   .wrapper {
-    margin: 1.5rem 0;
+    margin: 2rem 0;
+
+    &:hover {
+      box-shadow: 0 6px 20px var(--bs11);
+    }
   }
-  .wrapper:hover {
-    box-shadow: 0 6px 12px rgb(0 0 0 / 10%);
+
+  .hadith_header {
+    padding: 20px;
   }
-  .title {
-    padding: 23px;
+
+  .arabic {
+    padding: 28px 20px;
   }
+}
+
+// Additional styles for HadithOptions integration
+.hadith_options_container {
+  display: inline-flex;
+  align-items: center;
+}
+
+// Ensure proper alignment of the options menu
+.more_options_button {
+  background: var(--bg11);
+  border: 1px solid var(--bdr11);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--txt11);
+    border-color: var(--bdr13);
+    
+    svg {
+      fill: var(--bg11);
+    }
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--txt11);
+    transition: fill 0.2s ease;
+  }
+}
+
+// Custom styles for the popover menu
+.hadith_options_popover {
+  .MuiPopover-paper {
+    background-color: var(--bg11) !important;
+    border: 1px solid var(--bdr11) !important;
+    border-radius: 8px !important;
+    box-shadow: var(--bs21) !important;
+  }
+
+  .MuiMenu-list {
+    padding: 8px 0 !important;
+  }
+
+  .MuiMenuItem-root {
+    font-size: 14px !important;
+    color: var(--txt11) !important;
+    padding: 8px 16px !important;
+    min-height: 40px !important;
+
+    &:hover {
+      background-color: var(--bg22) !important;
+    }
+
+    .icon {
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      
+      svg {
+        width: 18px;
+        height: 18px;
+        fill: var(--txt11);
+      }
+    }
+
+    .text {
+      font-size: 14px;
+      color: var(--txt11);
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .action_buttons {
+    display: none !important;
+  }
+  
+  .hadith_options_container {
+    display: none !important;
+  }
+}
+
+// Add to your existing HadithCard.module.scss
+
+.pin_button {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #333;
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.icon_button {
+  // Keep existing styles for other icon buttons
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import HadithCard from "./HadithDetailCard";
 import styles from "./Content.module.scss";
 

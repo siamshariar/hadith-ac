@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useContext } from "react";
 import { BookmarkContext } from "../../contexts/BookmarkContext";
 import Link from "next/link";
@@ -12,6 +14,8 @@ export default function BookmarkList() {
   const [bookmarkKey, setBookmarkKey] = useState("");
 
   const handleDeleteBookmark = (e, key) => {
+    e.preventDefault();
+    e.stopPropagation();
     setBookmarkKey(key);
     setDeleteBookmarkOpen(true);
   };
@@ -26,24 +30,30 @@ export default function BookmarkList() {
     setDeleteBookmarkOpen(open);
   };
 
+  if (!bookmarks) {
+    return (
+      <div className={styles.content}>
+        <div className={styles.no_record}>No bookmarks found</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className={styles.content}>
         <div className={styles.lists}>
           {Object.keys(bookmarks).map((key) => (
             <div key={key} className={styles.item}>
-              <Link href={`/bookmarks?key=${key}`} legacyBehavior>
-                <a className={styles.link}>
-                  <span className={styles.left}>
-                    <span className={styles.icon}>
-                      <FolderIcon />
-                    </span>
-                    <span className={styles.desc}>
-                      <span>{bookmarks[key]["name"]}</span>
-                      <span>{bookmarks[key].entry.length} items</span>
-                    </span>
+              <Link href={`/bookmarks?key=${key}`} className={styles.link}>
+                <div className={styles.left}>
+                  <span className={styles.icon}>
+                    <FolderIcon />
                   </span>
-                </a>
+                  <span className={styles.desc}>
+                    <span>{bookmarks[key]?.name || 'Unnamed Folder'}</span>
+                    <span>{bookmarks[key]?.entry?.length || 0} items</span>
+                  </span>
+                </div>
               </Link>
 
               {key !== "favorites" && (
@@ -57,6 +67,10 @@ export default function BookmarkList() {
             </div>
           ))}
         </div>
+
+        {Object.keys(bookmarks).length === 0 && (
+          <div className={styles.no_record}>No bookmarks found</div>
+        )}
       </div>
 
       <DeleteBookmark

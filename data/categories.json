@@ -1,0 +1,200 @@
+[
+  {
+    "id": 1,
+    "name_en": "The Noble Qur'an and Qur'anic Sciences",
+    "name_ar": "القرآن الكريم وعلومه",
+    "name_vi": "Kinh Qur'an Cao Quý và Khoa học Qur'an",
+    "name_bn": "মহিমান্বিত কুরআন ও কুরআনিক বিজ্ঞান",
+    "name_ur": "قرآن مجید اور قرآنی علوم",
+    "parent_id": null,
+    "hadiths_count": 81,
+    "order": 1
+  },
+  {
+    "id": 2,
+    "name_en": "The Hadith and Hadith Sciences",
+    "name_ar": "الحديث وعلومه",
+    "name_vi": "Hadith và Khoa học Hadith",
+    "name_bn": "হাদীস ও হাদীস বিজ্ঞান",
+    "name_ur": "حدیث اور حدیث کے علوم",
+    "parent_id": null,
+    "hadiths_count": 9,
+    "order": 2
+  },
+  {
+    "id": 3,
+    "name_en": "The Creed",
+    "name_ar": "العقيدة",
+    "name_vi": "Tín Ngưỡng",
+    "name_bn": "আকীদাহ",
+    "name_ur": "عقیدہ",
+    "parent_id": null,
+    "hadiths_count": 457,
+    "order": 3
+  },
+  {
+    "id": 4,
+    "name_en": "Purification",
+    "name_ar": "الطهارة",
+    "name_vi": "Thanh tẩy",
+    "name_bn": "পবিত্রতা",
+    "name_ur": "طہارت",
+    "parent_id": null,
+    "hadiths_count": 289,
+    "order": 4
+  },
+  {
+    "id": 5,
+    "name_en": "Prayer",
+    "name_ar": "الصلاة",
+    "name_vi": "Lễ nguyện",
+    "name_bn": "নামাজ",
+    "name_ur": "نماز",
+    "parent_id": null,
+    "hadiths_count": 1129,
+    "order": 5
+  },
+  {
+    "id": 6,
+    "name_en": "Funerals",
+    "name_ar": "الجنائز",
+    "name_vi": "Tang lễ",
+    "name_bn": "জানাযা",
+    "name_ur": "جنازے",
+    "parent_id": null,
+    "hadiths_count": 127,
+    "order": 6
+  },
+  {
+    "id": 7,
+    "name_en": "Zakat",
+    "name_ar": "الزكاة",
+    "name_vi": "Zakat",
+    "name_bn": "যাকাত",
+    "name_ur": "زکوٰۃ",
+    "parent_id": null,
+    "hadiths_count": 156,
+    "order": 7
+  },
+  {
+    "id": 8,
+    "name_en": "Revelation and Collection of the Qur'an",
+    "name_ar": "الوحي وجمع القرآن",
+    "name_vi": "Mặc khải và Sưu tập Qur'an",
+    "name_bn": "ওহী ও কুরআন সংকলন",
+    "name_ur": "وحی اور قرآن کا جمع ہونا",
+    "parent_id": 1,
+    "hadiths_count": 15,
+    "order": 1
+  },
+  {
+    "id": 9,
+    "name_en": "Modes of Qur'anic Recitation and Tajweed",
+    "name_ar": "قراءات القرآن والتجويد",
+    "name_vi": "Cách đọc Qur'an và Quy tắc Tajweed",
+    "name_bn": "কুরআন তিলাওয়াতের পদ্ধতি ও তাজবীদ",
+    "name_ur": "قرآن کی قراءتیں اور تجوید",
+    "parent_id": 1,
+    "hadiths_count": 8,
+    "order": 2
+  },
+  {
+    "id": 10,
+    "name_en": "Virtues of the Qur'an",
+    "name_ar": "فضائل القرآن",
+    "name_vi": "Đức tính của Qur'an",
+    "name_bn": "কুরআনের গুণাবলী",
+    "name_ur": "قرآن کی فضیلتیں",
+    "parent_id": 1,
+    "hadiths_count": 58,
+    "order": 3
+  },
+  {
+    "id": 11,
+    "name_en": "Faith (Iman)",
+    "name_ar": "الإيمان",
+    "name_vi": "Đức tin (Iman)",
+    "name_bn": "ঈমান",
+    "name_ur": "ایمان",
+    "parent_id": 3,
+    "hadiths_count": 156,
+    "order": 1
+  },
+  {
+    "id": 12,
+    "name_en": "Monotheism (Tawhid)",
+    "name_ar": "التوحيد",
+    "name_vi": "Thuyết nhất thần (Tawhid)",
+    "name_bn": "তাওহীদ",
+    "name_ur": "توحید",
+    "parent_id": 3,
+    "hadiths_count": 89,
+    "order": 2
+  },
+  {
+    "id": 13,
+    "name_en": "Ablution (Wudu)",
+    "name_ar": "الوضوء",
+    "name_vi": "Rửa tay chân (Wudu)",
+    "name_bn": "ওযু",
+    "name_ur": "وضو",
+    "parent_id": 4,
+    "hadiths_count": 145,
+    "order": 1
+  },
+  {
+    "id": 14,
+    "name_en": "Ghusl (Bathing)",
+    "name_ar": "الغسل",
+    "name_vi": "Tắm (Ghusl)",
+    "name_bn": "গোসল",
+    "name_ur": "غسل",
+    "parent_id": 4,
+    "hadiths_count": 67,
+    "order": 2
+  },
+  {
+    "id": 15,
+    "name_en": "Tayammum (Dry Ablution)",
+    "name_ar": "التيمم",
+    "name_vi": "Tayammum (Rửa khô)",
+    "name_bn": "তায়াম্মুম",
+    "name_ur": "تیمم",
+    "parent_id": 4,
+    "hadiths_count": 27,
+    "order": 3
+  },
+  {
+    "id": 16,
+    "name_en": "Times of Prayer",
+    "name_ar": "مواقيت الصلاة",
+    "name_vi": "Thời gian cầu nguyện",
+    "name_bn": "নামাজের সময়",
+    "name_ur": "نماز کے اوقات",
+    "parent_id": 5,
+    "hadiths_count": 89,
+    "order": 1
+  },
+  {
+    "id": 17,
+    "name_en": "Call to Prayer (Adhan)",
+    "name_ar": "الأذان",
+    "name_vi": "Lời gọi cầu nguyện (Adhan)",
+    "name_bn": "আযান",
+    "name_ur": "اذان",
+    "parent_id": 5,
+    "hadiths_count": 156,
+    "order": 2
+  },
+  {
+    "id": 18,
+    "name_en": "Friday Prayer",
+    "name_ar": "صلاة الجمعة",
+    "name_vi": "Lễ nguyện thứ Sáu",
+    "name_bn": "জুমার নামাজ",
+    "name_ur": "جمعہ کی نماز",
+    "parent_id": 5,
+    "hadiths_count": 78,
+    "order": 3
+  }
+]

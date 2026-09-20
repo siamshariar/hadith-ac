@@ -1,3 +1,5 @@
+"use client";
+
 import { fonts, themes } from "../../lib/settings";
 import { useState, useContext } from "react";
 import { SettingsContext } from "../../contexts/SettingsContext";
@@ -85,6 +87,7 @@ const FontSize = () => {
             <IconButton
               className={styles.sizer_btn}
               onClick={() => handleFontSizeTranslation(fontSizeTranslation - 1)}
+              aria-label="Decrease font size"
             >
               <MinusIcon />
             </IconButton>
@@ -94,6 +97,7 @@ const FontSize = () => {
             <IconButton
               className={styles.sizer_btn}
               onClick={() => handleFontSizeTranslation(fontSizeTranslation + 1)}
+              aria-label="Increase font size"
             >
               <PlusIcon />
             </IconButton>
@@ -185,7 +189,10 @@ const FontFamily = () => {
             onChange={controlAccordion("font_trans")}
           >
             <AccordionSummary className={styles.accordion_summary}>
-              <IconButton className={styles.btn}>
+              <IconButton
+                className={styles.btn}
+                aria-label={expanded === "font_trans" ? "Collapse font choices" : "Expand font choices"}
+              >
                 <span
                   className={
                     expanded !== "font_trans" ? styles.none : styles.icon
@@ -251,7 +258,10 @@ const Theme = () => {
             onChange={controlAccordion("theme")}
           >
             <AccordionSummary className={styles.accordion_summary}>
-              <IconButton className={styles.btn}>
+              <IconButton
+                className={styles.btn}
+                aria-label={expanded === "theme" ? "Collapse theme choices" : "Expand theme choices"}
+              >
                 <span
                   className={expanded !== "theme" ? styles.none : styles.icon}
                 >

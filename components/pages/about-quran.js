@@ -34,13 +34,13 @@ const GridItem = ({ title, text, url }) => {
       <div className={styles.item}>
         <h2>{title}</h2>
         <p>{text}</p>
-        <Link href={url} legacyBehavior>
-          <a>
-            <span>Xem thêm</span>
-            <span>
-              <EastIcon />
-            </span>
-          </a>
+        <Link href={url}>
+
+          <span>Xem thêm</span>
+          <span>
+            <EastIcon />
+          </span>
+
         </Link>
       </div>
     </Grid>

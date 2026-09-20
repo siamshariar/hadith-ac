@@ -2,74 +2,273 @@
   display: block;
   width: 100%;
   background-color: var(--bg11);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .title_area {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--bdr11);
 }
+
 .title_area .left {
   width: calc(100% - 40px);
 }
+
 .title_area .left h1 {
   text-align: left;
-  font-size: 16px;
-  font-size: 100%;
-  font-weight: 400;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--txt11);
+  margin: 0 0 12px 0;
+  line-height: 1.4;
 }
+
+.language_selector {
+  margin-top: 8px;
+}
+
+.language_select {
+  padding: 6px 10px;
+  border: 1px solid var(--bdr11);
+  border-radius: 4px;
+  background-color: var(--bg12);
+  color: var(--txt11);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--main-color);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--main-color);
+    box-shadow: 0 0 0 2px rgba(70, 101, 72, 0.2);
+  }
+}
+
 .title_area .right {
   width: 24px;
   height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .content {
   display: block;
+  width: 100%;
 }
+
 .content .item {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: var(--bg12);
+  border-radius: 6px;
+  border-left: 4px solid var(--main-color);
 }
 
-.trans {
-}
-.attr {
-}
-.grade {
-}
-.exp {
+.content .item:last-child {
+  margin-bottom: 0;
 }
 
-.trans p {
-  font-size: 16px;
-  font-size: 100%;
+.image {
+  text-align: center;
+  border-left-color: #FF5722;
 }
-.attr p {
+
+.image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin: 0 auto;
+}
+
+.label {
   font-size: 14px;
-  font-size: 100%;
-}
-.grade p {
-  font-size: 16px;
-  font-size: 100%;
-}
-.exp p {
-  font-size: 15px;
-  font-size: 100%;
+  font-weight: 600;
+  color: var(--txt12);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.trans p span,
-.attr p span,
-.grade p span,
-.exp p span {
+.text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--txt11);
+}
+
+/* Specific section styles */
+.trans {
+  border-left-color: #4CAF50;
+}
+
+.attr {
+  border-left-color: #2196F3;
+}
+
+.grade {
+  border-left-color: #FF9800;
+}
+
+.exp {
+  border-left-color: #9C27B0;
+}
+
+.cat {
+  border-left-color: #607D8B;
+}
+
+.number {
+  border-left-color: #FF5722;
+}
+
+.hints {
+  border-left-color: #795548;
+}
+
+.references {
+  border-left-color: #607D8B;
+}
+
+.translations {
+  border-left-color: var(--main-color);
+}
+
+.trans .text {
+  font-size: 16px;
+  font-style: italic;
+}
+
+.attr .text {
+  font-size: 14px;
   font-weight: 500;
 }
 
-@media screen and (min-width: 1024px) {
-  .title_area .left h1 {
-    font-size: 18px;
-    font-size: 112.5%;
-    font-weight: 400;
+.grade .text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #FF9800;
+}
+
+.exp .text {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.cat .text {
+  font-size: 14px;
+  color: var(--txt12);
+}
+
+/* Responsive Design */
+@media screen and (min-width: 768px) {
+  .wrapper {
+    padding: 24px;
   }
+  
+  .title_area .left h1 {
+    font-size: 20px;
+  }
+  
+  .content .item {
+    padding: 18px;
+  }
+  
+  .text {
+    font-size: 16px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .wrapper {
+    padding: 28px;
+  }
+  
+  .title_area .left h1 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+  
+  .content .item {
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  
+  .label {
+    font-size: 15px;
+  }
+  
+  .text {
+    font-size: 16px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .wrapper {
+    background-color: var(--bg11);
+    border: 1px solid var(--bdr11);
+  }
+  
+  .content .item {
+    background-color: var(--bg12);
+  }
+}
+
+/* Translations list styling */
+.translations_list {
+  margin-top: 16px;
+}
+
+.translation_item {
+  margin-bottom: 12px;
+  padding: 12px;
+  background-color: var(--bg12);
+  border-radius: 6px;
+  border-left: 4px solid var(--main-color);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--bg22);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &.active {
+    border-left-color: var(--main-color);
+    background-color: rgba(70, 101, 72, 0.1);
+  }
+}
+
+.lang_code {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--main-color);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.translation_text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--txt11);
+  font-style: italic;
+  margin: 0;
 }

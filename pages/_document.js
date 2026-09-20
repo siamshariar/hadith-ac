@@ -5,6 +5,7 @@ import Document, { Html, Head, Main, NextScript } from "next/document";
 import { ServerStyleSheets } from "@mui/styles";
 
 import { GA_TRACKING_ID } from "../lib/gtag";
+import { config } from "../lib/config";
 
 class CustomDocument extends Document {
   static async getInitialProps(ctx) {
@@ -14,7 +15,7 @@ class CustomDocument extends Document {
 
   render() {
     return (
-      <Html lang="en">
+      <Html lang={config.language}>
         <Head>
           {/* Global Site Tag (gtag.js) - Google Analytics */}
           <script

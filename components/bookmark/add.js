@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useContext } from "react";
 import { BookmarkContext } from "../../contexts/BookmarkContext";
 import Modal from "@mui/material/Modal";
@@ -55,9 +57,14 @@ export default function AddBookmark({ open, closer, hadith }) {
           entry: [
             {
               id: hadith.id,
-              title: hadith.title,
-              hadeeth: hadith.hadeeth,
-              attribution: hadith.attribution,
+              hadith_number: hadith.hadith_number,
+              book_id: hadith.book_id,
+              chapter_id: hadith.chapter_id,
+              arabic_text: hadith.arabic_text,
+              translations: hadith.translations,
+              book: hadith.book,
+              chapter: hadith.chapter,
+              narrator: hadith.narrator,
               grade: hadith.grade,
               explanation: hadith.explanation,
               categories: hadith.categories,
@@ -74,9 +81,14 @@ export default function AddBookmark({ open, closer, hadith }) {
         let entry = bookmarks[folderKey].entry;
         entry.push({
           id: hadith.id,
-          title: hadith.title,
-          hadeeth: hadith.hadeeth,
-          attribution: hadith.attribution,
+          hadith_number: hadith.hadith_number,
+          book_id: hadith.book_id,
+          chapter_id: hadith.chapter_id,
+          arabic_text: hadith.arabic_text,
+          translations: hadith.translations,
+          book: hadith.book,
+          chapter: hadith.chapter,
+          narrator: hadith.narrator,
           grade: hadith.grade,
           explanation: hadith.explanation,
           categories: hadith.categories,

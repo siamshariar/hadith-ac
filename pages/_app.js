@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 // import LayoutContextProvider from "../contexts/LayoutContext";
+import SettingsContextProvider from "../contexts/SettingsContext";
 import * as gtag from "../lib/gtag";
 import "../styles/global.scss";
 
@@ -34,7 +35,11 @@ const App = ({ Component, pageProps }) => {
 
   const getLayout = Component.getLayout || ((page) => page);
 
-  return getLayout(<Component {...pageProps} />);
+  return (
+    <SettingsContextProvider>
+      {getLayout(<Component {...pageProps} />)}
+    </SettingsContextProvider>
+  );
 
   // return (
   //   <LayoutContextProvider>

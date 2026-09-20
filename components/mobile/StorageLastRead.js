@@ -42,28 +42,27 @@ export default function LastReadList() {
           lastRead.length > 0 &&
           lastRead.map((item) => (
             <div key={item.id} className={styles.item}>
-              <Link href={`hadiths/${item.id}`} legacyBehavior>
-                <a className={styles.link}>
-                  <span className={styles.left}>
-                    <span className={styles.icon}>
-                      <AutoStoriesIcon />
-                    </span>
-                    <span className={styles.desc}>
-                      <span>{item.title}</span>
-                      <span className={styles.time}>
-                        {formatDate(item.date)}
-                      </span>
+              <Link href={`hadiths/${item.id}`} className={styles.link}>
+
+                <span className={styles.left}>
+                  <span className={styles.icon}>
+                    <AutoStoriesIcon />
+                  </span>
+                  <span className={styles.desc}>
+                    <span>{item.title}</span>
+                    <span className={styles.time}>
+                      {formatDate(item.date)}
                     </span>
                   </span>
-                  {/* <span className={styles.right}>
-                    <span className={styles.time}>{formatDate(item.date)}</span>
-                  </span> */}
-                </a>
+                </span>
+                {/* <span className={styles.right}>
+                  <span className={styles.time}>{formatDate(item.date)}</span>
+                </span> */}
+
               </Link>
             </div>
           ))}
       </div>
-
       {lastRead && lastRead.length == 0 && (
         <h2 className={styles.no_record}>No records found!</h2>
       )}

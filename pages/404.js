@@ -6,11 +6,10 @@ export default function ErrorPage() {
       <div className="content">
         <h1>404</h1>
         <h2>Page not found.</h2>
-        <Link href="/" legacyBehavior>
-          <a>Back To Home</a>
+        <Link href="/">
+          Back To Home
         </Link>
       </div>
-
       <style jsx>
         {`
           body {

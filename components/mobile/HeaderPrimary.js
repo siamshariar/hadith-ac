@@ -44,6 +44,7 @@ export default function HeaderMobile({
                 className={styles.icon}
                 onClick={controlMobileNav(true)}
                 focusRipple={false}
+                aria-label="Open menu"
               >
                 <MenuIcon />
               </IconButton>
@@ -51,30 +52,30 @@ export default function HeaderMobile({
 
             <div className={styles.center}>
               {theme === "light" && (
-                <Link href="/" legacyBehavior>
-                  <a className={styles.logo}>
-                    <Image
-                      src="/img/logo.png"
-                      alt=""
-                      width={153}
-                      height={26}
-                      loading="eager"
-                    />
-                  </a>
+                <Link href="/" className={styles.logo}>
+
+                  <Image
+                    src="/img/logo.png"
+                    alt="Hadith VN"
+                    width={153}
+                    height={26}
+                    loading="eager"
+                  />
+
                 </Link>
               )}
 
               {theme !== "light" && (
-                <Link href="/" legacyBehavior>
-                  <a className={styles.logo}>
-                    <Image
-                      src="/img/logo_full_white.png"
-                      alt=""
-                      width={153}
-                      height={26}
-                      loading="eager"
-                    />
-                  </a>
+                <Link href="/" className={styles.logo}>
+
+                  <Image
+                    src="/img/logo_full_white.png"
+                    alt="Hadith VN"
+                    width={153}
+                    height={26}
+                    loading="eager"
+                  />
+
                 </Link>
               )}
             </div>
@@ -92,6 +93,7 @@ export default function HeaderMobile({
                 className={styles.icon}
                 onClick={() => modeSwitcher()}
                 focusRipple={false}
+                aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
               >
                 {theme === "light" && <Brightness4Icon />}
                 {theme !== "light" && <Brightness7Icon />}
@@ -100,7 +102,6 @@ export default function HeaderMobile({
           </div>
         </Container>
       </div>
-
       <MobileNav
         navOpen={mobileNavOpen}
         navControl={controlMobileNav}

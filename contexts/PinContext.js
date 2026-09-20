@@ -38,22 +38,47 @@ const PinContextProvider = ({ children }) => {
   };
 
   // change pin functions
-  // const addPin = (chapter, name, slug, verse) => {
   const addPin = (hadith) => {
     if (!checkPinnedAnyVerseOfThisChapter(pin, hadith.id)) {
       let newPin = pin.slice(); // assign pin to newPin
-      newPin.unshift({
+      
+      // Create comprehensive pin data with source context
+      const pinData = {
         id: hadith.id,
-        title: hadith.title,
+        title: hadith.title || hadith.hadeeth || hadith.arabic_text || 'Hadith',
         hadeeth: hadith.hadeeth,
+        arabic_text: hadith.arabic_text,
+        hadith_number: hadith.hadith_number,
         grade: hadith.grade,
-      });
+        // Store source context for navigation
+        book_id: hadith.book_id,
+        book_name: hadith.book_name,
+        chapter_id: hadith.chapter_id,
+        chapter_name: hadith.chapter_name,
+        category_id: hadith.category_id,
+        category_name: hadith.category_name,
+        // Store the original source URL for navigation back to context
+        source_url: hadith.source_url || getCurrentContextUrl(hadith),
+        date: new Date().toISOString()
+      };
+
+      newPin.unshift(pinData);
       saveToLocalStorage(newPin);
       setPin(newPin);
     }
   };
 
-  // const removePin = (chapter, verse) => {
+  // Helper function to get current context URL
+  const getCurrentContextUrl = (hadith) => {
+    if (typeof window !== 'undefined') {
+      const baseUrl = window.location.pathname + window.location.search;
+      const hadithAnchor = `#hadith-${hadith.hadith_number || hadith.id}`;
+      const fullUrl = baseUrl + hadithAnchor;
+      return fullUrl;
+    }
+    return '';
+  };
+
   const removePin = (hadith) => {
     let newPin = [];
     pin.forEach((el) => {
@@ -72,15 +97,30 @@ const PinContextProvider = ({ children }) => {
 
   const addLastRead = (hadith) => {
     let maxLength = 10; // should be 100 later
+    
+    // Create comprehensive last read data
+    const lastReadData = {
+      id: hadith.id,
+      title: hadith.title || hadith.hadeeth || hadith.arabic_text || 'Hadith',
+      hadeeth: hadith.hadeeth,
+      arabic_text: hadith.arabic_text,
+      hadith_number: hadith.hadith_number,
+      grade: hadith.grade,
+      // Store source context for navigation
+      book_id: hadith.book_id,
+      book_name: hadith.book_name,
+      chapter_id: hadith.chapter_id,
+      chapter_name: hadith.chapter_name,
+      category_id: hadith.category_id,
+      category_name: hadith.category_name,
+      // Store source URL
+      source_url: hadith.source_url || getCurrentContextUrl(hadith),
+      date: Date.now()
+    };
+
     if (checkIfLastReadAnyVerseOfThisChapter(lastRead, hadith.id)) {
       let newLastRead = [
-        {
-          id: hadith.id,
-          title: hadith.title,
-          hadeeth: hadith.hadeeth,
-          grade: hadith.grade,
-          date: Date.now(),
-        },
+        lastReadData
       ];
 
       for (let index = 0; index < lastRead.length; index++) {
@@ -90,20 +130,11 @@ const PinContextProvider = ({ children }) => {
         if (lastRead[index].id != hadith.id) newLastRead.push(lastRead[index]);
       }
 
-      // lastRead.forEach((el) => {
-      //   if (el.id != hadith.id) newLastRead.push(el);
-      // });
       saveLastReadToLocalStorage(newLastRead);
       setLastRead(newLastRead);
     } else {
       let newLastRead = lastRead.slice(); // assign lastRead to newLastRead
-      newLastRead.unshift({
-        id: hadith.id,
-        title: hadith.title,
-        hadeeth: hadith.hadeeth,
-        grade: hadith.grade,
-        date: Date.now(),
-      });
+      newLastRead.unshift(lastReadData);
       if (newLastRead.length > maxLength) {
         newLastRead.pop();
       }
