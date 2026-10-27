@@ -6,17 +6,17 @@ import SettingsModal from "./settings-modal";
 import BackIcon from "../icons/NavigateBefore";
 import DropDownIcon from "../icons/ArrowDropDown";
 import TuneIcon from "../icons/Tune";
+import SearchIcon from "../icons/Search";
 import styles from "./Header.module.scss";
 import {useRouter} from "next/router";
+import { useLocale } from "../../contexts/LocaleContext";
 
 export default function HeaderMobile({
-  contentTitle,
-  categoryList,
-  categoryTree,
   selectedCategoryId,
   backLink,
 }) {
   const router = useRouter()
+  const { t } = useLocale();
   const [categoryOpen, setCategoryOpen] = useState(false);
 
   const handleCategoryModal = (open) => (event) => {
@@ -88,6 +88,9 @@ export default function HeaderMobile({
               {backLink && (
                   <span
                       className={styles.icon}
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Back"
                       onClick={historyLength > 2 ? () => router.back() : () => router.push(`${backLink}`)}
                   >
                 <BackIcon />
@@ -95,17 +98,26 @@ export default function HeaderMobile({
               )}
             </div>
 
-            <div className={styles.center} onClick={handleCategoryModal(true)}>
-              <span>Danh mục</span>
+            <button
+              type="button"
+              className={styles.center}
+              onClick={handleCategoryModal(true)}
+              aria-haspopup="dialog"
+            >
+              <span>{t("categories")}</span>
               <span className={styles.icon}>
                 <DropDownIcon />
               </span>
-            </div>
+            </button>
 
             <div className={styles.right}>
+              <Link href="/search" className={styles.icon} aria-label={t("search")}>
+                <SearchIcon />
+              </Link>
               <Link
                 href="/settings"
                 className={styles.icon}
+                aria-label="Settings"
                 onClick={handleSettingsModal(true)}>
 
                 <TuneIcon />
@@ -118,8 +130,6 @@ export default function HeaderMobile({
       <CategoryModal
         open={categoryOpen}
         controller={handleCategoryModal}
-        categoryList={categoryList}
-        categoryTree={categoryTree}
         selectedCategoryId={selectedCategoryId}
       />
       <SettingsModal open={settingsOpen} controller={handleSettingsModal} />

@@ -16,12 +16,7 @@ const Layout = ({ children }) => {
             <div className={styles.wrapper}>
               <div className={styles.header}>
                 <HeaderWeb page="home" />
-                <HeaderMobile
-                  contentTitle={children.props.contentTitle}
-                  categoryList={children.props.categoryList}
-                  categoryTree={children.props.categoryTree}
-                  selectedCategoryId={children.props.selectedCategoryId}
-                />
+                <HeaderMobile />
               </div>
 
               <main id="viewport" className="viewport">

@@ -55,7 +55,6 @@
 }
 .icon.close_icon {
   right: 10px;
-  display: none;
 }
 
 input.input {
@@ -242,4 +241,36 @@ input.input {
 }
 .detail_expanded {
   color: inherit;
+}
+
+.count {
+  color: var(--txt13);
+  font-size: 0.85em;
+  font-weight: 400;
+}
+
+.chapterNo {
+  display: inline-block;
+  min-width: 28px;
+  color: var(--txt13);
+}
+
+.chapter {
+  font-size: 0.95rem;
+}
+
+.empty {
+  padding: 16px 0;
+  color: var(--txt12);
+  font-size: 14px;
+}
+
+.skeleton {
+  padding: 4px 8px 0 0;
+}
+
+.list:focus-visible {
+  outline: 2px solid var(--theme-color);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

@@ -23,7 +23,9 @@ import BookmarkIcon from "../icons/BookmarkBorder";
 import CategoryIcon from "@mui/icons-material/CategoryOutlined";
 import PinIcon from "../icons/PinOutline";
 import AutoStoriesIcon from "../icons/AutoStories";
+import SearchIcon from "../icons/Search";
 import { SidenavContext } from "../../contexts/SidenavContext";
+import { useLocale } from "../../contexts/LocaleContext";
 import { useRouter } from "next/router";
 
 // import PinModal from './pin-modal'
@@ -34,13 +36,7 @@ import { useRouter } from "next/router";
 
 import styles from "./MobileNav.module.scss";
 
-export default function MobileNav({
-  navOpen,
-  navControl,
-  categoryList,
-  categoryTree,
-  selectedCategoryId,
-}) {
+export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
   // go to verse modal
 
   // settings modal
@@ -105,6 +101,8 @@ export default function MobileNav({
   // 	}, 300)
   // }
 
+  const { t } = useLocale();
+
   // handle bookmark page
   const { bookmarkOpen, changeBookmarkOpen } = useContext(SidenavContext);
   const router = useRouter();
@@ -159,12 +157,30 @@ export default function MobileNav({
               {/*</li>*/}
 
               <li>
+                <Link href="/books" onClick={navControl(false)}>
+                  <span className={styles.icon}>
+                    <MenuBookIcon />
+                  </span>
+                  <span className={styles.text}>{t("books")}</span>
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/search" onClick={navControl(false)}>
+                  <span className={styles.icon}>
+                    <SearchIcon />
+                  </span>
+                  <span className={styles.text}>{t("search")}</span>
+                </Link>
+              </li>
+
+              <li>
                 <Link href="/categories" onClick={handleCategoryModal(true)}>
 
                   <span className={styles.icon}>
                     <CategoryIcon />
                   </span>
-                  <span className={styles.text}>Categories</span>
+                  <span className={styles.text}>{t("categories")}</span>
 
                 </Link>
               </li>
@@ -338,8 +354,6 @@ export default function MobileNav({
       <CategoryModal
         open={categoriesOpen}
         controller={handleCategoryModal}
-        categoryList={categoryList}
-        categoryTree={categoryTree}
         selectedCategoryId={selectedCategoryId}
       />
       {/* <PinModal

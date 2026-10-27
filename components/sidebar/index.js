@@ -1,338 +1,241 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useContext } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import Link from "next/link";
-import Scrollbar from "../core/scrollbar";
+import Skeleton from "react-loading-skeleton";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
+import Scrollbar from "../core/scrollbar";
+import ErrorState from "../core/error";
 import SearchIcon from "../icons/Search";
-import styles from "./index.module.scss";
 import { SettingsContext } from "../../contexts/SettingsContext";
+import { useLocale } from "../../contexts/LocaleContext";
+import useApi from "../../hooks/useApi";
+import { buildCategoryTree, getBook, getBooks, getCategories } from "../../lib/api";
+import {
+  UNASSIGNED_CHAPTER,
+  bookPath,
+  categoryHadithsPath,
+  categoryPath,
+  chapterPath,
+  shortBookName,
+} from "../../lib/hadith";
+import styles from "./index.module.scss";
 
-export default function Sidebar({
-  categoryList = [],
-  categoryTree = [],
-  selectedCategoryId,
-  books = [],
-  selectedBookId,
-  linkPattern = "categories",
-  chapters = [],
-  selectedChapterId,
-}) {
-  const { theme } = useContext(SettingsContext);
-  const isBooksMode = linkPattern === "books";
-  
-  // Use provided data only (API-only mode)
-  const currentCategoryList = useMemo(() => 
-    Array.isArray(categoryList) ? categoryList : [], 
-    [categoryList]
-  );
-  
-  const currentCategoryTree = useMemo(() => 
-    Array.isArray(categoryTree) ? categoryTree : [], 
-    [categoryTree]
-  );
-  
-  const currentBooks = useMemo(() => 
-    Array.isArray(books) ? books : [], 
-    [books]
-  );
-  
-  const currentChapters = useMemo(() => 
-    Array.isArray(chapters) ? chapters : [], 
-    [chapters]
-  );
+// Case- and accent-insensitive matching, so "giao ly" finds "Giáo lý".
+const fold = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/đ/gi, "d")
+    .toLowerCase();
 
-  const items = isBooksMode ? currentBooks : currentCategoryList;
-  const tree = isBooksMode ? currentBooks : currentCategoryTree;
-  const selectedId = isBooksMode ? selectedBookId : selectedCategoryId;
+const accordionClasses = {
+  root: styles.acc_root,
+  expanded: styles.acc_expanded,
+};
+const summaryClasses = {
+  root: styles.summary_root,
+  expanded: styles.summary_expanded,
+  expandIconWrapper: styles.summary_icon,
+  content: styles.summary_content,
+};
+const detailClasses = { root: styles.detail_root };
 
-  const input = useRef(null);
-  const closeButton = useRef(null);
-  const [filteredItems, setFilteredItems] = useState([]);
-  const [search, setSearch] = useState("");
-  const [isSearchEmpty, setIsSearchEmpty] = useState(true);
-  const [scrollPos, setScrollPos] = useState(0);
-  const [expandedCategories, setExpandedCategories] = useState(new Set());
-  const [expandedBooks, setExpandedBooks] = useState(new Set());
+function SidebarSkeleton() {
+  return (
+    <div className={styles.skeleton} aria-hidden="true">
+      <Skeleton count={10} height={22} style={{ marginBottom: 10 }} />
+    </div>
+  );
+}
 
-  const filterItems = (search) => {
-    setSearch(search);
-    const listToFilter = isBooksMode ? currentBooks : currentCategoryList;
-    const filtered = listToFilter.filter((item) => {
-      if (!item) return false;
-      
+// Parent categories open the category page (subcategories); leaf categories
+// open their hadith list.
+const categoryHref = (category) =>
+  category.totalChildren > 0 || (category.children && category.children.length > 0)
+    ? categoryPath(category)
+    : categoryHadithsPath(category);
+
+function CategoryLink({ category, active, level, parent }) {
+  return (
+    <Link
+      href={categoryHref(category)}
+      className={`${styles.list} ${active ? styles.active : ""} ${parent ? styles.parent : ""}`}
+      onClick={(e) => e.stopPropagation()}
+      aria-current={active ? "page" : undefined}
+      style={{ paddingLeft: `${5 + level * 4}px` }}
+    >
+      <span>{category.title}</span>
+      {category.totalHadith > 0 && <span className={styles.count}> ({category.totalHadith})</span>}
+    </Link>
+  );
+}
+
+function CategoryTree({ selectedCategoryId, filter }) {
+  const { lang, t } = useLocale();
+  const { data, error, loading, retry } = useApi(`categories:${lang}`, () => getCategories(lang));
+  const categories = useMemo(() => (Array.isArray(data) ? data : []), [data]);
+  const tree = useMemo(() => buildCategoryTree(categories), [categories]);
+  const [expanded, setExpanded] = useState(() => new Set());
+
+  // Open the branch that leads to the current category.
+  useEffect(() => {
+    if (!selectedCategoryId || !categories.length) return;
+    const byId = new Map(categories.map((category) => [category.id, category]));
+    const open = new Set();
+    let current = byId.get(selectedCategoryId);
+    if (current && current.totalChildren > 0) open.add(current.id);
+    while (current && current.parentId != null) {
+      open.add(current.parentId);
+      current = byId.get(current.parentId);
+    }
+    setExpanded((previous) => new Set([...previous, ...open]));
+  }, [selectedCategoryId, categories]);
+
+  if (loading && !categories.length) return <SidebarSkeleton />;
+  if (error) return <ErrorState error={error} onRetry={retry} compact />;
+
+  if (filter) {
+    const query = fold(filter);
+    const matches = categories.filter(
+      (category) => fold(category.title).includes(query) || fold(category.titleArabic).includes(query)
+    );
+    if (!matches.length) return <div className={styles.empty}>{t("noHadiths")}</div>;
+    return matches.map((category) => (
+      <CategoryLink key={category.id} category={category} active={category.id === selectedCategoryId} level={0} />
+    ));
+  }
+
+  const toggle = (id) =>
+    setExpanded((previous) => {
+      const next = new Set(previous);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const renderNodes = (nodes, level = 0) =>
+    nodes.map((category) => {
+      const active = category.id === selectedCategoryId;
+      if (!category.children.length) {
+        return <CategoryLink key={category.id} category={category} active={active} level={level} />;
+      }
       return (
-        (item.title && item.title.toLowerCase().includes(search.toLowerCase())) ||
-        (item.name_en && item.name_en.toLowerCase().includes(search.toLowerCase())) ||
-        (item.name_ar && item.name_ar.toLowerCase().includes(search.toLowerCase())) ||
-        (item.chapter_title && item.chapter_title.toLowerCase().includes(search.toLowerCase())) ||
-        (item.hadiths_count && `(${item.hadiths_count})`.includes(search)) ||
-        (item.id && item.id.toString().includes(search))
+        <div key={category.id} className={`${styles.tree_item} ${active ? styles.selected : ""}`}>
+          <Accordion
+            expanded={expanded.has(category.id)}
+            onChange={() => toggle(category.id)}
+            classes={accordionClasses}
+            disableGutters
+            slotProps={{ transition: { unmountOnExit: true } }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} classes={summaryClasses}>
+              <CategoryLink category={category} active={active} level={level} parent />
+            </AccordionSummary>
+            <AccordionDetails classes={detailClasses}>
+              <div className={styles.sub_item}>{renderNodes(category.children, level + 1)}</div>
+            </AccordionDetails>
+          </Accordion>
+        </div>
       );
     });
-    setFilteredItems(filtered);
-  };
 
-  const handleClose = () => {
-    setSearch("");
-    if (input.current) {
-      input.current.value = "";
-    }
-  };
+  return renderNodes(tree);
+}
+
+function BookChapters({ book, selectedChapterNo, active }) {
+  const { lang, t } = useLocale();
+  const { data, error, loading, retry } = useApi(`book:${book.slug}:${lang}`, () => getBook(book.slug, lang));
+
+  if (loading) return <Skeleton count={4} height={18} style={{ marginBottom: 8 }} />;
+  if (error) return <ErrorState error={error} onRetry={retry} compact />;
+
+  return ((data && data.chapters) || []).map((chapter) => {
+    const isActive = active && chapter.chapterNo === selectedChapterNo;
+    const label = chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : chapter.name;
+    return (
+      <Link
+        key={chapter.chapterNo}
+        href={chapterPath(book.slug, chapter.chapterNo)}
+        className={`${styles.list} ${styles.chapter} ${isActive ? styles.active : ""}`}
+        aria-current={isActive ? "page" : undefined}
+      >
+        {chapter.chapterNo !== UNASSIGNED_CHAPTER && <span className={styles.chapterNo}>{chapter.chapterNo}.</span>}
+        <span>{label}</span>
+        <span className={styles.count}> ({chapter.totalHadith})</span>
+      </Link>
+    );
+  });
+}
+
+function BookTree({ selectedBookSlug, selectedChapterNo, filter }) {
+  const { lang, t } = useLocale();
+  const { data, error, loading, retry } = useApi(`books:${lang}`, () => getBooks(lang));
+  const books = Array.isArray(data) ? data : [];
+  const [expanded, setExpanded] = useState(() => new Set(selectedBookSlug ? [selectedBookSlug] : []));
 
   useEffect(() => {
-    if (search === "") {
-      setIsSearchEmpty(true);
-      if (closeButton.current) {
-        closeButton.current.style.display = "none";
-      }
-    } else {
-      setIsSearchEmpty(false);
-      if (closeButton.current) {
-        closeButton.current.style.display = "block";
-      }
-    }
-  }, [search]);
+    if (selectedBookSlug) setExpanded((previous) => new Set([...previous, selectedBookSlug]));
+  }, [selectedBookSlug]);
 
-  // Auto-expand categories that contain the selected category
-  useEffect(() => {
-    if (selectedCategoryId && !isBooksMode && currentCategoryTree.length > 0) {
-      const findParentCategories = (categories, targetId, parents = new Set()) => {
-        for (const category of categories) {
-          if (category.id === targetId) {
-            return parents;
-          }
-          if (category.children && category.children.length > 0) {
-            const newParents = new Set([...parents, category.id]);
-            const found = findParentCategories(category.children, targetId, newParents);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
+  if (loading && !books.length) return <SidebarSkeleton />;
+  if (error) return <ErrorState error={error} onRetry={retry} compact />;
 
-      const parentIds = findParentCategories(currentCategoryTree, selectedCategoryId);
-      if (parentIds) {
-        setExpandedCategories(parentIds);
-      }
-    }
-  }, [selectedCategoryId, currentCategoryTree, isBooksMode]);
+  const query = fold(filter);
+  const visible = query
+    ? books.filter((book) => fold(book.name).includes(query) || fold(book.nameArabic).includes(query))
+    : books;
+  if (!visible.length) return <div className={styles.empty}>{t("noHadiths")}</div>;
 
-  // Auto-expand selected book
-  useEffect(() => {
-    if (selectedBookId && isBooksMode) {
-      setExpandedBooks(new Set([selectedBookId]));
-    }
-  }, [selectedBookId, isBooksMode]);
-
-  const handleCategoryToggle = (categoryId) => {
-    setExpandedCategories(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(categoryId)) {
-        newSet.delete(categoryId);
-      } else {
-        newSet.add(categoryId);
-      }
-      return newSet;
+  const toggle = (slug) =>
+    setExpanded((previous) => {
+      const next = new Set(previous);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
     });
-  };
 
-  const handleBookToggle = (bookId) => {
-    setExpandedBooks(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(bookId)) {
-        newSet.delete(bookId);
-      } else {
-        newSet.add(bookId);
-      }
-      return newSet;
-    });
-  };
-
-  const getBookChapters = (bookId) => {
-    return currentChapters.filter(chapter => chapter.book_id === bookId);
-  };
-
-  const renderCategoryTree = (categories, level = 0) => {
-    if (!categories || categories.length === 0) return null;
-
-    return categories.map((category) => {
-      const hasChildren = category.children && category.children.length > 0;
-      const isExpanded = expandedCategories.has(category.id);
-      const isSelected = category.id === selectedCategoryId;
-      
-      if (hasChildren) {
-        return (
-          <div key={category.id} className={`${styles.tree_item} ${isSelected ? styles.selected : ''}`}>
-            <Accordion
-              expanded={isExpanded}
-              onChange={() => handleCategoryToggle(category.id)}
-              classes={{
-                root: styles.acc_root,
-                expanded: styles.acc_expanded,
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                classes={{
-                  root: styles.summary_root,
-                  expanded: styles.summary_expanded,
-                  expandIconWrapper: styles.summary_icon,
-                  content: styles.summary_content,
-                }}
-              >
-                <Link
-                  href={`/categories/${category.id}/hadiths`}
-                  className={`${styles.list} ${isSelected ? styles.active : ""} ${styles.parent}`}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ paddingLeft: `${5 + (level * 15)}px` }}
-                >
-                  <span>{category.title || category.name_en || category.name_ar || `Category ${category.id}`}</span>
-                  {category.hadiths_count > 0 && (
-                    <span className={styles.count}>({category.hadiths_count})</span>
-                  )}
-                </Link>
-              </AccordionSummary>
-              <AccordionDetails
-                classes={{
-                  root: styles.detail_root,
-                  expanded: styles.detail_expanded,
-                }}
-              >
-                <div className={styles.sub_item}>
-                  {renderCategoryTree(category.children, level + 1)}
-                </div>
-              </AccordionDetails>
-            </Accordion>
+  return visible.map((book) => {
+    const active = book.slug === selectedBookSlug;
+    const isOpen = expanded.has(book.slug);
+    return (
+      <Accordion
+        key={book.slug}
+        expanded={isOpen}
+        onChange={() => toggle(book.slug)}
+        classes={accordionClasses}
+        disableGutters
+        slotProps={{ transition: { unmountOnExit: true } }}
+      >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} classes={summaryClasses}>
+          <Link
+            href={bookPath(book)}
+            className={`${styles.list} ${active && selectedChapterNo == null ? styles.active : ""} ${styles.parent}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span>{shortBookName(book)}</span>
+            <span className={styles.count}> ({book.totalHadith})</span>
+          </Link>
+        </AccordionSummary>
+        <AccordionDetails classes={detailClasses}>
+          <div className={styles.sub_item}>
+            {isOpen && <BookChapters book={book} selectedChapterNo={selectedChapterNo} active={active} />}
           </div>
-        );
-      } else {
-        return (
-          <Link
-            key={category.id}
-            href={`/categories/${category.id}/hadiths`}
-            className={`${styles.list} ${isSelected ? styles.active : ""}`}
-            style={{ paddingLeft: `${5 + (level * 15)}px` }}
-          >
-            <span>{category.title || category.name_en || category.name_ar || `Category ${category.id}`}</span>
-            {category.hadiths_count > 0 && (
-              <span className={styles.count}>({category.hadiths_count})</span>
-            )}
-          </Link>
-        );
-      }
-    });
-  };
+        </AccordionDetails>
+      </Accordion>
+    );
+  });
+}
 
-  const renderBookAccordion = (book) => {
-    const bookChapters = getBookChapters(book.id);
-    const isExpanded = expandedBooks.has(book.id);
-    const isSelected = book.id === selectedBookId;
-    const hasChapters = bookChapters.length > 0;
-
-    if (hasChapters) {
-      return (
-        <Accordion
-          key={book.id}
-          expanded={isExpanded}
-          onChange={() => handleBookToggle(book.id)}
-          classes={{
-            root: styles.acc_root,
-            expanded: styles.acc_expanded,
-          }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            classes={{
-              root: styles.summary_root,
-              expanded: styles.summary_expanded,
-              expandIconWrapper: styles.summary_icon,
-              content: styles.summary_content,
-            }}
-          >
-            <Link 
-              href={`/books/${book.id}`} 
-              className={`${styles.list} ${isSelected ? styles.active : ""}`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span>{book.title || book.name_en || book.name_ar || `Book ${book.id}`}</span>
-              {book.total_hadiths > 0 && (
-                <span className={styles.count}>({book.total_hadiths})</span>
-              )}
-            </Link>
-          </AccordionSummary>
-          <AccordionDetails
-            classes={{
-              root: styles.detail_root,
-              expanded: styles.detail_expanded,
-            }}
-          >
-            <div className={styles.sub_item}>
-              {bookChapters.map((chapter, i) => (
-                <Link
-                  key={chapter.id}
-                  href={`/books/${book.id}/chapters/${chapter.id}`}
-                  className={`${styles.list} ${styles.chapter} ${book.id === selectedBookId && chapter.id === selectedChapterId ? styles.active : ""}`}
-                  style={{ paddingLeft: '20px' }}
-                >
-                  <span>{chapter.title || chapter.name_en || chapter.chapter_title || `Chapter ${chapter.id}`}</span>
-                  {chapter.total_hadiths > 0 && (
-                    <span className={styles.count}>({chapter.total_hadiths})</span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </AccordionDetails>
-        </Accordion>
-      );
-    } else {
-      return (
-        <Link
-          key={book.id}
-          href={`/books/${book.id}`}
-          className={`${styles.list} ${isSelected ? styles.active : ""}`}
-        >
-          <span>{book.title || book.name_en || book.name_ar || `Book ${book.id}`}</span>
-          {book.total_hadiths > 0 && (
-            <span className={styles.count}>({book.total_hadiths})</span>
-          )}
-        </Link>
-      );
-    }
-  };
-
-  const renderContent = () => {
-    if (isBooksMode) {
-      if (currentBooks.length === 0) {
-        return <div className={styles.empty}>No books available</div>;
-      }
-      return currentBooks.map(book => renderBookAccordion(book));
-    } else {
-      if (currentCategoryTree.length > 0) {
-        return renderCategoryTree(currentCategoryTree);
-      } else if (currentCategoryList.length > 0) {
-        // Fallback to flat list if tree not available
-        return currentCategoryList.map((category) => (
-          <Link
-            key={category.id}
-            href={`/categories/${category.id}/hadiths`}
-            className={`${styles.list} ${category.id === selectedCategoryId ? styles.active : ""}`}
-          >
-            <span>{category.title || category.name_en || category.name_ar || `Category ${category.id}`}</span>
-            {category.hadiths_count > 0 && (
-              <span className={styles.count}>({category.hadiths_count})</span>
-            )}
-          </Link>
-        ));
-      } else {
-        return <div className={styles.empty}>No categories available</div>;
-      }
-    }
-  };
+export default function Sidebar({ mode = "categories", selectedCategoryId, selectedBookSlug, selectedChapterNo }) {
+  const { theme } = useContext(SettingsContext);
+  const { t } = useLocale();
+  const isBooksMode = mode === "books";
+  const [search, setSearch] = useState("");
 
   return (
     <div className={`${styles.wrapper} ${theme}`}>
@@ -341,71 +244,42 @@ export default function Sidebar({
           <span className={`${styles.icon} ${styles.search_icon}`}>
             <SearchIcon />
           </span>
-          <span
-            className={`${styles.icon} ${styles.close_icon}`}
-            onClick={handleClose}
-            ref={closeButton}
-            style={{ display: 'none' }}
-          >
-            <CloseIcon />
-          </span>
+          {search && (
+            <button
+              type="button"
+              className={`${styles.icon} ${styles.close_icon}`}
+              onClick={() => setSearch("")}
+              aria-label="Clear"
+            >
+              <CloseIcon />
+            </button>
+          )}
           <input
             type="text"
-            name="search"
-            placeholder={isBooksMode ? "Search books and chapters" : "Search categories"}
+            name="filter"
+            value={search}
+            placeholder={isBooksMode ? t("books") : t("categories")}
+            aria-label={isBooksMode ? t("books") : t("categories")}
             className={styles.input}
             autoComplete="off"
-            onChange={(e) => filterItems(e.target.value)}
-            ref={input}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>
       <div className={styles.content}>
-        <Scrollbar
-          className={styles.category}
-          scrollPos={scrollPos}
-          id={selectedId}
-        >
-          <div className={styles.lists}>
-            {renderContent()}
-          </div>
+        <Scrollbar className={styles.category}>
+          <nav className={styles.lists} aria-label={isBooksMode ? t("books") : t("categories")}>
+            {isBooksMode ? (
+              <BookTree
+                selectedBookSlug={selectedBookSlug}
+                selectedChapterNo={selectedChapterNo}
+                filter={search.trim()}
+              />
+            ) : (
+              <CategoryTree selectedCategoryId={selectedCategoryId} filter={search.trim()} />
+            )}
+          </nav>
         </Scrollbar>
-
-        {!isSearchEmpty && (
-          <Scrollbar className={styles.category}>
-            <div className={styles.lists}>
-              {filteredItems && filteredItems.length > 0 ? (
-                filteredItems.map((item) => (
-                  isBooksMode ? (
-                    <Link 
-                      key={item.id} 
-                      href={`/books/${item.id}`} 
-                      className={`${styles.list} ${item.id === selectedBookId ? styles.active : ""}`}
-                    >
-                      <span>{item.title || item.name_en || item.name_ar || `Book ${item.id}`}</span>
-                      {item.hadiths_count > 0 && (
-                        <span className={styles.count}>({item.hadiths_count})</span>
-                      )}
-                    </Link>
-                  ) : (
-                    <Link 
-                      key={item.id} 
-                      href={`/categories/${item.id}/hadiths`} 
-                      className={`${styles.list} ${item.id === selectedCategoryId ? styles.active : ""}`}
-                    >
-                      <span>{item.title || item.name_en || item.name_ar || `Category ${item.id}`}</span>
-                      {item.hadiths_count > 0 && (
-                        <span className={styles.count}>({item.hadiths_count})</span>
-                      )}
-                    </Link>
-                  )
-                ))
-              ) : (
-                <div className={styles.empty}>No records found!</div>
-              )}
-            </div>
-          </Scrollbar>
-        )}
       </div>
     </div>
   );

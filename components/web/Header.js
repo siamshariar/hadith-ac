@@ -23,11 +23,15 @@ import InfoIcon from "../icons/Info";
 import PinOutlineIcon from "../icons/PinOutline";
 import AutoStoriesIcon from "../icons/AutoStories";
 import SettingsIcon from "../icons/SettingsOutlined";
+import SearchIcon from "../icons/Search";
+import MenuBookIcon from "../icons/MenuBook";
+import { useLocale } from "../../contexts/LocaleContext";
 
 export default function HeaderWeb({ page }) {
   const router = useRouter();
 
   const { theme, changeTheme } = useContext(SettingsContext);
+  const { t } = useLocale();
 
   const modeSwitcher = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -146,6 +150,14 @@ export default function HeaderWeb({ page }) {
           </div>
 
           <div className={styles.right}>
+            <IconButton component={Link} href="/books" className={styles.btn} aria-label={t("books")} title={t("books")}>
+              <MenuBookIcon />
+            </IconButton>
+
+            <IconButton component={Link} href="/search" className={styles.btn} aria-label={t("search")} title={t("search")}>
+              <SearchIcon />
+            </IconButton>
+
             <IconButton
               className={styles.btn}
               onClick={() => modeSwitcher()}

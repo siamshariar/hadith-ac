@@ -6,15 +6,12 @@ import Container from "../core/container";
 import IconButton from "@mui/material/IconButton";
 import MobileNav from "./MobileNav";
 import MenuIcon from "../icons/Menu";
+import SearchIcon from "../icons/Search";
 import Brightness4Icon from "../icons/Brightness4";
 import Brightness7Icon from "../icons/Brightness7";
 import styles from "./Header.module.scss";
 
-export default function HeaderMobile({
-  categoryList,
-  categoryTree,
-  selectedCategoryId,
-}) {
+export default function HeaderMobile({ selectedCategoryId }) {
   const { theme, changeTheme } = useContext(SettingsContext);
 
   const modeSwitcher = () => {
@@ -81,13 +78,9 @@ export default function HeaderMobile({
             </div>
 
             <div className={styles.right}>
-              {/* <IconButton
-                className={styles.icon}
-                onClick={() => searchModalController(true)}
-                focusRipple={false}
-              >
+              <Link href="/search" className={styles.icon} aria-label="Search">
                 <SearchIcon />
-              </IconButton> */}
+              </Link>
 
               <IconButton
                 className={styles.icon}
@@ -105,8 +98,6 @@ export default function HeaderMobile({
       <MobileNav
         navOpen={mobileNavOpen}
         navControl={controlMobileNav}
-        categoryList={categoryList}
-        categoryTree={categoryTree}
         selectedCategoryId={selectedCategoryId}
       />
     </>
