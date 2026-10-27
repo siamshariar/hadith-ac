@@ -168,7 +168,7 @@ export default function Meta(props) {
 
       {/* Others */}
       <link
-        href={`${server}/img/favicon/favicon.ico`}
+        href="/img/favicon/favicon.ico"
         rel="shortcut icon"
         type="image/x-icon"
       />
