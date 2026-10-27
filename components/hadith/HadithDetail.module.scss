@@ -233,6 +233,8 @@
 
     select {
       flex: 1 1 auto;
+      // a flex item is otherwise as wide as its longest option, wider than a phone
+      min-width: 0;
       max-width: none;
     }
   }
