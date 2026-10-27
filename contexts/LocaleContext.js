@@ -15,7 +15,7 @@ export const LocaleContext = createContext(null);
 // (from `?lang=`, the preference cookie or the default) and `languageInfo` the
 // API's description of it ({ code, name, nativeName, direction }). Static
 // pages have neither and read the cookie after mounting.
-export default function LocaleProvider({ pageLang, languageInfo, children }) {
+export default function LocaleProvider({ pageLang, pageUi, languageInfo, children }) {
   const router = useRouter();
   const [preferred, setPreferred] = useState(null);
 
@@ -24,7 +24,8 @@ export default function LocaleProvider({ pageLang, languageInfo, children }) {
   }, []);
 
   const lang = normalizeLanguage(pageLang || preferred || DEFAULT_LANGUAGE);
-  const preferredLang = normalizeLanguage(preferred || pageLang || DEFAULT_LANGUAGE);
+  // The saved preference (cookie), not a one-off ?lang= override.
+  const preferredLang = normalizeLanguage(preferred || DEFAULT_LANGUAGE);
 
   const setLanguage = useCallback(
     (code) => {
@@ -39,7 +40,9 @@ export default function LocaleProvider({ pageLang, languageInfo, children }) {
   );
 
   const value = useMemo(() => {
-    const ui = uiLanguage(lang);
+    // Interface language: from the server (saved preference) when given,
+    // else from the preference read on the client.
+    const ui = pageUi === "vi" || pageUi === "en" ? pageUi : uiLanguage(preferredLang);
     const info = languageInfo && languageInfo.code === lang ? languageInfo : null;
     const nameOf = (code) =>
       languageName(ui, code, info && code === info.code ? (ui === "vi" ? info.nativeName : info.name) : null);
@@ -60,7 +63,7 @@ export default function LocaleProvider({ pageLang, languageInfo, children }) {
       languageName: nameOf,
       formatNumber: (number) => formatNumber(number, ui),
     };
-  }, [lang, preferredLang, languageInfo, setLanguage]);
+  }, [lang, preferredLang, pageUi, languageInfo, setLanguage]);
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }

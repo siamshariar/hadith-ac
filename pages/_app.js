@@ -41,7 +41,7 @@ const App = ({ Component, pageProps }) => {
   const getLayout = Component.getLayout || ((page) => page);
 
   return (
-    <LocaleProvider pageLang={pageProps.lang} languageInfo={pageProps.languageInfo}>
+    <LocaleProvider pageLang={pageProps.lang} pageUi={pageProps.uiLang} languageInfo={pageProps.languageInfo}>
       <SettingsContextProvider>
         <RouteProgress />
         {getLayout(<Component {...pageProps} />)}

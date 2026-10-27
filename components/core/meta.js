@@ -175,6 +175,8 @@ export default function Meta(props) {
 
       <link rel="manifest" href="/site.webmanifest" />
 
+      {props.canonical && <link rel="canonical" href={props.canonical} />}
+
       {/* page title */}
       <title>
         {`${props.title != "" ? props.title + " | " : ""}Hadith in Vietnamese | Hadith.vn`}
