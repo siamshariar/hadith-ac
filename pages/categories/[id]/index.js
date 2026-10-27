@@ -74,7 +74,7 @@ export default function Category({ category, preview, books, error }) {
                 <li key={child.id}>
                   <Link href={childHref(child)} className={styles.tile}>
                     <span className={styles.tileBody}>
-                      <span className={styles.tileTitle}>{child.title}</span>
+                      <bdi className={styles.tileTitle}>{child.title}</bdi>
                       {child.titleArabic && (
                         <span className={styles.tileArabic} dir="rtl" lang="ar">
                           {child.titleArabic}

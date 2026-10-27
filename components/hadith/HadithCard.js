@@ -26,12 +26,14 @@ export default function HadithCard({ hadith, book, context, isBookmarkPage, upda
           </Link>
           {context && <span className={styles.context}>{context}</span>}
         </div>
-        <HadithOptions
-          hadith={hadith}
-          book={book}
-          isBookmarkPage={isBookmarkPage}
-          updateBookmarksData={updateBookmarksData}
-        />
+        <div className={styles.options}>
+          <HadithOptions
+            hadith={hadith}
+            book={book}
+            isBookmarkPage={isBookmarkPage}
+            updateBookmarksData={updateBookmarksData}
+          />
+        </div>
       </header>
 
       {hadith.title && (

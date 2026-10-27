@@ -20,6 +20,8 @@
 }
 
 .context {
+  flex: 1 1 auto;
+  min-width: 0;
   padding-top: 8px;
   color: var(--txt12);
   font-size: 14px;
@@ -33,6 +35,14 @@
       text-decoration: underline;
     }
   }
+}
+
+.options {
+  flex: 0 0 auto;
+}
+
+.languageLabel {
+  white-space: nowrap;
 }
 
 .title {

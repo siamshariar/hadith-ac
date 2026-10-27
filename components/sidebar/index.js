@@ -69,7 +69,7 @@ function CategoryLink({ category, active, level, parent }) {
       aria-current={active ? "page" : undefined}
       style={{ paddingLeft: `${5 + level * 4}px` }}
     >
-      <span>{category.title}</span>
+      <bdi>{category.title}</bdi>
       {category.totalHadith > 0 && <span className={styles.count}> ({category.totalHadith})</span>}
     </Link>
   );

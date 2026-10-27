@@ -43,7 +43,7 @@ function LanguageSwitch({ available, languages }) {
 
   return (
     <label className={styles.languageSwitch}>
-      <span>{t("readIn")}</span>
+      <span className={styles.languageLabel}>{t("readIn")}</span>
       <select value={lang} onChange={change}>
         {codes.map((code) => (
           <option key={code} value={code}>
@@ -165,7 +165,9 @@ export default function HadithDetail({ hadith, languages }) {
               </>
             )}
           </p>
-          <HadithOptions hadith={hadith} book={book} />
+          <div className={styles.options}>
+            <HadithOptions hadith={hadith} book={book} />
+          </div>
         </div>
 
         <h1 className={styles.title} dir="auto">
@@ -202,7 +204,7 @@ export default function HadithDetail({ hadith, languages }) {
             {hadith.categories.map((category) => (
               <li key={category.id}>
                 <Link href={categoryPath(category)} className={styles.chip}>
-                  {category.title}
+                  <bdi>{category.title}</bdi>
                 </Link>
               </li>
             ))}

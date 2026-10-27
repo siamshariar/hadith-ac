@@ -13,7 +13,7 @@ export default function CategoryCard({ category, index }) {
       <Link href={categoryPath(category)} className={styles.head}>
         <span className={styles.number}>{index}</span>
         <span className={styles.left}>
-          <span className={styles.name}>{category.title}</span>
+          <bdi className={styles.name}>{category.title}</bdi>
           <span className={styles.count}>
             {formatNumber(category.totalHadith)} {t("hadiths")}
           </span>
@@ -30,7 +30,7 @@ export default function CategoryCard({ category, index }) {
           {children.map((child) => (
             <li key={child.id}>
               <Link href={categoryPath(child)} className={styles.child}>
-                <span>{child.title}</span>
+                <bdi>{child.title}</bdi>
                 <span className={styles.childCount}>{formatNumber(child.totalHadith)}</span>
               </Link>
             </li>
