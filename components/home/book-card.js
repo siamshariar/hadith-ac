@@ -1,27 +1,44 @@
-import { useContext } from "react";
-import { SettingsContext } from "../../contexts/SettingsContext";
 import Link from "next/link";
+import { useLocale } from "../../contexts/LocaleContext";
+import { bookPath } from "../../lib/hadith";
 import styles from "./book-card.module.scss";
 
-export default function BookCard({ book, linkToBooksPage = false }) {
-  const { verseMode } = useContext(SettingsContext);
+// One collection. With `showTranslation`, says how much of it exists in the
+// reader's language (most collections only have English).
+export default function BookCard({ book, index, showTranslation = false }) {
+  const { t, lang, formatNumber, languageName } = useLocale();
 
-  // Link to book page to show chapters
-  const href = linkToBooksPage ? "/books" : `/books/${book.id}`;
+  const counts = [`${formatNumber(book.totalHadith)} ${t("hadiths")}`];
+  if (book.totalChapter > 1) counts.push(`${formatNumber(book.totalChapter)} ${t("chapters")}`);
+
+  let translationNote = null;
+  if (showTranslation && lang !== "ar" && book.totalTranslated != null) {
+    translationNote =
+      book.totalTranslated > 0
+        ? t("translationAvailability", {
+            count: formatNumber(book.totalTranslated),
+            language: languageName(lang),
+          })
+        : t("noTranslationInBook", { language: languageName(lang) });
+  }
 
   return (
-    <div className={styles.item}>
-      <Link href={href} className={styles.wrapper}>
-        {/* ...existing code... */}
-      </Link>
-      <span className={styles.number}>{book.id}</span>
-      <div className={styles.left}>
-        <Link href={href} className={styles.name}>
-          {book.name_en || book.name_ar || book.title}
-        </Link>
-        {/* <div className={styles.bottom}>{book.meaning}</div> */}
-      </div>
-      {/* <div className={styles.right}>{book.nameArabic}</div> */}
-    </div>
+    <Link href={bookPath(book)} className={styles.item}>
+      <span className={styles.number}>{index}</span>
+      <span className={styles.left}>
+        <span className={styles.name}>{book.name}</span>
+        <span className={styles.bottom}>{counts.join(" · ")}</span>
+        {translationNote && (
+          <span className={`${styles.translation} ${book.totalTranslated > 0 ? styles.hasTranslation : ""}`}>
+            {translationNote}
+          </span>
+        )}
+      </span>
+      {book.nameArabic && (
+        <span className={styles.right} dir="rtl" lang="ar">
+          {book.nameArabic}
+        </span>
+      )}
+    </Link>
   );
 }

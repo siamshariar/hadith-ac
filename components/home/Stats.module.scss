@@ -1,0 +1,41 @@
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 920px;
+  margin: 12px auto 0;
+}
+
+.item {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  border: 1px solid var(--bdr11);
+  border-radius: 8px;
+  background: var(--bg11);
+  text-align: center;
+}
+
+.number {
+  color: var(--main-color);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.label {
+  color: var(--txt12);
+  font-size: 13px;
+}
+
+@media only screen and (min-width: 600px) {
+  .stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .number {
+    font-size: 26px;
+  }
+}

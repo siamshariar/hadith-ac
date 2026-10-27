@@ -1,38 +1,42 @@
-import { useContext } from "react";
-import { SettingsContext } from "../../contexts/SettingsContext";
 import Link from "next/link";
+import { useLocale } from "../../contexts/LocaleContext";
+import { categoryPath } from "../../lib/hadith";
 import styles from "./category-card.module.scss";
 
-export default function CategoryCard({ category }) {
-  const { verseMode } = useContext(SettingsContext);
-
-  // Determine the link based on category hierarchy
-  let link;
-  if (category.parent_id === null || category.parent_id === 0) {
-    // Root category - show subcategories
-    link = `/categories/${category.id}`;
-  } else {
-    // Subcategory - show hadiths
-    link = `/categories/${category.id}/hadiths`;
-  }
+// A top-level category with its children (from /hadith/home).
+export default function CategoryCard({ category, index }) {
+  const { t, formatNumber } = useLocale();
+  const children = category.children || [];
 
   return (
     <div className={styles.item}>
-      <Link href={link} className={styles.wrapper}>
-
-      </Link>
-      <span className={styles.number}>{category.id}</span>
-      <div className={styles.left}>
-        <Link href={link} className={styles.name}>
-          {category.name_en || category.title}
-        </Link>
-        {category.hadiths_count && (
-          <div className={styles.count}>
-            {category.hadiths_count} hadiths
-          </div>
+      <Link href={categoryPath(category)} className={styles.head}>
+        <span className={styles.number}>{index}</span>
+        <span className={styles.left}>
+          <span className={styles.name}>{category.title}</span>
+          <span className={styles.count}>
+            {formatNumber(category.totalHadith)} {t("hadiths")}
+          </span>
+        </span>
+        {category.titleArabic && (
+          <span className={styles.right} dir="rtl" lang="ar">
+            {category.titleArabic}
+          </span>
         )}
-      </div>
-      {/* <div className={styles.right}>{category.nameArabic}</div> */}
+      </Link>
+
+      {children.length > 0 && (
+        <ul className={styles.children} aria-label={`${t("subcategories")}: ${category.title}`}>
+          {children.map((child) => (
+            <li key={child.id}>
+              <Link href={categoryPath(child)} className={styles.child}>
+                <span>{child.title}</span>
+                <span className={styles.childCount}>{formatNumber(child.totalHadith)}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

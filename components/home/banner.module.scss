@@ -1,13 +1,6 @@
+// Brand gradient band with the hadith of the day on a card.
 .banner {
-  display: none;
-}
-
-// mobile banner
-.banner_mobile {
-  display: block;
-  padding: 40px 0;
-  background: #3134de;
-  //background: linear-gradient(90deg, #BE7AF8 0%, #3134DE 33%, #3134DE 66%, #BE7AF8 100%);
+  padding: 16px 0 4px;
   background: linear-gradient(
     90deg,
     var(--hbnc1) 0%,
@@ -15,159 +8,96 @@
     var(--hbnc2) 50%,
     var(--hbnc1) 100%
   );
-  text-align: center;
-}
-
-.banner_mobile .banner_link {
-  color: #fff;
-  font-size: 16px;
 }
 
 .inner {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding-top: 54px;
-  padding-bottom: 50px;
-  padding-left: 40px;
-  padding-right: 40px;
-  background-color: var(--bg11);
-  position: relative;
-  z-index: 9;
-  top: 90px;
-  margin-top: -62px;
-  margin-bottom: 90px;
-  border-radius: 8px;
+  gap: 14px;
+  max-width: 920px;
+  margin: 0 auto 12px;
+  padding: 18px 16px;
   border: 1px solid var(--bdr11);
+  border-radius: 10px;
+  background-color: var(--bg11);
+  box-shadow: 0 7px 13px rgba(71, 88, 114, 0.18);
 }
 
-.inner q {
-  color: #fff;
-  color: var(--text11);
-  text-align: center;
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
 }
 
-.inner span {
+.eyebrow {
+  color: var(--main-color);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.citation {
+  color: var(--txt12);
   font-size: 14px;
-  opacity: 0.8;
-  margin-top: 14px;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--main-color);
+    text-decoration: underline;
+  }
+}
+
+.title {
+  color: var(--txt11);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.more {
+  margin-left: auto;
+  color: var(--main-color);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
 }
 
 @media only screen and (min-width: 1024px) {
-  .banner_mobile {
-    display: none;
-  }
-
+  // The desktop header is transparent over the band (see web/Header .home).
   .banner {
-    display: block;
-    padding-top: 70px;
-    background: #3134de;
-    //background: linear-gradient(90deg, #BE7AF8 0%, #3134DE 33%, #3134DE 66%, #BE7AF8 100%);
-    background: linear-gradient(
-      90deg,
-      var(--hbnc1) 0%,
-      var(--hbnc2) 50%,
-      var(--hbnc2) 50%,
-      var(--hbnc1) 100%
-    );
+    padding-top: 86px;
   }
-
-  .calligraphy {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 40px;
-  }
-
-  .grid {
-    display: block;
+  .inner {
     position: relative;
-    top: 80px;
-    margin-bottom: 80px;
+    z-index: 9;
+    top: 40px;
+    margin-bottom: 40px;
+    padding: 28px 36px;
+    gap: 18px;
   }
-
-  .grid_item {
-    background-color: var(--bg11);
-    border-radius: 8px;
-    box-shadow: 0px 7px 13px rgba(71, 88, 114, 0.3);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 24px;
-    height: 100%;
-  }
-
   .title {
-    color: var(--txt00);
-    font-family: Roboto;
-    font-size: 24px;
-    font-weight: normal;
-    line-height: 1.5;
-    margin-bottom: 20px;
-  }
-
-  .text {
-    font-family: Roboto;
-    color: var(--txt11);
-    font-size: 16px;
-    font-weight: normal;
-    line-height: 1.5;
-  }
-
-  .link {
-    display: flex;
-    font-family: Roboto;
-    font-size: 16px;
-    font-weight: normal;
-    line-height: 1.5;
-    margin-top: 26px;
-  }
-
-  .link_text {
-    color: var(--txt12);
-    transition: color 250ms ease;
-  }
-
-  .link_icon {
-    margin-left: 8px;
-  }
-
-  .link_icon svg {
-    fill: var(--txt12);
-    transition: fill 250ms ease;
-  }
-
-  .link:hover .link_text {
-    color: var(--main-color);
-  }
-
-  .link:hover .link_icon svg {
-    fill: var(--main-color);
-  }
-}
-
-@media only screen and (min-width: 960px) {
-  .title {
-    white-space: normal;
-    display: -moz-box;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-height: 72px;
-  }
-
-  .text {
-    white-space: normal;
-    display: -moz-box;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-height: 72px;
+    font-size: 21px;
   }
 }

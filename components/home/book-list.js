@@ -1,21 +1,15 @@
-import Grid from "@mui/material/Grid";
-import Container from "../core/container";
 import BookCard from "./book-card";
 import styles from "./book-list.module.scss";
 
-export default function BookList({ books, linkToBooksPage = false }) {
+export default function BookList({ books, showTranslation = false }) {
+  if (!books || !books.length) return null;
   return (
-    <div className={styles.wrap}>
-      <Container>
-        <Grid container className={styles.gridContainer}>
-          {books &&
-            books.map((book) => (
-              <Grid key={book.id} className={styles.gridItem}>
-                <BookCard book={book} linkToBooksPage={linkToBooksPage} />
-              </Grid>
-            ))}
-        </Grid>
-      </Container>
-    </div>
+    <ol className={styles.list}>
+      {books.map((book, index) => (
+        <li key={book.slug}>
+          <BookCard book={book} index={index + 1} showTranslation={showTranslation} />
+        </li>
+      ))}
+    </ol>
   );
 }

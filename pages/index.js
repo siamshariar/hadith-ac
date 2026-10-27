@@ -1,110 +1,69 @@
+import Link from "next/link";
 import { server } from "../lib/config";
-import {
-  getBooks,
-  getRootCategories,
-  getAllCategories,
-  ensureSerializable
-} from "../lib/fetch";
+import { getHome, loadPage } from "../lib/api";
+import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
+import Container from "../components/core/container";
+import ErrorState from "../components/core/error";
 import Layout from "../components/layouts/LayoutPrimary";
 import Banner from "../components/home/banner";
-import CategoryList from "../components/home/category-list";
-import BookList from "../components/home/book-list";
+import HomeSearch from "../components/home/search";
 import Stats from "../components/home/Stats";
-import { useEffect, useState } from 'react';
+import BookList from "../components/home/book-list";
+import CategoryList from "../components/home/category-list";
 import styles from "../components/home/Home.module.scss";
 
-export default function Home({ 
-  rootCategories: initialRootCategories, 
-  books: initialBooks, 
-  allCategories: initialAllCategories 
-}) {
-  const [books, setBooks] = useState(initialBooks || []);
-  const [rootCategories, setRootCategories] = useState(initialRootCategories || []);
-  const [allCategories, setAllCategories] = useState(initialAllCategories || []);
-  const [loading, setLoading] = useState(false);
-
-  // Fetch API data after initial render
-  useEffect(() => {
-    let mounted = true;
-    
-    async function fetchApiData() {
-      if (loading) return;
-      
-      setLoading(true);
-      try {
-        // Fetch books from API
-        const apiBooksData = await getBooks(1, 20); // Get first page with 20 books
-        if (mounted && apiBooksData.books && apiBooksData.books.length > 0) {
-          setBooks(apiBooksData.books);
-        }
-
-        // Fetch root categories from API
-        const apiRootCategories = await getRootCategories();
-        if (mounted && apiRootCategories && apiRootCategories.length > 0) {
-          setRootCategories(apiRootCategories);
-        }
-
-        // Fetch all categories from API
-        const apiAllCategoriesData = await getAllCategories(1, 50); // Get first page with 50 categories
-        if (mounted && apiAllCategoriesData.categories && apiAllCategoriesData.categories.length > 0) {
-          setAllCategories(apiAllCategoriesData.categories);
-        }
-      } catch (err) {
-        console.warn('Failed to fetch API data for home:', err);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-    
-    // Only fetch if we don't have data or want fresh data
-    const hasData = books.length > 0 || rootCategories.length > 0 || allCategories.length > 0;
-    if (!hasData) {
-      const timer = setTimeout(fetchApiData, 100);
-      return () => { 
-        mounted = false; 
-        clearTimeout(timer); 
-      };
-    }
-    
-    return () => { mounted = false; };
-  }, []);
+export default function Home({ home, error }) {
+  const { t } = useLocale();
 
   return (
     <>
       <Meta
-        title="Homepage - Hadith Collection"
-        description="Comprehensive collection of authentic Hadiths in multiple languages"
+        title={t("home")}
+        description="Hadith collections in Arabic with translations: Sahih al-Bukhari, Sahih Muslim, the Sunan, Muwatta Malik, the forty-hadith books and HadeethEnc."
         url={server}
         image={`${server}/img/s_logo.png`}
         type="website"
       />
 
-      <Banner />
-      
-      <Stats />
-      
-      {loading && (
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
-          <p>Loading data...</p>
-        </div>
+      {error || !home ? (
+        <Container>
+          <div className={styles.error}>
+            <ErrorState error={error} />
+          </div>
+        </Container>
+      ) : (
+        <>
+          <Banner hadith={home.dailyHadith} />
+          <HomeSearch />
+          <Stats totals={home.totals} />
+
+          <Container>
+            <div className={styles.twoColumnLayout}>
+              <section className={styles.column} aria-labelledby="home-books">
+                <div className={styles.sectionHead}>
+                  <h2 id="home-books" className={styles.sectionTitle}>
+                    {t("books")}
+                  </h2>
+                  <Link href="/books" className={styles.sectionLink}>
+                    {t("viewAll")} <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
+                <BookList books={home.books} />
+              </section>
+
+              <section className={styles.column} aria-labelledby="home-categories">
+                <div className={styles.sectionHead}>
+                  <h2 id="home-categories" className={styles.sectionTitle}>
+                    {t("categories")}
+                  </h2>
+                </div>
+                <CategoryList categories={home.categories} />
+              </section>
+            </div>
+          </Container>
+        </>
       )}
-      
-      <div className={styles.twoColumnLayout}>
-        <div className={styles.column}>
-          <BookList books={books} />
-        </div>
-        <div className={styles.column}>
-          <CategoryList 
-            categories={allCategories} 
-            title="All Categories" 
-            showCount={true}
-          />
-        </div>
-      </div>
     </>
   );
 }
@@ -113,43 +72,8 @@ Home.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
-export async function getStaticProps() {
-  try {
-    // Fetch initial data from API
-    const [booksData, rootCategories, allCategoriesData] = await Promise.all([
-      getBooks(1, 10).catch(() => ({ books: [] })),
-      getRootCategories().catch(() => []),
-      getAllCategories(1, 30).catch(() => ({ categories: [] }))
-    ]);
-
-    // Ensure all data is serializable
-    const serializableBooks = ensureSerializable(booksData?.books || []);
-    const serializableRootCategories = ensureSerializable(rootCategories || []);
-    const serializableAllCategories = ensureSerializable(allCategoriesData?.categories || []);
-
-    return {
-      props: {
-        rootCategories: serializableRootCategories,
-        books: serializableBooks,
-        allCategories: serializableAllCategories,
-        contentTitle: "Hadith Collection",
-        selectedCategoryId: null,
-      },
-      revalidate: 3600, // Revalidate every hour
-    };
-  } catch (error) {
-    console.error('Error in getStaticProps:', error);
-    
-    // Return empty data on error
-    return {
-      props: {
-        rootCategories: [],
-        books: [],
-        allCategories: [],
-        contentTitle: "Hadith Collection",
-        selectedCategoryId: null,
-      },
-      revalidate: 60, // Try again in 1 minute
-    };
-  }
+export async function getServerSideProps(context) {
+  return loadPage(context, async (lang) => ({
+    props: { home: await getHome(lang) },
+  }));
 }

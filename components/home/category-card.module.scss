@@ -1,22 +1,26 @@
 .item {
   width: 100%;
-  padding: 18px 15px 18px 65px;
-  position: relative;
   background: var(--bg11);
-  border-radius: 0;
-  transition: all 0.3s ease;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border: 1px solid var(--bdr11);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-a.wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 3;
+.head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 72px;
+  padding: 14px 15px 14px 65px;
+  color: var(--txt11);
+  transition: background-color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--accent-soft);
+  }
 }
 
 .number {
@@ -36,57 +40,68 @@ a.wrapper {
 }
 
 .left {
-  width: 55%;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .name {
-  display: inline-block;
   color: var(--txt11);
   font-size: 16px;
-  font-family: Roboto;
-  font-weight: 400;
-}
-
-.bottom {
-  font-size: 13px;
-  color: var(--txt13);
-  display: -moz-box;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .count {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--txt13);
-  margin-top: 4px;
-  font-weight: 500;
 }
 
 .right {
-  font-family: PDMSIslam;
-  font-size: 22px;
-  color: var(--txt11);
+  flex: 0 1 auto;
+  max-width: 45%;
+  font-family: var(--font-arabic);
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--txt12);
   text-align: right;
-  display: -moz-box;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.children {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 15px 14px 15px;
+}
+
+.child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--bdr11);
+  border-radius: 999px;
+  color: var(--txt11);
+  font-size: 14px;
+  line-height: 1.4;
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--theme-color);
+    color: var(--main-color);
+  }
+}
+
+.childCount {
+  color: var(--txt13);
+  font-size: 12px;
 }
 
 @media only screen and (min-width: 1024px) {
-  .item {
-    padding: 30px 20px 30px 75px;
-    border-radius: 4px;
-    border: 1px solid var(--bdr11);
-  }
-  .item:hover {
-    box-shadow: var(--bs11);
+  .head {
+    padding: 20px 20px 18px 75px;
   }
   .number {
     width: 38px;
@@ -94,13 +109,10 @@ a.wrapper {
     left: 20px;
     font-size: 16px;
   }
-  // .left {
-  //   width: 60%;
-  // }
   .name {
     font-size: 18px;
   }
-  .bottom {
-    font-size: 14px;
+  .children {
+    padding: 0 20px 18px 75px;
   }
 }

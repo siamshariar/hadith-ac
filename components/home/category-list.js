@@ -1,21 +1,15 @@
-import Grid from "@mui/material/Grid";
-import Container from "../core/container";
 import CategoryCard from "./category-card";
 import styles from "./category-list.module.scss";
 
 export default function CategoryList({ categories }) {
+  if (!categories || !categories.length) return null;
   return (
-    <div className={styles.wrap}>
-      <Container>
-        <Grid container className={styles.gridContainer}>
-          {categories &&
-            categories.map((category) => (
-              <Grid key={category.id} className={styles.gridItem}>
-                <CategoryCard category={category} />
-              </Grid>
-            ))}
-        </Grid>
-      </Container>
-    </div>
+    <ol className={styles.list}>
+      {categories.map((category, index) => (
+        <li key={category.id}>
+          <CategoryCard category={category} index={index + 1} />
+        </li>
+      ))}
+    </ol>
   );
 }
