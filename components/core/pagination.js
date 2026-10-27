@@ -1,90 +1,101 @@
-import { useState, useEffect } from 'react';
-import styles from './pagination.module.scss';
+import Link from "next/link";
+import { useLocale } from "../../contexts/LocaleContext";
+import styles from "./pagination.module.scss";
 
-const Pagination = ({ 
-  totalItems, 
-  currentPage, 
-  perPage, 
-  onPageChange,
-  maxVisiblePages = 5 
-}) => {
-  const totalPages = Math.ceil(totalItems / perPage);
-  
-  if (totalPages <= 1) {
-    return null;
-  }
-  
-  // Calculate range of pages to show
-  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-  
-  // Adjust start page if we're near the end
-  if (endPage - startPage + 1 < maxVisiblePages) {
-    startPage = Math.max(1, endPage - maxVisiblePages + 1);
-  }
-  
-  const pages = [];
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(i);
-  }
-  
+// Page numbers to show: first, last, and a window around the current page.
+function pageItems(page, lastPage) {
+  const pages = new Set([1, lastPage, page - 1, page, page + 1]);
+  if (page <= 3) [2, 3, 4].forEach((p) => pages.add(p));
+  if (page >= lastPage - 2) [lastPage - 3, lastPage - 2, lastPage - 1].forEach((p) => pages.add(p));
+  const sorted = [...pages].filter((p) => p >= 1 && p <= lastPage).sort((a, b) => a - b);
+
+  const items = [];
+  sorted.forEach((p, index) => {
+    if (index > 0 && p - sorted[index - 1] > 1) items.push(`gap-${p}`);
+    items.push(p);
+  });
+  return items;
+}
+
+// URL-driven pagination: every page is a real link (?page=N), so pages can
+// be shared, bookmarked and reached with the back button.
+export default function Pagination({ pagination, hrefFor }) {
+  const { t, formatNumber } = useLocale();
+  if (!pagination) return null;
+
+  const { page, perPage, total, lastPage } = pagination;
+  if (!lastPage || lastPage <= 1) return null;
+
+  const from = Math.min((page - 1) * perPage + 1, total);
+  const to = Math.min(page * perPage, total);
+
   return (
-    <div className={styles.pagination}>
-      <button
-        className={`${styles.pageButton} ${currentPage === 1 ? styles.disabled : ''}`}
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-        Previous
-      </button>
-      
-      {startPage > 1 && (
-        <>
-          <button
-            className={styles.pageButton}
-            onClick={() => onPageChange(1)}
-          >
-            1
-          </button>
-          {startPage > 2 && <span className={styles.ellipsis}>...</span>}
-        </>
-      )}
-      
-      {pages.map(page => (
-        <button
-          key={page}
-          className={`${styles.pageButton} ${currentPage === page ? styles.active : ''}`}
-          onClick={() => onPageChange(page)}
-        >
-          {page}
-        </button>
-      ))}
-      
-      {endPage < totalPages && (
-        <>
-          {endPage < totalPages - 1 && <span className={styles.ellipsis}>...</span>}
-          <button
-            className={styles.pageButton}
-            onClick={() => onPageChange(totalPages)}
-          >
-            {totalPages}
-          </button>
-        </>
-      )}
-      
-      <button
-        className={`${styles.pageButton} ${currentPage === totalPages ? styles.disabled : ''}`}
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-      >
-        Next
-      </button>
-      
-      <div className={styles.pageInfo}>
-        Showing {((currentPage - 1) * perPage) + 1} - {Math.min(currentPage * perPage, totalItems)} of {totalItems}
-      </div>
-    </div>
-  );
-};
+    <nav className={styles.pagination} aria-label={t("page")}>
+      <div className={styles.controls}>
+        {page > 1 ? (
+          <Link href={hrefFor(page - 1)} className={`${styles.step} ${styles.prev}`} rel="prev">
+            <span aria-hidden="true">‹</span> {t("previous")}
+          </Link>
+        ) : (
+          <span className={`${styles.step} ${styles.prev} ${styles.disabled}`} aria-disabled="true">
+            <span aria-hidden="true">‹</span> {t("previous")}
+          </span>
+        )}
 
-export default Pagination;
+        <ol className={styles.pages}>
+          {pageItems(page, lastPage).map((item) =>
+            typeof item === "string" ? (
+              <li key={item} className={styles.gap} aria-hidden="true">
+                …
+              </li>
+            ) : (
+              <li key={item} className={Math.abs(item - page) > 1 && item !== 1 && item !== lastPage ? styles.far : ""}>
+                {item === page ? (
+                  <span className={`${styles.number} ${styles.active}`} aria-current="page">
+                    {item}
+                  </span>
+                ) : (
+                  <Link href={hrefFor(item)} className={styles.number} aria-label={`${t("page")} ${item}`}>
+                    {item}
+                  </Link>
+                )}
+              </li>
+            )
+          )}
+        </ol>
+
+        {page < lastPage ? (
+          <Link href={hrefFor(page + 1)} className={`${styles.step} ${styles.next}`} rel="next">
+            {t("next")} <span aria-hidden="true">›</span>
+          </Link>
+        ) : (
+          <span className={`${styles.step} ${styles.next} ${styles.disabled}`} aria-disabled="true">
+            {t("next")} <span aria-hidden="true">›</span>
+          </span>
+        )}
+      </div>
+
+      {total > 0 && (
+        <p className={styles.info}>
+          {t("showingRange", {
+            from: formatNumber(from),
+            to: formatNumber(to),
+            total: formatNumber(total),
+          })}
+        </p>
+      )}
+    </nav>
+  );
+}
+
+// Builds `pathname?query&page=N` while keeping the other query params.
+export function pageHref(pathname, query, page) {
+  const params = new URLSearchParams();
+  Object.entries(query || {}).forEach(([key, value]) => {
+    if (key === "page" || value === undefined || value === null || value === "") return;
+    params.set(key, String(value));
+  });
+  if (page > 1) params.set("page", String(page));
+  const search = params.toString();
+  return search ? `${pathname}?${search}` : pathname;
+}

@@ -1,0 +1,47 @@
+.breadcrumbs {
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--txt12);
+
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 0;
+  }
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  li + li::before {
+    content: "›";
+    margin: 0 8px;
+    color: var(--txt13);
+  }
+
+  a {
+    color: var(--txt12);
+    transition: color 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--main-color);
+      text-decoration: underline;
+    }
+  }
+
+  span[aria-current] {
+    color: var(--txt11);
+    font-weight: 500;
+  }
+}
+
+@media only screen and (min-width: 1024px) {
+  .breadcrumbs {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+}

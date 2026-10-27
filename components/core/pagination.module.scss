@@ -1,73 +1,93 @@
 .pagination {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0 8px;
+}
+
+.controls {
+  display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 30px 0;
-  padding: 20px;
-  background-color: var(--bg11);
-  border-radius: 8px;
-  box-shadow: var(--bs21);
+  gap: 6px;
+  width: 100%;
 }
 
-.pageButton {
-  padding: 8px 16px;
-  border: 1px solid var(--bdr11);
-  background-color: var(--bg12);
-  color: var(--txt12);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 14px;
+.pages {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.step,
+.number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 40px;
-  text-align: center;
-  
-  &:hover:not(.disabled) {
-    background-color: var(--main-color);
-    color: white;
-    border-color: var(--main-color);
-  }
-  
-  &.active {
-    background-color: var(--main-color);
-    color: white;
-    border-color: var(--main-color);
-  }
-  
-  &.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-.ellipsis {
-  padding: 0 8px;
-  color: var(--txt12);
-}
-
-.pageInfo {
-  margin-left: 20px;
-  color: var(--txt12);
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--bdr11);
+  border-radius: 6px;
+  background: var(--bg11);
+  color: var(--txt11);
   font-size: 14px;
+  line-height: 1;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-@media (max-width: 768px) {
-  .pagination {
-    gap: 4px;
-    padding: 15px;
+a.step:hover,
+a.number:hover,
+a.step:focus-visible,
+a.number:focus-visible {
+  border-color: var(--theme-color);
+  color: var(--main-color);
+}
+
+.step {
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.active {
+  background: var(--theme-color);
+  border-color: var(--theme-color);
+  color: #fff;
+  font-weight: 500;
+}
+
+.disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.gap {
+  min-width: 18px;
+  text-align: center;
+  color: var(--txt13);
+}
+
+.info {
+  font-size: 13px;
+  color: var(--txt12);
+}
+
+// Small screens: keep first, last and neighbours; previous/next become arrows.
+@media only screen and (max-width: 599px) {
+  .far {
+    display: none;
   }
-  
-  .pageButton {
-    padding: 6px 12px;
-    min-width: 36px;
-    font-size: 13px;
+  .step {
+    min-width: 40px;
+    padding: 0;
+    font-size: 0;
+
+    span {
+      font-size: 20px;
+    }
   }
-  
-  .pageInfo {
-    margin-left: 0;
-    margin-top: 10px;
-    width: 100%;
-    text-align: center;
+  .controls {
+    justify-content: space-between;
   }
 }

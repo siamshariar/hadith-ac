@@ -18,27 +18,16 @@ export default function RemoveBookmark({
 }) {
   const { bookmarks, changeBookmarks } = useContext(BookmarkContext);
 
-  const checkVerseBookmarked = (arr, id) => {
-    return arr.some((el) => {
-      return el.id == id;
-    });
-  };
-
-  const elementRemove = (arr, elem) => {
-    return arr.filter((item) => !(item.id == elem.id));
-  };
-
   const handleRemoveBookmark = (e) => {
-    let entry = bookmarks[bookmarkKey].entry;
+    const folder = bookmarks[bookmarkKey];
+    if (!folder) return;
 
-    if (entry !== null && checkVerseBookmarked(entry, hadith.id)) {
-      let newBookmarks = bookmarks;
-      entry = elementRemove(entry, { id: hadith.id });
-      newBookmarks[bookmarkKey] = {
-        name: bookmarks[bookmarkKey].name,
-        entry: entry,
-      };
-      changeBookmarks(newBookmarks);
+    const entry = folder.entry || [];
+    if (entry.some((el) => el.id == hadith.id)) {
+      changeBookmarks({
+        ...bookmarks,
+        [bookmarkKey]: { name: folder.name, entry: entry.filter((item) => !(item.id == hadith.id)) },
+      });
 
       if (typeof isBookmarkPage !== "undefined" && isBookmarkPage === true) {
         updateBookmarksData(hadith.id);
@@ -66,7 +55,7 @@ export default function RemoveBookmark({
 
           <h2 className={styles.title}>Remove bookmark?</h2>
           <div className={styles.title_desc}>
-            Are you sure want to remove the verse from bookmark?
+            Are you sure you want to remove this hadith from your bookmarks?
           </div>
 
           <div className={styles.buttons}>

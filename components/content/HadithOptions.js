@@ -1,9 +1,11 @@
- "use client";
+"use client";
 
 import { useState, useEffect, useContext } from "react";
 import { PinContext } from "../../contexts/PinContext";
 import { BookmarkContext } from "../../contexts/BookmarkContext";
+import { useLocale } from "../../contexts/LocaleContext";
 import { server } from "../../lib/config";
+import { citation, cleanText, hadithPath, isCurrentStoredRef, storedHadithRef } from "../../lib/hadith";
 import Popover from "@mui/material/Popover";
 import MenuList from "@mui/material/MenuList";
 import MenuItem from "@mui/material/MenuItem";
@@ -23,30 +25,18 @@ import ShareIcon from "../icons/Share";
 
 import styles from "./HadithOptions.module.scss";
 
-const HadithOptions = ({
-  // chapterNumber,
-  // chapterName,
-  // chapterSlug,
-  // verseNumber,
-  // ayaArabic,
-  // translation,
-  // footnotes,
-  // printRef,
-  updateBookmarksData,
-  isBookmarkPage,
-  hadith,
-}) => {
+// `hadith` is an API hadith object, `book` its collection ({ name, slug ... }).
+const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage }) => {
+  const { t } = useLocale();
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const handlePopoverOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
-  };
-
   const open = Boolean(anchorEl);
+
+  const handlePopoverOpen = (event) => setAnchorEl(event.currentTarget);
+  const handlePopoverClose = () => setAnchorEl(null);
+
+  const reference = citation(hadith, book) || `#${hadith.id}`;
+  const url = `${server}${hadithPath(hadith)}`;
+  const shareTitle = `${reference} | Hadith | hadith.vn`;
 
   //snackbar
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -58,61 +48,40 @@ const HadithOptions = ({
     setSnackbarOpen(false);
   };
 
-  const handleCopyLink = () => {
-    if (typeof window !== "undefined") {
-      // let path = window.location.pathname;
-      // let parts = path.split("/");
-      let url = `${server}/hadiths/${hadith.id}`;
-
-      // if (parts.length === 3 && parts[1] === "chapters") {
-      //   url = `${server}/chapters/${chapterSlug}#verse-${verseNumber}`;
-      // } else if (
-      //   parts.length === 5 &&
-      //   parts[1] === "chapters" &&
-      //   parts[3] === "verses"
-      // ) {
-      //   url = `${server}/chapters/${chapterSlug}/verses/${verseNumber}`;
-      // } else {
-      //   url = `${server}/chapters/${chapterSlug}/verses/${verseNumber}`;
-      // }
-
-      navigator.clipboard.writeText(url);
-      handlePopoverClose();
-      setSnackbarOpen(true);
+  const copyText = (text) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(text).catch(() => {});
     }
+    handlePopoverClose();
+    setSnackbarOpen(true);
   };
 
+  const handleCopyLink = () => copyText(url);
+
+  // The copied text keeps the same labels as the page: a fallback translation
+  // is marked as such, and grades keep their grader names.
   const handleCopyFile = () => {
-    if (typeof window !== "undefined") {
-      // let path = window.location.pathname;
-      // let parts = path.split("/");
-      let url = `${server}/hadiths/${hadith.id}`;
+    const parts = [reference];
+    if (hadith.title) parts.push(cleanText(hadith.title));
+    if (hadith.arabic) parts.push(cleanText(hadith.arabic));
 
-      // if (parts.length === 3 && parts[1] === "chapters") {
-      //   url = `${server}/chapters/${chapterSlug}#verse-${verseNumber}`;
-      // } else if (
-      //   parts.length === 5 &&
-      //   parts[1] === "chapters" &&
-      //   parts[3] === "verses"
-      // ) {
-      //   url = `${server}/chapters/${chapterSlug}/verses/${verseNumber}`;
-      // } else {
-      //   url = `${server}/chapters/${chapterSlug}/verses/${verseNumber}`;
-      // }
-
-      const translationText = Object.values(hadith.translations || {})[0] || '';
-      let file = `Hadith ${hadith.hadith_number || hadith.id}\n\n${hadith.arabic_text || ''}\n\n${translationText}\n\nGrade: ${hadith.grade || ''}\n\n${url}`;
-
-      navigator.clipboard.writeText(file);
-      handlePopoverClose();
-      setSnackbarOpen(true);
+    const translation = hadith.translation;
+    if (translation && translation.text) {
+      const label = translation.isFallback ? `[${t("fallbackTranslation")}] ` : "";
+      parts.push(`${label}${cleanText(translation.text)}`);
     }
+
+    const grades = [];
+    if (hadith.gradeText) grades.push(hadith.gradeText);
+    (hadith.grades || []).forEach((grade) => grades.push(`${grade.graderName}: ${grade.grade}`));
+    if (grades.length) parts.push(`${t("grades")}: ${grades.join("; ")}`);
+
+    parts.push(url);
+    copyText(parts.join("\n\n"));
   };
 
   // share option
   const [shareOpen, setShareOpen] = useState(false);
-  const [shareUrl, setShareUrl] = useState("");
-  const [shareTitle, setShareTitle] = useState("");
 
   const handleShareClose = (open) => (event) => {
     if (
@@ -126,61 +95,35 @@ const HadithOptions = ({
 
   const handleWebShare = () => {
     handlePopoverClose();
-
-    const url = `${server}/hadiths/${hadith.id}`;
-    const title =
-      "Hadith " +
-      (hadith.hadith_number || hadith.id) +
-      " | Hadith | Hadith in Vietnamese | hadith.vn";
-
-    setShareUrl(url);
-    setShareTitle(title);
     setShareOpen(true);
   };
 
   const handleMobileShare = () => {
     handlePopoverClose();
-
-    const url = `${server}/hadiths/${hadith.id}`;
-    const title =
-      "Hadith " +
-      (hadith.hadith_number || hadith.id) +
-      " | Hadith | Hadith in Vietnamese | hadith.vn";
-
-    if (navigator.share) {
-      navigator.share({
-        title: title,
-        url: url,
-      });
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({ title: shareTitle, url }).catch(() => {});
     } else {
-      setShareUrl(url);
-      setShareTitle(title);
       setShareOpen(true);
     }
   };
 
-  // bookmarks
+  // bookmarks (only entries saved against the current API ids count)
   const { bookmarks } = useContext(BookmarkContext);
-  const [isBookmarked, setIsBookmarked] = useState(true);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkKey, setBookmarkKey] = useState("");
 
-  const checkVerseBookmarked = (arr, id) => {
-    return arr.some((el) => {
-      return el.id == id;
-    });
-  };
-
   useEffect(() => {
-    for (let [key, value] of Object.entries(bookmarks)) {
-      if (checkVerseBookmarked(value.entry, hadith.id)) {
-        setIsBookmarked(true);
+    let found = false;
+    for (let [key, value] of Object.entries(bookmarks || {})) {
+      const entries = (value && value.entry) || [];
+      if (entries.some((el) => isCurrentStoredRef(el) && el.id == hadith.id)) {
         setBookmarkKey(key);
+        found = true;
         break;
-      } else {
-        setIsBookmarked(false);
       }
     }
-  }, [bookmarks, anchorEl]);
+    setIsBookmarked(found);
+  }, [bookmarks, anchorEl, hadith.id]);
 
   const [addBookmarkOpen, setAddBookmarkOpen] = useState(false);
   const [removeBookmarkOpen, setRemoveBookmarkOpen] = useState(false);
@@ -207,46 +150,22 @@ const HadithOptions = ({
   };
 
   // pin options
-  const checkPinnedThisVerse = (arr, id) => {
-    return arr.some((el) => el.id == id);
-  };
-
   const { pin, addPin, removePin } = useContext(PinContext);
   const [isPinned, setIsPinned] = useState(false);
 
   useEffect(() => {
-    checkPinnedThisVerse(pin, hadith.id)
-      ? setIsPinned(true)
-      : setIsPinned(false);
-  }, [pin, hadith]);
+    setIsPinned((pin || []).some((el) => isCurrentStoredRef(el) && el.id == hadith.id));
+  }, [pin, hadith.id]);
 
   const handleAddPin = () => {
-    // addPin(chapterNumber, chapterName, chapterSlug, verseNumber);
-    addPin(hadith);
+    addPin(storedHadithRef(hadith, book));
     handlePopoverClose();
   };
 
   const handleRemovePin = () => {
-    // removePin(chapterNumber, verseNumber);
     removePin(hadith);
     handlePopoverClose();
   };
-
-  // print option
-  const pageStyle = `
-    @page {
-      size: auto;
-      margin: 20mm;
-    }
-  `;
-
-  // const handlePrint = useReactToPrint({
-  //   content: () => printRef,
-  //   documentTitle: chapterName,
-  //   pageStyle: pageStyle,
-  //   onBeforeGetContent: () => handlePopoverClose(),
-  //   removeAfterPrint: true,
-  // });
 
   return (
     <>
@@ -258,20 +177,15 @@ const HadithOptions = ({
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleSnackbarClose}
-        message="Đã được copy"
+        message={t("copied")}
       />
 
-      <Share
-        open={shareOpen}
-        closer={handleShareClose}
-        url={shareUrl}
-        title={shareTitle}
-      />
+      <Share open={shareOpen} closer={handleShareClose} url={url} title={shareTitle} />
 
       <AddBookmark
         open={addBookmarkOpen}
         closer={handleBookmarkClose}
-        hadith={hadith}
+        entry={storedHadithRef(hadith, book)}
       />
 
       <RemoveBookmark
@@ -289,7 +203,8 @@ const HadithOptions = ({
             className={styles.more_icon}
             onClick={handlePopoverOpen}
             focusRipple={false}
-            aria-label="Hadith options"
+            aria-label={t("hadithOptions")}
+            aria-haspopup="menu"
           >
             <MoreIcon />
           </IconButton>
@@ -310,63 +225,49 @@ const HadithOptions = ({
             classes={{ paper: styles.custom_paper }}
           >
             <MenuList>
-              <MenuItem
-                classes={{
-                  root: styles.mobile_share,
-                }}
-                onClick={() => handleMobileShare()}
-              >
+              <MenuItem classes={{ root: styles.mobile_share }} onClick={handleMobileShare}>
                 <span className={styles.icon}>
                   <ShareIcon />
                 </span>
-                <span className={styles.text}>Share</span>
+                <span className={styles.text}>{t("share")}</span>
               </MenuItem>
 
-              <MenuItem
-                classes={{
-                  root: styles.web_share,
-                }}
-                onClick={() => handleWebShare()}
-              >
+              <MenuItem classes={{ root: styles.web_share }} onClick={handleWebShare}>
                 <span className={styles.icon}>
                   <ShareIcon />
                 </span>
-                <span className={styles.text}>Share</span>
+                <span className={styles.text}>{t("share")}</span>
               </MenuItem>
 
-              {isBookmarked && (
+              {isBookmarked ? (
                 <MenuItem onClick={handleRemoveBookmark}>
                   <span className={styles.icon}>
                     <BookmarkIcon />
                   </span>
-                  <span className={styles.text}>Remove bookmark</span>
+                  <span className={styles.text}>{t("removeBookmark")}</span>
                 </MenuItem>
-              )}
-
-              {!isBookmarked && (
+              ) : (
                 <MenuItem onClick={handleAddBookmark}>
                   <span className={styles.icon}>
                     <BookmarkBorder />
                   </span>
-                  <span className={styles.text}>Bookmark</span>
+                  <span className={styles.text}>{t("bookmark")}</span>
                 </MenuItem>
               )}
 
-              {!isPinned && (
-                <MenuItem onClick={() => handleAddPin()}>
-                  <span className={styles.icon}>
-                    <PinIcon />
-                  </span>
-                  <span className={styles.text}>Pin</span>
-                </MenuItem>
-              )}
-
-              {isPinned && (
-                <MenuItem onClick={() => handleRemovePin()}>
+              {isPinned ? (
+                <MenuItem onClick={handleRemovePin}>
                   <span className={styles.icon}>
                     <UnpinIcon />
                   </span>
-                  <span className={styles.text}>Unpin</span>
+                  <span className={styles.text}>{t("unpin")}</span>
+                </MenuItem>
+              ) : (
+                <MenuItem onClick={handleAddPin}>
+                  <span className={styles.icon}>
+                    <PinIcon />
+                  </span>
+                  <span className={styles.text}>{t("pin")}</span>
                 </MenuItem>
               )}
 
@@ -374,22 +275,15 @@ const HadithOptions = ({
                 <span className={styles.icon}>
                   <FileCopyIcon />
                 </span>
-                <span className={styles.text}>Copy</span>
+                <span className={styles.text}>{t("copy")}</span>
               </MenuItem>
 
               <MenuItem onClick={handleCopyLink}>
                 <span className={styles.icon}>
                   <LinkIcon />
                 </span>
-                <span className={styles.text}>Copy Link</span>
+                <span className={styles.text}>{t("copyLink")}</span>
               </MenuItem>
-
-              {/*<MenuItem onClick={handlePrint}>*/}
-              {/*  <span className={styles.icon}>*/}
-              {/*    <PrintIcon />*/}
-              {/*  </span>*/}
-              {/*  <span className={styles.text}>Print</span>*/}
-              {/*</MenuItem>*/}
             </MenuList>
           </Popover>
         </div>

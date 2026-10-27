@@ -2,14 +2,17 @@
 
 import { useState, useContext } from "react";
 import { BookmarkContext } from "../../contexts/BookmarkContext";
+import { useLocale } from "../../contexts/LocaleContext";
 import Modal from "@mui/material/Modal";
 import Backdrop from "@mui/material/Backdrop";
 import Fade from "@mui/material/Fade";
 import CloseIcon from "../icons/Close";
 import styles from "./modal.module.scss";
 
-export default function AddBookmark({ open, closer, hadith }) {
+// `entry` is a stored reference (lib/hadith storedHadithRef): ids and numbers only.
+export default function AddBookmark({ open, closer, entry }) {
   const { bookmarks, changeBookmarks } = useContext(BookmarkContext);
+  const { t } = useLocale();
 
   const [folderKey, setFolderKey] = useState("favorites");
   const [newFolderKey, setNewFolderKey] = useState("");
@@ -44,7 +47,7 @@ export default function AddBookmark({ open, closer, hadith }) {
   };
 
   const handleAddBookmark = (e) => {
-    let newBookmarks = bookmarks;
+    const item = { ...entry, date: new Date().toISOString() };
 
     if (folderKey === "create") {
       if (newFolderKey === "") {
@@ -52,55 +55,21 @@ export default function AddBookmark({ open, closer, hadith }) {
       } else if (bookmarks.hasOwnProperty(newFolderKey)) {
         handleShowMessage(newFolderName + " is already exists!");
       } else {
-        newBookmarks[newFolderKey] = {
-          name: newFolderName,
-          entry: [
-            {
-              id: hadith.id,
-              hadith_number: hadith.hadith_number,
-              book_id: hadith.book_id,
-              chapter_id: hadith.chapter_id,
-              arabic_text: hadith.arabic_text,
-              translations: hadith.translations,
-              book: hadith.book,
-              chapter: hadith.chapter,
-              narrator: hadith.narrator,
-              grade: hadith.grade,
-              explanation: hadith.explanation,
-              categories: hadith.categories,
-            },
-          ],
-        };
-
-        changeBookmarks(newBookmarks);
+        changeBookmarks({
+          ...bookmarks,
+          [newFolderKey]: { name: newFolderName, entry: [item] },
+        });
         closer(false)(e);
         setFolderKey("favorites");
       }
-    } else {
-      if (bookmarks.hasOwnProperty(folderKey)) {
-        let entry = bookmarks[folderKey].entry;
-        entry.push({
-          id: hadith.id,
-          hadith_number: hadith.hadith_number,
-          book_id: hadith.book_id,
-          chapter_id: hadith.chapter_id,
-          arabic_text: hadith.arabic_text,
-          translations: hadith.translations,
-          book: hadith.book,
-          chapter: hadith.chapter,
-          narrator: hadith.narrator,
-          grade: hadith.grade,
-          explanation: hadith.explanation,
-          categories: hadith.categories,
-        });
-        newBookmarks[folderKey] = {
-          name: bookmarks[folderKey].name,
-          entry: entry,
-        };
-
-        changeBookmarks(newBookmarks);
-        closer(false)(e);
-      }
+    } else if (bookmarks.hasOwnProperty(folderKey)) {
+      const folder = bookmarks[folderKey];
+      const entries = (folder.entry || []).filter((el) => el.id != item.id);
+      changeBookmarks({
+        ...bookmarks,
+        [folderKey]: { name: folder.name, entry: [...entries, item] },
+      });
+      closer(false)(e);
     }
   };
 
@@ -120,7 +89,7 @@ export default function AddBookmark({ open, closer, hadith }) {
           <button className={styles.close} onClick={handleClose}>
             <CloseIcon />
           </button>
-          <h2 className={styles.title}>Bookmark this hadith</h2>
+          <h2 className={styles.title}>{t("bookmark")}</h2>
           <div className={styles.input_area}>
             <h2 className={styles.sub_title}>Choose Folder</h2>
             <select

@@ -1,0 +1,188 @@
+// ---------------------------------------------------------------- Arabic
+
+.arabic {
+  font-family: var(--font-arabic);
+  font-size: calc(var(--fs-arabic) * 0.78);
+  font-weight: 400;
+  line-height: 2.05;
+  color: var(--txt00);
+  text-align: right;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  word-spacing: 0.04em;
+}
+
+.arabicLarge {
+  font-size: calc(var(--fs-arabic) * 0.86);
+  line-height: 2.15;
+}
+
+.clampArabic {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
+@media only screen and (min-width: 600px) {
+  .arabic {
+    font-size: calc(var(--fs-arabic) * 0.86);
+  }
+  .arabicLarge {
+    font-size: var(--fs-arabic);
+  }
+}
+
+// ---------------------------------------------------------------- translation
+
+.translation {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.labelRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.label {
+  color: var(--txt12);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.fallbackBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--notice-bdr);
+  border-radius: 999px;
+  background: var(--notice-bg);
+  color: var(--notice-txt);
+  font-weight: 500;
+}
+
+.author {
+  color: var(--txt13);
+}
+
+.fallbackNote {
+  padding: 8px 12px;
+  border-left: 3px solid var(--notice-bdr);
+  border-radius: 4px;
+  background: var(--notice-bg);
+  color: var(--notice-txt);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.translationText {
+  font-family: var(--font-trans);
+  font-size: calc(var(--fs-trans) * 0.92);
+  line-height: 1.7;
+  color: var(--txt11);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.clampTranslation {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  overflow: hidden;
+}
+
+@media only screen and (min-width: 600px) {
+  .translationText {
+    font-size: var(--fs-trans);
+  }
+}
+
+.missing {
+  padding: 10px 12px;
+  border: 1px dashed var(--notice-bdr);
+  border-radius: 6px;
+  background: var(--notice-bg);
+  color: var(--notice-txt);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+// ---------------------------------------------------------------- grades
+
+.gradeChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--grade-bg);
+  color: var(--grade-txt);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.chipPrimary {
+  font-weight: 500;
+}
+
+.chipGrader {
+  opacity: 0.8;
+}
+
+.sectionTitle {
+  margin-bottom: 10px;
+  color: var(--txt11);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.gradesFull {
+  display: block;
+}
+
+.gradeText {
+  margin-bottom: 10px;
+  color: var(--grade-txt);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.graderList {
+  display: grid;
+  gap: 6px;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 16px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: var(--grade-bg);
+    color: var(--grade-txt);
+    font-size: 15px;
+  }
+}
+
+.graderName {
+  color: var(--txt12);
+}
+
+.graderGrade {
+  font-weight: 500;
+}
