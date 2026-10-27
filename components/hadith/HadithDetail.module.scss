@@ -1,0 +1,253 @@
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--bdr11);
+}
+
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.context {
+  padding-top: 8px;
+  color: var(--txt12);
+  font-size: 14px;
+  line-height: 1.5;
+
+  a {
+    color: var(--main-color);
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+}
+
+.title {
+  color: var(--txt11);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  color: var(--txt12);
+  font-size: 14px;
+}
+
+.fact strong {
+  color: var(--txt11);
+  font-weight: 500;
+}
+
+.languageSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+
+  select {
+    max-width: 220px;
+    padding: 6px 28px 6px 10px;
+    border: 1px solid var(--bdr13);
+    border-radius: 6px;
+    background-color: var(--bg11);
+    color: var(--txt11);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--theme-color);
+      outline-offset: 1px;
+    }
+  }
+}
+
+.arabicBlock {
+  padding: 18px 16px;
+  border: 1px solid var(--bdr11);
+  border-radius: 10px;
+  background: var(--bg12);
+}
+
+.translationBlock {
+  display: block;
+}
+
+.section {
+  display: block;
+}
+
+.sectionTitle {
+  margin-bottom: 10px;
+  color: var(--txt11);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.fallbackNote {
+  padding: 8px 12px;
+  border-left: 3px solid var(--notice-bdr);
+  border-radius: 4px;
+  background: var(--notice-bg);
+  color: var(--notice-txt);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.attribution {
+  color: var(--txt11);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.attributionLabel {
+  color: var(--txt12);
+}
+
+.prose {
+  color: var(--txt11);
+  font-family: var(--font-trans);
+  font-size: calc(var(--fs-trans) * 0.92);
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.hints {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--txt11);
+  font-family: var(--font-trans);
+  font-size: calc(var(--fs-trans) * 0.9);
+  line-height: 1.65;
+
+  li {
+    position: relative;
+    padding-inline-start: 22px;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset-inline-start: 4px;
+      top: 0.65em;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--theme-color);
+    }
+  }
+}
+
+.words {
+  display: grid;
+  gap: 8px;
+
+  div {
+    padding: 10px 12px;
+    border: 1px solid var(--bdr11);
+    border-radius: 8px;
+  }
+
+  dt {
+    margin-bottom: 4px;
+    color: var(--txt11);
+    font-weight: 500;
+  }
+
+  dd {
+    color: var(--txt12);
+    line-height: 1.6;
+  }
+}
+
+.reference {
+  color: var(--txt12);
+  font-family: var(--font-arabic);
+  font-size: 18px;
+  line-height: 1.9;
+  white-space: pre-line;
+  text-align: right;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border: 1px solid var(--bdr11);
+  border-radius: 999px;
+  color: var(--txt11);
+  font-size: 14px;
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--theme-color);
+    color: var(--main-color);
+  }
+}
+
+@media only screen and (max-width: 599px) {
+  .languageSwitch {
+    width: 100%;
+    margin-left: 0;
+
+    select {
+      flex: 1 1 auto;
+      max-width: none;
+    }
+  }
+}
+
+@media only screen and (min-width: 600px) {
+  .prose {
+    font-size: var(--fs-trans);
+  }
+  .hints {
+    font-size: calc(var(--fs-trans) * 0.95);
+  }
+}
+
+@media only screen and (min-width: 1024px) {
+  .detail {
+    gap: 28px;
+  }
+  .title {
+    font-size: 26px;
+  }
+  .arabicBlock {
+    padding: 28px 32px;
+  }
+  .sectionTitle {
+    font-size: 18px;
+  }
+}
