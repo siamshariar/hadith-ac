@@ -15,6 +15,7 @@ export const BookmarkContext = createContext();
 const BookmarkContextProvider = ({ children }) => {
   const [bookmarks, setBookmarks] = useState(defaultBookmarks);
   const [archived, setArchived] = useState(0);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const saved = readJson("bookmarks", null);
@@ -33,6 +34,7 @@ const BookmarkContextProvider = ({ children }) => {
     writeJson("bookmarks", cleaned);
     setBookmarks(cleaned);
     setArchived(archivedCount("bookmarks"));
+    setLoaded(true);
   }, []);
 
   // Always pass a new object: mutating the current one would not re-render.
@@ -48,6 +50,7 @@ const BookmarkContextProvider = ({ children }) => {
         bookmarks,
         changeBookmarks,
         archived,
+        loaded,
       }}
     >
       {children}

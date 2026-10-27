@@ -1,0 +1,70 @@
+import { useContext } from "react";
+import { useRouter } from "next/router";
+import { PinContext } from "../../contexts/PinContext";
+import { useLocale } from "../../contexts/LocaleContext";
+import { storedRefHref, storedRefLabel, storedRefSource } from "../../lib/hadith";
+import PinIcon from "../icons/Pin";
+import AutoStoriesIcon from "../icons/AutoStories";
+import styles from "./list.module.scss";
+
+const formatDate = (date, ui) => {
+  const value = new Date(date);
+  if (Number.isNaN(value.getTime())) return "";
+  const today = new Date().toDateString() === value.toDateString();
+  const options = today
+    ? { hour: "numeric", minute: "numeric" }
+    : { year: "numeric", month: "long", day: "numeric" };
+  return value.toLocaleString(ui === "vi" ? "vi-VN" : "en-US", options);
+};
+
+// Pinned hadiths (kind="pin") or the last-read history (kind="lastRead").
+// Entries are references (id, book, number); they open the current pages.
+export default function StoredList({ kind, controller }) {
+  const { pin, lastRead, archived } = useContext(PinContext);
+  const router = useRouter();
+  const { t, ui } = useLocale();
+  const isPin = kind === "pin";
+  const items = (isPin ? pin : lastRead) || [];
+  const archivedCount = (archived && archived[kind]) || 0;
+  const Icon = isPin ? PinIcon : AutoStoriesIcon;
+
+  const open = (event, href) => {
+    event.preventDefault();
+    if (controller) controller(false)(event);
+    router.push(href);
+  };
+
+  return (
+    <div className={styles.content}>
+      {archivedCount > 0 && <p className={styles.archived}>{t("legacyArchived", { count: archivedCount })}</p>}
+
+      <div className={styles.lists}>
+        {items.map((item) => {
+          const href = storedRefHref(item, { preferContext: isPin });
+          const label = storedRefLabel(item);
+          const source = storedRefSource(item);
+          return (
+            <div key={item.id} className={styles.item}>
+              <a href={href} className={styles.link} onClick={(event) => open(event, href)}>
+                <span className={styles.left}>
+                  <span className={styles.icon}>
+                    <Icon />
+                  </span>
+                  <span className={styles.desc}>
+                    <span className={styles.hadith_title} dir="auto">
+                      {label}
+                    </span>
+                    {source && source !== label && <span className={styles.source_info}>{source}</span>}
+                    {!isPin && item.date && <span className={styles.time}>{formatDate(item.date, ui)}</span>}
+                  </span>
+                </span>
+              </a>
+            </div>
+          );
+        })}
+      </div>
+
+      {items.length === 0 && <h2 className={styles.no_record}>{isPin ? t("noPins") : t("noLastRead")}</h2>}
+    </div>
+  );
+}

@@ -11,6 +11,11 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
+import Skeleton from "react-loading-skeleton";
+import ErrorState from "../core/error";
+import { useLocale } from "../../contexts/LocaleContext";
+import useApi from "../../hooks/useApi";
+import { getLanguages } from "../../lib/api";
 import Switcher from "../core/switcher";
 import UpIcon from "../icons/ChevronUp";
 import DownIcon from "../icons/ChevronDown";
@@ -21,6 +26,8 @@ import styles from "./index.module.scss";
 export default function SettingsContent() {
   return (
     <div className={styles.wrapper}>
+      <Language />
+      <hr className={styles.divider} />
       {/* <View />
       <hr className={styles.divider} /> */}
       {/* <VerseMode />
@@ -40,6 +47,50 @@ export default function SettingsContent() {
     </div>
   );
 }
+
+// Content language: populated from /hadith/languages, saved in a cookie so
+// server-rendered pages use it as {localizationCode}. Arabic is not offered
+// here because the Arabic text is always shown.
+const Language = () => {
+  const { t, preferredLang, setLanguage, formatNumber } = useLocale();
+  const { data, error, loading, retry } = useApi("languages", () => getLanguages());
+
+  const languages = (Array.isArray(data) ? data : [])
+    .filter((language) => language.code !== "ar")
+    .sort((a, b) => {
+      const rank = (code) => (code === "vi" ? 0 : code === "en" ? 1 : 2);
+      return rank(a.code) - rank(b.code) || a.name.localeCompare(b.name);
+    });
+
+  return (
+    <div className={`${styles.block} ${styles.language}`}>
+      <div className={styles.title}>{t("contentLanguage")}</div>
+      <div className={styles.list}>
+        {loading && !languages.length ? (
+          <Skeleton height={40} />
+        ) : error ? (
+          <ErrorState error={error} onRetry={retry} compact />
+        ) : (
+          <select
+            className={styles.language_select}
+            value={preferredLang}
+            onChange={(event) => setLanguage(event.target.value)}
+            aria-label={t("contentLanguage")}
+          >
+            {languages.map((language) => (
+              <option key={language.code} value={language.code}>
+                {language.nativeName}
+                {language.nativeName !== language.name ? ` (${language.name})` : ""}
+                {` - ${t("translatedCount", { count: formatNumber(language.totalTranslated) })}`}
+              </option>
+            ))}
+          </select>
+        )}
+        <p className={styles.language_note}>{t("contentLanguageNote")}</p>
+      </div>
+    </div>
+  );
+};
 
 const FontSize = () => {
   const {
@@ -61,12 +112,13 @@ const FontSize = () => {
     <div className={`${styles.block} ${styles.font_size}`}>
       <div className={styles.title}>Font Size</div>
       <div className={styles.list}>
-        {/* <div className={styles.item}>
+        <div className={styles.item}>
           <div className={styles.label}>Arabic</div>
           <div className={styles.sizer}>
             <IconButton
               className={styles.sizer_btn}
               onClick={() => handleFontSizeArabic(fontSizeArabic - 1)}
+              aria-label="Decrease Arabic font size"
             >
               <MinusIcon />
             </IconButton>
@@ -76,13 +128,14 @@ const FontSize = () => {
             <IconButton
               className={styles.sizer_btn}
               onClick={() => handleFontSizeArabic(fontSizeArabic + 1)}
+              aria-label="Increase Arabic font size"
             >
               <PlusIcon />
             </IconButton>
           </div>
-        </div> */}
+        </div>
         <div className={styles.item}>
-          <div className={styles.label}>Change Font Size</div>
+          <div className={styles.label}>Translation</div>
           <div className={styles.sizer}>
             <IconButton
               className={styles.sizer_btn}
@@ -136,14 +189,19 @@ const FontFamily = () => {
     <div className={`${styles.block} ${styles.font_family}`}>
       <div className={styles.title}>Font Family</div>
       <div className={styles.list}>
-        {/* <div className={styles.item}>
+        <div className={styles.item}>
           <Accordion
             className={styles.accordion}
             expanded={expanded === "font_arabic"}
             onChange={controlAccordion("font_arabic")}
           >
             <AccordionSummary className={styles.accordion_summary}>
-              <IconButton className={styles.btn}>
+              <IconButton
+                component="span"
+                tabIndex={-1}
+                aria-hidden="true"
+                className={styles.btn}
+              >
                 <span
                   className={
                     expanded !== "font_arabic" ? styles.none : styles.icon
@@ -181,7 +239,7 @@ const FontFamily = () => {
               </RadioGroup>
             </AccordionDetails>
           </Accordion>
-        </div> */}
+        </div>
         <div className={styles.item}>
           <Accordion
             className={styles.accordion}
@@ -190,8 +248,10 @@ const FontFamily = () => {
           >
             <AccordionSummary className={styles.accordion_summary}>
               <IconButton
+                component="span"
+                tabIndex={-1}
+                aria-hidden="true"
                 className={styles.btn}
-                aria-label={expanded === "font_trans" ? "Collapse font choices" : "Expand font choices"}
               >
                 <span
                   className={
@@ -208,7 +268,7 @@ const FontFamily = () => {
                   <DownIcon />
                 </span>
               </IconButton>
-              <div className={styles.label}>Choose Font</div>
+              <div className={styles.label}>Choose Translation Font</div>
             </AccordionSummary>
 
             <AccordionDetails className={styles.accordion_details}>
@@ -259,8 +319,10 @@ const Theme = () => {
           >
             <AccordionSummary className={styles.accordion_summary}>
               <IconButton
+                component="span"
+                tabIndex={-1}
+                aria-hidden="true"
                 className={styles.btn}
-                aria-label={expanded === "theme" ? "Collapse theme choices" : "Expand theme choices"}
               >
                 <span
                   className={expanded !== "theme" ? styles.none : styles.icon}

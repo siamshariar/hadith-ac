@@ -169,3 +169,23 @@
   .print_footer span:nth-child(2) {
   }
 }
+
+.notice {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--notice-bdr);
+  border-radius: 4px;
+  background: var(--notice-bg);
+  color: var(--notice-txt);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.remove {
+  border: 0;
+  background: none;
+  color: var(--main-color);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

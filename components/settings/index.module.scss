@@ -290,3 +290,27 @@
     padding-right: 0;
   }
 }
+
+.language_select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--bdr13);
+  border-radius: 6px;
+  background-color: var(--bg11);
+  color: var(--txt11);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color);
+    outline-offset: 1px;
+  }
+}
+
+.language_note {
+  margin-top: 8px;
+  color: var(--txt12);
+  font-size: 13px;
+  line-height: 1.5;
+}

@@ -145,3 +145,19 @@
     background-color: var(--bg12);
   }
 }
+
+.archived {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--notice-bdr);
+  border-radius: 4px;
+  background: var(--notice-bg);
+  color: var(--notice-txt);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.item .desc .source_info {
+  font-size: 12px;
+  opacity: 0.7;
+}
