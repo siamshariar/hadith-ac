@@ -38,6 +38,21 @@
   --bsc11: #466548;
   --sidebar-icon-color: rgba(0, 0, 0, 0.54);
   --snsic: #138025;
+
+  // reading typography (overridden from the reader's settings)
+  --fs-arabic: 28px;
+  --fs-trans: 18px;
+  --font-arabic: "Amiri", "Noto Naskh Arabic", "Traditional Arabic", serif;
+  --font-trans: "Roboto", -apple-system, "Segoe UI", sans-serif;
+
+  // hadith content states
+  --accent-soft: rgba(70, 101, 72, 0.1); // light tint of the main green
+  --notice-bg: #fff7e3; // fallback translation / missing translation
+  --notice-bdr: #f0d58c;
+  --notice-txt: #6f4e00;
+  --grade-bg: #eef3ee;
+  --grade-txt: #2f4a31;
+  --error-txt: #b3261e;
 }
 
 .dark {
@@ -64,6 +79,15 @@
   --bsc11: #313a55;
   --sidebar-icon-color: #9eabbe;
   --snsic: #ffffff;
+
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --notice-bg: #3a3420;
+  --notice-bdr: #6b5a2a;
+  --notice-txt: #f3dfa6;
+  --grade-bg: #2c3a35;
+  --grade-txt: #cfe3d1;
+  --error-txt: #f2b8b5;
+  --txt13: #9eabbe;
 }
 
 .blue {

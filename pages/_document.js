@@ -6,6 +6,7 @@ import { ServerStyleSheets } from "@mui/styles";
 
 import { GA_TRACKING_ID } from "../lib/gtag";
 import { config } from "../lib/config";
+import { uiLanguage } from "../lib/language";
 
 class CustomDocument extends Document {
   static async getInitialProps(ctx) {
@@ -14,8 +15,9 @@ class CustomDocument extends Document {
   }
 
   render() {
+    const pageProps = (this.props.__NEXT_DATA__ && this.props.__NEXT_DATA__.props && this.props.__NEXT_DATA__.props.pageProps) || {};
     return (
-      <Html lang={config.language}>
+      <Html lang={uiLanguage(pageProps.lang || config.language)}>
         <Head>
           {/* Global Site Tag (gtag.js) - Google Analytics */}
           <script

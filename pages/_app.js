@@ -2,7 +2,10 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 // import LayoutContextProvider from "../contexts/LayoutContext";
 import SettingsContextProvider from "../contexts/SettingsContext";
+import LocaleProvider from "../contexts/LocaleContext";
+import RouteProgress from "../components/core/RouteProgress";
 import * as gtag from "../lib/gtag";
+import "react-loading-skeleton/dist/skeleton.css";
 import "../styles/global.scss";
 
 const App = ({ Component, pageProps }) => {
@@ -19,14 +22,16 @@ const App = ({ Component, pageProps }) => {
   }, [router.events]);
 
   useEffect(() => {
-    document.addEventListener("keydown", (e) => {
+    const preventSave = (e) => {
       if (
         e.key === "s" &&
         (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)
       ) {
         e.preventDefault();
       }
-    });
+    };
+    document.addEventListener("keydown", preventSave);
+    return () => document.removeEventListener("keydown", preventSave);
 
     // document.addEventListener('contextmenu', (e) => {
     //   e.preventDefault()
@@ -36,9 +41,12 @@ const App = ({ Component, pageProps }) => {
   const getLayout = Component.getLayout || ((page) => page);
 
   return (
-    <SettingsContextProvider>
-      {getLayout(<Component {...pageProps} />)}
-    </SettingsContextProvider>
+    <LocaleProvider pageLang={pageProps.lang} languageInfo={pageProps.languageInfo}>
+      <SettingsContextProvider>
+        <RouteProgress />
+        {getLayout(<Component {...pageProps} />)}
+      </SettingsContextProvider>
+    </LocaleProvider>
   );
 
   // return (

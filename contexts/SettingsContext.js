@@ -1,6 +1,41 @@
 import { useState, useEffect, createContext } from "react";
 import { useRouter } from "next/router";
-import { settings as defaultSettings } from "../lib/settings";
+import { settings as defaultSettings, fontStacks } from "../lib/settings";
+
+// Settings saved before version 2 never let the reader choose the Arabic font
+// or size (those controls were hidden), so they get the new defaults.
+const migrateSettings = (saved) => {
+  if (!saved || typeof saved !== "object") return defaultSettings;
+  if (saved.version === defaultSettings.version) return saved;
+  return {
+    ...defaultSettings,
+    ...saved,
+    fontSize: {
+      ...defaultSettings.fontSize,
+      ...(saved.fontSize || {}),
+      arabic: defaultSettings.fontSize.arabic,
+    },
+    fontFamily: {
+      ...defaultSettings.fontFamily,
+      ...(saved.fontFamily || {}),
+      arabic: defaultSettings.fontFamily.arabic,
+    },
+    version: defaultSettings.version,
+  };
+};
+
+// Typography is applied through CSS variables on <html>, so it also reaches
+// content rendered after a client-side navigation.
+const applyTypography = (settings) => {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement.style;
+  const size = settings.fontSize || defaultSettings.fontSize;
+  const family = settings.fontFamily || defaultSettings.fontFamily;
+  root.setProperty("--fs-arabic", `${size.arabic || defaultSettings.fontSize.arabic}px`);
+  root.setProperty("--fs-trans", `${size.translation || defaultSettings.fontSize.translation}px`);
+  root.setProperty("--font-arabic", fontStacks[family.arabic] || fontStacks.Amiri);
+  root.setProperty("--font-trans", fontStacks[family.translation] || fontStacks.Roboto);
+};
 
 export const SettingsContext = createContext();
 
@@ -11,44 +46,33 @@ const SettingsContextProvider = ({ children }) => {
 
   // first render
   useEffect(() => {
-    const savedSettings = localStorage.getItem("settings");
-    const newSettings =
-      savedSettings === null ? defaultSettings : JSON.parse(savedSettings);
+    let newSettings = defaultSettings;
+    try {
+      const savedSettings = localStorage.getItem("settings");
+      newSettings =
+        savedSettings === null ? defaultSettings : migrateSettings(JSON.parse(savedSettings));
+      saveToLocalStorage(newSettings);
+    } catch (error) {
+      newSettings = defaultSettings;
+    }
     initSettings(newSettings);
     setSettings(newSettings);
   }, []);
 
   // helper functions
   const saveToLocalStorage = (settings) => {
-    localStorage.setItem("settings", JSON.stringify(settings));
+    try {
+      localStorage.setItem("settings", JSON.stringify(settings));
+    } catch (error) {
+      // storage unavailable (private mode): settings last for this visit only
+    }
   };
 
   const initSettings = (settings) => {
     // init theme
     document.body.setAttribute("class", settings.theme);
 
-    // init font css
-    // const elemsArabic = document.querySelectorAll(".text_arabic");
-    // const elemsTrans = document.querySelectorAll(".text_trans");
-
-    // for (const elem of elemsArabic) {
-    //   elem.style.fontSize = settings.fontSize.arabic + "px";
-    //   elem.style.fontFamily = settings.fontFamily.arabic;
-    // }
-    // for (const elem of elemsTrans) {
-    //   elem.style.fontSize = settings.fontSize.translation + "px";
-    //   elem.style.fontFamily = settings.fontFamily.translation;
-    // }
-
-    const customFont = document.querySelectorAll(".custom_font");
-    for (const elem of customFont) {
-    if (settings.fontSize && settings.fontSize.translation) {
-      elem.style.fontSize = settings.fontSize.translation + "px";
-      }
-    if (settings.fontFamily && settings.fontFamily.translation) {
-      elem.style.fontFamily = settings.fontFamily.translation;
-    }
-    }
+    applyTypography(settings);
   };
 
   const redirectAfterChangeVerseMode = (mode) => {
@@ -80,65 +104,49 @@ const SettingsContextProvider = ({ children }) => {
   };
 
   const changeFontSizeArabic = (value) => {
-    if (value > 100 || value < 10) return;
-
-    const elems = document.querySelectorAll(".text_arabic");
-    for (const elem of elems) {
-      elem.style.fontSize = value + "px";
-    }
+    if (value > 60 || value < 16) return;
 
     const obj = {
       arabic: value,
       translation: settings.fontSize.translation,
     };
     const newSettings = { ...settings, ["fontSize"]: obj };
+    applyTypography(newSettings);
     saveToLocalStorage(newSettings);
     setSettings(newSettings);
   };
 
   const changeFontSizeTranslation = (value) => {
-    if (value > 60 || value < 6) return;
-
-    const elems = document.querySelectorAll(".custom_font");
-    for (const elem of elems) {
-      elem.style.fontSize = value + "px";
-    }
+    if (value > 40 || value < 12) return;
 
     const obj = {
       arabic: settings.fontSize.arabic,
       translation: value,
     };
     const newSettings = { ...settings, ["fontSize"]: obj };
+    applyTypography(newSettings);
     saveToLocalStorage(newSettings);
     setSettings(newSettings);
   };
 
   const changeFontFamilyArabic = (value) => {
-    const elems = document.querySelectorAll(".text_arabic");
-    for (const elem of elems) {
-      elem.style.fontFamily = value;
-    }
-
     const obj = {
       arabic: value,
       translation: settings.fontFamily.translation,
     };
     const newSettings = { ...settings, ["fontFamily"]: obj };
+    applyTypography(newSettings);
     saveToLocalStorage(newSettings);
     setSettings(newSettings);
   };
 
   const changeFontFamilyTranslation = (value) => {
-    const elems = document.querySelectorAll(".custom_font");
-    for (const elem of elems) {
-      elem.style.fontFamily = value;
-    }
-
     const obj = {
       arabic: settings.fontFamily.arabic,
       translation: value,
     };
     const newSettings = { ...settings, ["fontFamily"]: obj };
+    applyTypography(newSettings);
     saveToLocalStorage(newSettings);
     setSettings(newSettings);
   };

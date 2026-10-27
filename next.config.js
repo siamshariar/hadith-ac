@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8090/api";
 const apiHostname = new URL(apiBaseUrl).hostname;
 
 const nextConfig = {
