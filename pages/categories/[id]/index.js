@@ -1,117 +1,148 @@
-import { useRouter } from 'next/router';
-import { getCategoryById, getSubcategories, getHadithsByCategory, ensureSerializable } from '../../../lib/fetch';
-import CategoryList from '../../../components/home/category-list';
+import Link from "next/link";
+import { server } from "../../../lib/config";
+import { booksForHadiths, getCategory, getCategoryHadiths, loadPage } from "../../../lib/api";
+import { categoryCrumbs, categoryHadithsPath, categoryPath } from "../../../lib/hadith";
+import { useLocale } from "../../../contexts/LocaleContext";
+import Meta from "../../../components/core/meta";
+import Breadcrumbs from "../../../components/core/breadcrumbs";
+import ErrorState, { EmptyState } from "../../../components/core/error";
+import Layout from "../../../components/layouts/LayoutSecondary";
+import HadithCard, { HadithList } from "../../../components/hadith/HadithCard";
+import styles from "../../../components/content/Page.module.scss";
 
-export default function CategoryPage({ category, subcategories, hadiths, isRootCategory }) {
-  const router = useRouter();
-  
-  if (router.isFallback) {
-    return <div>Loading...</div>;
-  }
+const PREVIEW_SIZE = 5;
 
-  if (!category) {
+const childHref = (child) => (child.totalChildren > 0 ? categoryPath(child) : categoryHadithsPath(child));
+
+export default function Category({ category, preview, books, error }) {
+  const { t, formatNumber } = useLocale();
+
+  if (error || !category) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold">Category Not Found</h1>
-        <p>The requested category could not be found.</p>
+      <div className={styles.page}>
+        <ErrorState error={error} />
       </div>
     );
   }
 
+  const children = category.children || [];
+  const hadiths = (preview && preview.hadiths) || [];
+  const total = category.totalHadith || 0;
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">{category.name_en || category.title}</h1>
-      
-      {isRootCategory ? (
-        // Show subcategories for root categories
-        subcategories && subcategories.length > 0 ? (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Subcategories</h2>
-            <CategoryList categories={subcategories} />
+    <>
+      <Meta
+        title={category.title}
+        description={`${category.title} (${category.titleArabic || ""}): ${total} hadiths.`}
+        url={`${server}${categoryPath(category)}`}
+        image={`${server}/img/s_logo.png`}
+        type="website"
+      />
+
+      <div className={styles.page}>
+        <Breadcrumbs items={categoryCrumbs(category, t)} />
+
+        <header className={styles.header}>
+          <p className={styles.eyebrow}>{t("categories")}</p>
+          <h1 className={styles.title}>{category.title}</h1>
+          {category.titleArabic && (
+            <p className={styles.titleArabic} dir="rtl" lang="ar">
+              {category.titleArabic}
+            </p>
+          )}
+          <p className={styles.meta}>
+            <span>
+              {formatNumber(total)} {t("hadiths")}
+            </span>
+            {children.length > 0 && (
+              <span>
+                {formatNumber(children.length)} {t("subcategories").toLowerCase()}
+              </span>
+            )}
+          </p>
+        </header>
+
+        {children.length > 0 && (
+          <section className={styles.section} aria-labelledby="category-children">
+            <div className={styles.sectionHead}>
+              <h2 id="category-children" className={styles.sectionTitle}>
+                {t("subcategories")}
+              </h2>
+            </div>
+            <ul className={styles.grid}>
+              {children.map((child) => (
+                <li key={child.id}>
+                  <Link href={childHref(child)} className={styles.tile}>
+                    <span className={styles.tileBody}>
+                      <span className={styles.tileTitle}>{child.title}</span>
+                      {child.titleArabic && (
+                        <span className={styles.tileArabic} dir="rtl" lang="ar">
+                          {child.titleArabic}
+                        </span>
+                      )}
+                      <span className={styles.tileMeta}>
+                        {formatNumber(child.totalHadith)} {t("hadiths")}
+                        {child.totalChildren > 0 &&
+                          ` · ${formatNumber(child.totalChildren)} ${t("subcategories").toLowerCase()}`}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section className={styles.section} aria-labelledby="category-hadiths">
+          <div className={styles.sectionHead}>
+            <h2 id="category-hadiths" className={styles.sectionTitle}>
+              {t("hadithsInCategory")}
+            </h2>
           </div>
-        ) : (
-          <p>No subcategories found.</p>
-        )
-      ) : (
-        // Show hadiths for subcategories
-        hadiths && hadiths.length > 0 ? (
-          <div className="grid gap-4">
-            {hadiths.map(hadith => (
-              <div key={hadith.id} className="bg-white p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold">Hadith {hadith.hadith_number}</h3>
-                <p className="text-gray-700">{hadith.hadeeth}</p>
-                {hadith.grade && (
-                  <span className="text-sm text-blue-600">Grade: {hadith.grade}</span>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p>No hadiths found in this category.</p>
-        )
-      )}
-    </div>
+
+          {hadiths.length === 0 ? (
+            <EmptyState>{t("noHadiths")}</EmptyState>
+          ) : (
+            <HadithList
+              hadiths={hadiths}
+              renderCard={(hadith) => <HadithCard key={hadith.id} hadith={hadith} book={books[hadith.bookSlug]} />}
+            />
+          )}
+
+          {total > hadiths.length && (
+            <p className={styles.more}>
+              <Link href={categoryHadithsPath(category)} className={styles.button}>
+                {t("allHadithsInCategory", { count: formatNumber(total) })}
+              </Link>
+            </p>
+          )}
+        </section>
+      </div>
+    </>
   );
 }
 
-export async function getStaticProps(context) {
+Category.getLayout = function getLayout(page) {
+  const { category } = page.props;
+  return <Layout selectedCategoryId={category ? category.id : null}>{page}</Layout>;
+};
+
+export async function getServerSideProps(context) {
   const { id } = context.params;
-
-  try {
-    const category = await getCategoryById(id);
-    
-    if (!category) {
-      return {
-        props: {
-          category: null,
-          subcategories: [],
-          hadiths: [],
-          isRootCategory: false
-        },
-        revalidate: 3600
-      };
-    }
-
-    const isRootCategory = category.parent_id === null || category.parent_id === 0;
-    
-    let subcategories = [];
-    let hadiths = [];
-    
-    if (isRootCategory) {
-      // Fetch subcategories for root categories
-      subcategories = await getSubcategories(id);
-    } else {
-      // Fetch hadiths for subcategories
-      hadiths = await getHadithsByCategory(id);
-    }
-    
-    return {
-      props: ensureSerializable({
-        category,
-        subcategories,
-        hadiths,
-        isRootCategory
-      }),
-      revalidate: 3600
-    };
-  } catch (error) {
-    console.error('Error fetching category:', error);
+  return loadPage(context, async (lang) => {
+    const [category, preview] = await Promise.all([
+      getCategory(id, lang),
+      getCategoryHadiths(id, lang, { perPage: PREVIEW_SIZE }),
+    ]);
     return {
       props: {
-        category: null,
-        subcategories: [],
-        hadiths: [],
-        isRootCategory: false
+        category,
+        preview,
+        books: await booksForHadiths(preview.hadiths, lang),
+        backLink: category.breadcrumbs && category.breadcrumbs.length
+          ? categoryPath(category.breadcrumbs[category.breadcrumbs.length - 1])
+          : "/categories",
       },
-      revalidate: 3600
     };
-  }
-}
-
-export async function getStaticPaths() {
-  // Return empty paths for now to avoid build errors
-  return {
-    paths: [],
-    fallback: true
-  };
+  });
 }
