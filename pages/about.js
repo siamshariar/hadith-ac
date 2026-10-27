@@ -1,5 +1,4 @@
 import { server } from "../lib/config";
-import { getAllCategories, getAllCategoriesTree, ensureSerializable } from "../lib/fetch";
 import Meta from "../components/core/meta";
 import Layout from "../components/layouts/LayoutTertiary";
 import AboutContent from "../components/pages/about";
@@ -24,23 +23,10 @@ AboutPage.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
-export async function getStaticProps(context) {
-  const categoryListData = await getAllCategories();
-  const categoryList = categoryListData?.categories || [];
-  const categoryTree = await getAllCategoriesTree();
-
-  if (!categoryList || !categoryTree) {
-    return {
-      notFound: true,
-    };
-  }
-
+export async function getStaticProps() {
   return {
-    props: ensureSerializable({
-      categoryList,
-      categoryTree,
-      selectedCategoryId: null,
+    props: {
       contentTitle: "About",
-    }),
+    },
   };
 }
