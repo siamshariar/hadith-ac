@@ -27,7 +27,7 @@ import styles from "./HadithOptions.module.scss";
 
 // `hadith` is an API hadith object, `book` its collection ({ name, slug ... }).
 const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage }) => {
-  const { t } = useLocale();
+  const { t, languageName } = useLocale();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -66,6 +66,13 @@ const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage }) =>
     if (hadith.arabic) parts.push(cleanText(hadith.arabic));
 
     const translation = hadith.translation;
+    const linked = hadith.linkedTranslation;
+    const ownIsNative = translation && translation.text && !translation.isFallback;
+    if (!ownIsNative && linked && linked.text) {
+      // HadeethEnc's translation of the quoted wording, labelled as such.
+      const label = t("linkedTranslation", { language: languageName(linked.languageCode) });
+      parts.push(`[${label}] ${cleanText(linked.text)}`);
+    }
     if (translation && translation.text) {
       const label = translation.isFallback ? `[${t("fallbackTranslation")}] ` : "";
       parts.push(`${label}${cleanText(translation.text)}`);

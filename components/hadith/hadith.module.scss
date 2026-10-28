@@ -186,3 +186,84 @@
 .graderGrade {
   font-weight: 500;
 }
+
+// ---------------------------------------------------------------- linked translation (HadeethEnc)
+
+.translations {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.linked {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--bdr11);
+  border-inline-start: 3px solid var(--theme-color);
+  border-radius: 6px;
+  background: var(--accent-soft);
+}
+
+.linkedBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--theme-color);
+  border-radius: 999px;
+  color: var(--grade-txt);
+  font-weight: 500;
+}
+
+.linkedNote {
+  color: var(--txt12);
+  font-size: 13px;
+  line-height: 1.5;
+
+  a {
+    color: var(--main-color);
+    font-weight: 500;
+    white-space: nowrap;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+}
+
+.fallbackDetails {
+  summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    color: var(--txt12);
+    font-size: 14px;
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::before {
+      content: "▸";
+      transition: transform 0.2s ease;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: var(--main-color);
+    }
+  }
+
+  &[open] summary {
+    margin-bottom: 8px;
+
+    &::before {
+      transform: rotate(90deg);
+    }
+  }
+}

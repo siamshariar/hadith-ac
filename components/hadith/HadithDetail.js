@@ -15,12 +15,12 @@ import {
 } from "../../lib/hadith";
 import HadithOptions from "../content/HadithOptions";
 import Grades from "./Grades";
-import { ArabicText, Translation } from "./HadithText";
+import { ArabicText, HadithTranslations } from "./HadithText";
 import styles from "./HadithDetail.module.scss";
 
 // Switches this hadith's language with ?lang= (shareable, does not change the
 // saved preference). Options come from the hadith's `availableLanguages`.
-function LanguageSwitch({ available, languages }) {
+function LanguageSwitch({ available, languages, linked }) {
   const router = useRouter();
   const { t, lang } = useLocale();
   const names = new Map((languages || []).map((language) => [language.code, language]));
@@ -32,7 +32,9 @@ function LanguageSwitch({ available, languages }) {
   const label = (code) => {
     const info = names.get(code);
     const name = info ? (info.nativeName && info.nativeName !== info.name ? `${info.nativeName} (${info.name})` : info.name) : code;
-    return missingCurrent && code === lang ? `${name} - ${t("notAvailableShort")}` : name;
+    if (!missingCurrent || code !== lang) return name;
+    // No translation of its own: say whether a linked HadeethEnc one is shown.
+    return linked && linked.languageCode === lang ? `${name} - HadeethEnc` : `${name} - ${t("notAvailableShort")}`;
   };
 
   const change = (event) => {
@@ -179,7 +181,7 @@ export default function HadithDetail({ hadith, languages }) {
             {t("hadithNumber")}: <strong>{hadith.referenceNumber}</strong>
           </span>
           {hadith.title && <span className={styles.fact}>{reference}</span>}
-          <LanguageSwitch available={hadith.availableLanguages} languages={languages} />
+          <LanguageSwitch available={hadith.availableLanguages} languages={languages} linked={hadith.linkedTranslation} />
         </div>
       </header>
 
@@ -188,7 +190,7 @@ export default function HadithDetail({ hadith, languages }) {
       </section>
 
       <section className={styles.translationBlock}>
-        <Translation translation={hadith.translation} showNote />
+        <HadithTranslations hadith={hadith} showNote />
       </section>
 
       <Grades grades={hadith.grades} gradeText={hadith.gradeText} variant="full" />

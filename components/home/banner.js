@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Container from "../core/container";
 import Grades from "../hadith/Grades";
-import { ArabicText, Translation } from "../hadith/HadithText";
+import { ArabicText, HadithTranslations } from "../hadith/HadithText";
 import { useLocale } from "../../contexts/LocaleContext";
 import { citation, cleanText, hadithPath } from "../../lib/hadith";
 import styles from "./banner.module.scss";
@@ -34,7 +34,7 @@ export default function Banner({ hadith }) {
 
           <div className={styles.text}>
             <ArabicText text={hadith.arabic} clamped />
-            <Translation translation={hadith.translation} clamped />
+            <HadithTranslations hadith={hadith} clamped />
           </div>
 
           <div className={styles.footer}>

@@ -5,7 +5,7 @@ import { useLocale } from "../../contexts/LocaleContext";
 import { citation, cleanText, hadithPath } from "../../lib/hadith";
 import HadithOptions from "../content/HadithOptions";
 import Grades from "./Grades";
-import { ArabicText, Translation, needsClamp } from "./HadithText";
+import { ArabicText, HadithTranslations, needsClamp } from "./HadithText";
 import styles from "./HadithCard.module.scss";
 
 // One hadith in a list (chapter, category, search, bookmarks). The citation
@@ -44,7 +44,7 @@ export default function HadithCard({ hadith, book, context, isBookmarkPage, upda
 
       <div className={styles.body}>
         <ArabicText text={hadith.arabic} clamped={clamped} />
-        <Translation translation={hadith.translation} clamped={clamped} />
+        <HadithTranslations hadith={hadith} clamped={clamped} />
       </div>
 
       <footer className={styles.foot}>
