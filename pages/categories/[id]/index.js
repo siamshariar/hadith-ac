@@ -14,8 +14,8 @@ const PREVIEW_SIZE = 5;
 
 const childHref = (child) => (child.totalChildren > 0 ? categoryPath(child) : categoryHadithsPath(child));
 
-export default function Category({ category, preview, books, error }) {
-  const { t, formatNumber } = useLocale();
+export default function Category({ category, preview, previewFiltered, books, error }) {
+  const { t, lang, formatNumber, languageName } = useLocale();
 
   if (error || !category) {
     return (
@@ -28,6 +28,9 @@ export default function Category({ category, preview, books, error }) {
   const children = category.children || [];
   const hadiths = (preview && preview.hadiths) || [];
   const total = category.totalHadith || 0;
+  const language = languageName(lang);
+  const showTranslated = lang !== "ar" && category.totalTranslated != null;
+  const translated = category.totalTranslated || 0;
 
   return (
     <>
@@ -54,6 +57,7 @@ export default function Category({ category, preview, books, error }) {
             <span>
               {formatNumber(total)} {t("hadiths")}
             </span>
+            {showTranslated && <span>{t("countTranslated", { count: formatNumber(translated), language })}</span>}
             {children.length > 0 && (
               <span>
                 {formatNumber(children.length)} {t("subcategories").toLowerCase()}
@@ -72,7 +76,10 @@ export default function Category({ category, preview, books, error }) {
             <ul className={styles.grid}>
               {children.map((child) => (
                 <li key={child.id}>
-                  <Link href={childHref(child)} className={styles.tile}>
+                  <Link
+                    href={childHref(child)}
+                    className={`${styles.tile} ${showTranslated && child.totalTranslated === 0 ? styles.tileMuted : ""}`}
+                  >
                     <span className={styles.tileBody}>
                       <bdi className={styles.tileTitle}>{child.title}</bdi>
                       {child.titleArabic && (
@@ -82,6 +89,9 @@ export default function Category({ category, preview, books, error }) {
                       )}
                       <span className={styles.tileMeta}>
                         {formatNumber(child.totalHadith)} {t("hadiths")}
+                        {showTranslated &&
+                          child.totalTranslated != null &&
+                          ` · ${t("countTranslated", { count: formatNumber(child.totalTranslated), language })}`}
                         {child.totalChildren > 0 &&
                           ` · ${formatNumber(child.totalChildren)} ${t("subcategories").toLowerCase()}`}
                       </span>
@@ -109,12 +119,28 @@ export default function Category({ category, preview, books, error }) {
             />
           )}
 
-          {total > hadiths.length && (
+          {/* The hadith list defaults to the translated ones (see its ?all=1). */}
+          {previewFiltered ? (
             <p className={styles.more}>
-              <Link href={categoryHadithsPath(category)} className={styles.button}>
-                {t("allHadithsInCategory", { count: formatNumber(total) })}
-              </Link>
+              {translated > hadiths.length && (
+                <Link href={categoryHadithsPath(category)} className={styles.button}>
+                  {t("viewTranslatedInCategory", { count: formatNumber(translated), language })}
+                </Link>
+              )}{" "}
+              {total > translated && (
+                <Link href={`${categoryHadithsPath(category)}?all=1`} className={`${styles.button} ${styles.buttonGhost}`}>
+                  {t("viewAllInCategory", { count: formatNumber(total) })}
+                </Link>
+              )}
             </p>
+          ) : (
+            total > hadiths.length && (
+              <p className={styles.more}>
+                <Link href={categoryHadithsPath(category)} className={styles.button}>
+                  {t("allHadithsInCategory", { count: formatNumber(total) })}
+                </Link>
+              </p>
+            )
           )}
         </section>
       </div>
@@ -130,14 +156,23 @@ Category.getLayout = function getLayout(page) {
 export async function getServerSideProps(context) {
   const { id } = context.params;
   return loadPage(context, async (lang) => {
-    const [category, preview] = await Promise.all([
+    // Preview the hadiths translated into the reader's language first,
+    // like the full list; fall back to all when none are.
+    let previewFiltered = lang !== "ar";
+    const [category, firstPreview] = await Promise.all([
       getCategory(id, lang),
-      getCategoryHadiths(id, lang, { perPage: PREVIEW_SIZE }),
+      getCategoryHadiths(id, lang, { perPage: PREVIEW_SIZE, translated: previewFiltered }),
     ]);
+    let preview = firstPreview;
+    if (previewFiltered && preview.pagination.total === 0) {
+      preview = await getCategoryHadiths(id, lang, { perPage: PREVIEW_SIZE });
+      previewFiltered = false;
+    }
     return {
       props: {
         category,
         preview,
+        previewFiltered,
         books: await booksForHadiths(preview.hadiths, lang),
         backLink: category.breadcrumbs && category.breadcrumbs.length
           ? categoryPath(category.breadcrumbs[category.breadcrumbs.length - 1])

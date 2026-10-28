@@ -16,8 +16,8 @@ import styles from "../../../../components/content/Page.module.scss";
 const chapterLabel = (chapter, t) =>
   chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapter.chapterNo}`;
 
-export default function Chapter({ data, neighbours, error }) {
-  const { t, formatNumber } = useLocale();
+export default function Chapter({ data, neighbours, onlyReadable, readableCount, error }) {
+  const { t, lang, formatNumber, languageName } = useLocale();
   const router = useRouter();
   const loading = useRouteLoading();
 
@@ -34,6 +34,12 @@ export default function Chapter({ data, neighbours, error }) {
   const title = unassigned ? t("unassignedChapter") : chapter.name;
   const basePath = chapterPath(book.slug, chapter.chapterNo);
   const pastLastPage = hadiths.length === 0 && pagination.total > 0;
+  // Query kept by pagination and links: the ?lang= override and the filter.
+  const query = { lang: router.query.lang || undefined, translated: onlyReadable ? 1 : undefined };
+  const showToggle =
+    lang !== "ar" &&
+    readableCount != null &&
+    (onlyReadable || (readableCount > 0 && readableCount < chapter.totalHadith));
 
   return (
     <>
@@ -67,7 +73,7 @@ export default function Chapter({ data, neighbours, error }) {
           )}
           <p className={styles.meta}>
             <span>
-              {formatNumber(pagination.total)} {t("hadiths")}
+              {formatNumber(chapter.totalHadith)} {t("hadiths")}
             </span>
             {pagination.lastPage > 1 && (
               <span>
@@ -79,9 +85,30 @@ export default function Chapter({ data, neighbours, error }) {
 
         {unassigned && <p className={styles.notice}>{t("unassignedChapterNote")}</p>}
 
+        {showToggle && (
+          <div className={styles.toolbar}>
+            <Link
+              href={pageHref(basePath, { ...query, translated: onlyReadable ? undefined : 1 }, 1)}
+              className={`${styles.chip} ${onlyReadable ? styles.chipActive : ""}`}
+              role="switch"
+              aria-checked={onlyReadable ? "true" : "false"}
+              scroll={false}
+            >
+              <span className={styles.switchBox} aria-hidden="true">
+                {onlyReadable ? "✓" : ""}
+              </span>
+              {t("onlyReadable", {
+                language: languageName(lang),
+                count: formatNumber(readableCount),
+                total: formatNumber(chapter.totalHadith),
+              })}
+            </Link>
+          </div>
+        )}
+
         {pastLastPage ? (
           <EmptyState>
-            {t("pageEmpty")} <Link href={basePath}>{t("goToFirstPage")}</Link>
+            {t("pageEmpty")} <Link href={pageHref(basePath, query, 1)}>{t("goToFirstPage")}</Link>
           </EmptyState>
         ) : hadiths.length === 0 ? (
           <EmptyState>{t("noHadiths")}</EmptyState>
@@ -93,7 +120,7 @@ export default function Chapter({ data, neighbours, error }) {
           />
         )}
 
-        <Pagination pagination={pagination} hrefFor={(page) => pageHref(basePath, router.query.lang ? { lang: router.query.lang } : {}, page)} />
+        <Pagination pagination={pagination} hrefFor={(page) => pageHref(basePath, query, page)} />
 
         {neighbours && (neighbours.previous || neighbours.next) && (
           <nav className={`${styles.toolbar} ${styles.neighbours}`} aria-label={t("chapter")}>
@@ -134,13 +161,23 @@ export async function getServerSideProps(context) {
   if (!/^-?\d+$/.test(String(chapterId))) return { notFound: true };
 
   return loadPage(context, async (lang) => {
-    const [data, book] = await Promise.all([
+    // ?translated=1: only hadiths readable in the language (own or linked
+    // translation). Off by default; Arabic is the original text.
+    const onlyReadable = lang !== "ar" && context.query.translated === "1";
+    const [data, book, readableTotal] = await Promise.all([
       getChapterHadiths(bookId, chapterId, lang, {
         page: parsePage(context.query.page),
         perPage: config.perPage,
+        translated: onlyReadable,
       }),
       // Cached; only used for previous/next chapter links.
       getBook(bookId, lang).catch(() => null),
+      // The readable count for the toggle label (the chapter has no such field).
+      onlyReadable || lang === "ar"
+        ? Promise.resolve(null)
+        : getChapterHadiths(bookId, chapterId, lang, { perPage: 1, translated: true })
+            .then((result) => result.pagination.total)
+            .catch(() => null),
     ]);
 
     let neighbours = null;
@@ -155,6 +192,8 @@ export async function getServerSideProps(context) {
       props: {
         data,
         neighbours,
+        onlyReadable,
+        readableCount: onlyReadable ? data.pagination.total : readableTotal,
         backLink: bookPath(data.book),
       },
     };

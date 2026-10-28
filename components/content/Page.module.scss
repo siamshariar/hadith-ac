@@ -339,3 +339,30 @@
     height: 48px;
   }
 }
+
+// check-box glyph inside a toggle chip (role="switch")
+.switchBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+// a category with nothing in the reader's language yet: reachable, quieter
+.tileMuted {
+  border-style: dashed;
+  color: var(--txt13);
+
+  .tileTitle {
+    color: var(--txt12);
+  }
+}
+
+.more .button + .button {
+  margin-left: 8px;
+}

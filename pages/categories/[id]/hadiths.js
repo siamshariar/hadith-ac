@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { server, config } from "../../../lib/config";
 import { booksForHadiths, getCategoryHadiths, loadPage, parsePage } from "../../../lib/api";
 import { categoryCrumbs, categoryHadithsPath, categoryPath } from "../../../lib/hadith";
@@ -12,8 +13,9 @@ import Layout from "../../../components/layouts/LayoutSecondary";
 import HadithCard, { HadithList } from "../../../components/hadith/HadithCard";
 import styles from "../../../components/content/Page.module.scss";
 
-export default function CategoryHadiths({ data, books, direct, error }) {
-  const { t, formatNumber } = useLocale();
+export default function CategoryHadiths({ data, books, direct, filtered, counts, error }) {
+  const { t, lang, formatNumber, languageName } = useLocale();
+  const router = useRouter();
   const loading = useRouteLoading();
 
   if (error || !data) {
@@ -26,7 +28,19 @@ export default function CategoryHadiths({ data, books, direct, error }) {
 
   const { category, hadiths, pagination } = data;
   const basePath = categoryHadithsPath(category);
-  const query = direct ? { direct: 1 } : {};
+  // Kept by pagination and every toggle: ?lang=, ?direct=1 and ?all=1
+  // (all hadiths; the default is those translated into the reader's language).
+  const query = {
+    lang: router.query.lang || undefined,
+    direct: direct ? 1 : undefined,
+    all: router.query.all === "1" ? 1 : undefined,
+  };
+  const language = languageName(lang);
+  const translatedCount = counts ? counts.translated : null;
+  const allCount = counts ? counts.all : pagination.total;
+  const showLanguageToggle =
+    lang !== "ar" && translatedCount != null && translatedCount > 0 && translatedCount < allCount;
+  const noneTranslated = lang !== "ar" && translatedCount === 0 && router.query.all !== "1";
   const crumbs = categoryCrumbs(category, t, { linkCurrent: true });
   crumbs.push({ label: t("hadith") });
   const pastLastPage = hadiths.length === 0 && pagination.total > 0;
@@ -54,8 +68,11 @@ export default function CategoryHadiths({ data, books, direct, error }) {
           )}
           <p className={styles.meta}>
             <span>
-              {formatNumber(pagination.total)} {t("hadiths")}
+              {formatNumber(allCount)} {t("hadiths")}
             </span>
+            {lang !== "ar" && translatedCount != null && (
+              <span>{t("countTranslated", { count: formatNumber(translatedCount), language })}</span>
+            )}
             {pagination.lastPage > 1 && (
               <span>
                 {t("page")} {pagination.page}/{pagination.lastPage}
@@ -64,19 +81,45 @@ export default function CategoryHadiths({ data, books, direct, error }) {
           </p>
         </header>
 
+        {showLanguageToggle && (
+          <div className={styles.toolbar}>
+            <div className={styles.chips} role="group" aria-label={t("contentLanguage")}>
+              <Link
+                href={pageHref(basePath, { ...query, all: undefined }, 1)}
+                className={`${styles.chip} ${filtered ? styles.chipActive : ""}`}
+                aria-current={filtered ? "true" : undefined}
+                scroll={false}
+              >
+                {t("onlyLanguage", { language, count: formatNumber(translatedCount) })}
+              </Link>
+              <Link
+                href={pageHref(basePath, { ...query, all: 1 }, 1)}
+                className={`${styles.chip} ${!filtered ? styles.chipActive : ""}`}
+                aria-current={!filtered ? "true" : undefined}
+                scroll={false}
+              >
+                {t("allHadiths", { count: formatNumber(allCount) })}
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {noneTranslated && <p className={styles.notice}>{t("noneTranslatedHere", { language })}</p>}
+
         {category.totalChildren > 0 && (
           <div className={styles.toolbar}>
             <div className={styles.chips} role="group" aria-label={t("subcategories")}>
               <Link
-                href={basePath}
+                href={pageHref(basePath, { ...query, direct: undefined }, 1)}
+                scroll={false}
                 className={`${styles.chip} ${!direct ? styles.chipActive : ""}`}
                 aria-current={!direct ? "true" : undefined}
               >
                 {t("includeSub")}
-                <span className={styles.chipCount}>{formatNumber(category.totalHadith)}</span>
               </Link>
               <Link
-                href={`${basePath}?direct=1`}
+                href={pageHref(basePath, { ...query, direct: 1 }, 1)}
+                scroll={false}
                 className={`${styles.chip} ${direct ? styles.chipActive : ""}`}
                 aria-current={direct ? "true" : undefined}
               >
@@ -117,17 +160,43 @@ CategoryHadiths.getLayout = function getLayout(page) {
 export async function getServerSideProps(context) {
   const { id } = context.params;
   const direct = context.query.direct === "1";
+  const all = context.query.all === "1";
 
   return loadPage(context, async (lang) => {
-    const data = await getCategoryHadiths(id, lang, {
-      page: parsePage(context.query.page),
-      perPage: config.perPage,
-      direct,
-    });
+    const page = parsePage(context.query.page);
+    const perPage = config.perPage;
+    const count = (translated) =>
+      getCategoryHadiths(id, lang, { perPage: 1, direct, translated })
+        .then((result) => result.pagination.total)
+        .catch(() => null);
+
+    // Default: only hadiths translated into the reader's language (Arabic is
+    // the original, so it is never filtered). ?all=1 shows every hadith.
+    let filtered = !all && lang !== "ar";
+    let data = await getCategoryHadiths(id, lang, { page, perPage, direct, translated: filtered });
+    let translatedCount = filtered ? data.pagination.total : null;
+    let allCount = filtered ? null : data.pagination.total;
+
+    if (filtered && translatedCount === 0) {
+      // Nothing translated here: show all of them rather than an empty list.
+      data = await getCategoryHadiths(id, lang, { page, perPage, direct });
+      filtered = false;
+      allCount = data.pagination.total;
+    }
+
+    // The other figure for the toggle; the category itself carries both
+    // counts unless only its direct hadiths are listed.
+    if (allCount == null) allCount = direct ? await count(false) : data.category.totalHadith;
+    if (translatedCount == null && lang !== "ar") {
+      translatedCount = direct ? await count(true) : data.category.totalTranslated ?? null;
+    }
+
     return {
       props: {
         data,
         direct,
+        filtered,
+        counts: { translated: translatedCount, all: allCount },
         books: await booksForHadiths(data.hadiths, lang),
         backLink: categoryPath(data.category),
       },
