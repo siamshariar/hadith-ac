@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { server } from "../../../lib/config";
-import { getBook, loadPage } from "../../../lib/api";
+import { getBook, getBooks, loadPage } from "../../../lib/api";
 import { UNASSIGNED_CHAPTER, bookPath, chapterPath, isCategoryBook } from "../../../lib/hadith";
 import { useLocale } from "../../../contexts/LocaleContext";
 import Meta from "../../../components/core/meta";
@@ -9,8 +9,8 @@ import ErrorState, { EmptyState } from "../../../components/core/error";
 import Layout from "../../../components/layouts/LayoutSecondary";
 import styles from "../../../components/content/Page.module.scss";
 
-export default function Book({ book, error }) {
-  const { t, formatNumber } = useLocale();
+export default function Book({ book, counts, error }) {
+  const { t, lang, formatNumber, languageName } = useLocale();
 
   if (error || !book) {
     return (
@@ -59,6 +59,18 @@ export default function Book({ book, error }) {
               </span>
             )}
           </p>
+          {counts && lang !== "ar" && (counts.own > 0 || counts.linked > 0) && (
+            <p className={styles.meta}>
+              {counts.own > 0 && (
+                <span>{t("translationAvailability", { count: formatNumber(counts.own), language: languageName(lang) })}</span>
+              )}
+              {counts.linked > 0 && (
+                <span>
+                  {t("bookLinkedTranslations", { count: formatNumber(counts.linked), language: languageName(lang) })}
+                </span>
+              )}
+            </p>
+          )}
         </header>
 
         {isCategoryBook(book) && (
@@ -118,10 +130,19 @@ Book.getLayout = function getLayout(page) {
 };
 
 export async function getServerSideProps(context) {
-  return loadPage(context, async (lang) => ({
-    props: {
-      book: await getBook(context.params.bookId, lang),
-      backLink: "/books",
-    },
-  }));
+  return loadPage(context, async (lang) => {
+    const [book, books] = await Promise.all([
+      getBook(context.params.bookId, lang),
+      // The book endpoint has no per-language counts; the (cached) list does.
+      getBooks(lang).catch(() => []),
+    ]);
+    const listed = books.find((item) => item.slug === book.slug);
+    return {
+      props: {
+        book,
+        counts: listed ? { own: listed.totalTranslated || 0, linked: listed.totalLinkedTranslated || 0 } : null,
+        backLink: "/books",
+      },
+    };
+  });
 }

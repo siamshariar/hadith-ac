@@ -3,10 +3,14 @@ import { useLocale } from "../../contexts/LocaleContext";
 import { categoryPath } from "../../lib/hadith";
 import styles from "./category-card.module.scss";
 
-// A top-level category with its children (from /hadith/home).
+// A top-level category with its children (from /hadith/home or the flat
+// list). Counts show how many hadiths are translated into the reader's
+// language next to the total; children with none are muted, not hidden.
 export default function CategoryCard({ category, index }) {
-  const { t, formatNumber } = useLocale();
+  const { t, lang, formatNumber, languageName } = useLocale();
   const children = category.children || [];
+  const showTranslated = lang !== "ar" && category.totalTranslated != null;
+  const language = languageName(lang);
 
   return (
     <div className={styles.item}>
@@ -16,6 +20,14 @@ export default function CategoryCard({ category, index }) {
           <bdi className={styles.name}>{category.title}</bdi>
           <span className={styles.count}>
             {formatNumber(category.totalHadith)} {t("hadiths")}
+            {showTranslated && (
+              <>
+                {" · "}
+                <span className={category.totalTranslated > 0 ? styles.translated : ""}>
+                  {t("countTranslated", { count: formatNumber(category.totalTranslated), language })}
+                </span>
+              </>
+            )}
           </span>
         </span>
         {category.titleArabic && (
@@ -27,14 +39,29 @@ export default function CategoryCard({ category, index }) {
 
       {children.length > 0 && (
         <ul className={styles.children} aria-label={`${t("subcategories")}: ${category.title}`}>
-          {children.map((child) => (
-            <li key={child.id}>
-              <Link href={categoryPath(child)} className={styles.child}>
-                <bdi>{child.title}</bdi>
-                <span className={styles.childCount}>{formatNumber(child.totalHadith)}</span>
-              </Link>
-            </li>
-          ))}
+          {children.map((child) => {
+            const childTranslated = showTranslated && child.totalTranslated != null;
+            const muted = childTranslated && child.totalTranslated === 0;
+            const countLabel = childTranslated
+              ? t("countTranslatedOfTotal", {
+                  count: formatNumber(child.totalTranslated),
+                  total: formatNumber(child.totalHadith),
+                  language,
+                })
+              : `${formatNumber(child.totalHadith)} ${t("hadiths")}`;
+            return (
+              <li key={child.id}>
+                <Link href={categoryPath(child)} className={`${styles.child} ${muted ? styles.muted : ""}`} title={countLabel}>
+                  <bdi>{child.title}</bdi>
+                  <span className={styles.childCount} aria-label={countLabel}>
+                    {childTranslated
+                      ? `${formatNumber(child.totalTranslated)}/${formatNumber(child.totalHadith)}`
+                      : formatNumber(child.totalHadith)}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

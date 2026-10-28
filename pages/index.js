@@ -39,8 +39,22 @@ export default function Home({ home, error }) {
           <Stats totals={home.totals} />
 
           <Container>
-            <div className={styles.twoColumnLayout}>
-              <section className={styles.column} aria-labelledby="home-books">
+            {/* Categories first: most of what exists in the reader's language
+                (HadeethEnc) is organised by category. */}
+            <div className={styles.sections}>
+              <section className={styles.section} aria-labelledby="home-categories">
+                <div className={styles.sectionHead}>
+                  <h2 id="home-categories" className={styles.sectionTitle}>
+                    {t("categories")}
+                  </h2>
+                  <Link href="/categories" className={styles.sectionLink}>
+                    {t("viewAll")} <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
+                <CategoryList categories={home.categories} columns={2} />
+              </section>
+
+              <section className={styles.section} aria-labelledby="home-books">
                 <div className={styles.sectionHead}>
                   <h2 id="home-books" className={styles.sectionTitle}>
                     {t("books")}
@@ -49,16 +63,7 @@ export default function Home({ home, error }) {
                     {t("viewAll")} <span aria-hidden="true">→</span>
                   </Link>
                 </div>
-                <BookList books={home.books} />
-              </section>
-
-              <section className={styles.column} aria-labelledby="home-categories">
-                <div className={styles.sectionHead}>
-                  <h2 id="home-categories" className={styles.sectionTitle}>
-                    {t("categories")}
-                  </h2>
-                </div>
-                <CategoryList categories={home.categories} />
+                <BookList books={home.books} columns={2} showTranslation />
               </section>
             </div>
           </Container>

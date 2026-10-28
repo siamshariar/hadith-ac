@@ -12,6 +12,7 @@ export default function Books({ books, error }) {
   const { t, lang, formatNumber, languageName } = useLocale();
   const list = books || [];
   const translated = list.reduce((sum, book) => sum + (book.totalTranslated || 0), 0);
+  const linked = list.reduce((sum, book) => sum + (book.totalLinkedTranslated || 0), 0);
   const total = list.reduce((sum, book) => sum + (book.totalHadith || 0), 0);
 
   return (
@@ -51,6 +52,8 @@ export default function Books({ books, error }) {
                   count: formatNumber(translated),
                   language: languageName(lang),
                 })}
+                {linked > 0 &&
+                  `; ${t("bookLinkedTranslations", { count: formatNumber(linked), language: languageName(lang) })}`}
                 {". "}
                 {t("contentLanguageNote")}
               </p>

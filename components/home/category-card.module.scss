@@ -116,3 +116,18 @@
     padding: 0 20px 18px 75px;
   }
 }
+
+.translated {
+  color: var(--grade-txt);
+  font-weight: 500;
+}
+
+// Nothing in the reader's language yet: still reachable, visually quieter.
+.muted {
+  border-style: dashed;
+  color: var(--txt13);
+
+  .childCount {
+    color: var(--txt13);
+  }
+}
