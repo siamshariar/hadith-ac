@@ -7,6 +7,7 @@ import Meta from "../../../components/core/meta";
 import Breadcrumbs from "../../../components/core/breadcrumbs";
 import ErrorState, { EmptyState } from "../../../components/core/error";
 import Layout from "../../../components/layouts/LayoutSecondary";
+import { GoToHadith } from "../../../components/home/search";
 import styles from "../../../components/content/Page.module.scss";
 
 export default function Book({ book, counts, error }) {
@@ -43,12 +44,14 @@ export default function Book({ book, counts, error }) {
 
         <header className={styles.header}>
           <p className={styles.eyebrow}>{t("books")}</p>
-          <h1 className={styles.title}>{book.name}</h1>
-          {book.nameArabic && (
-            <p className={styles.titleArabic} dir="rtl" lang="ar">
-              {book.nameArabic}
-            </p>
-          )}
+          <div className={styles.titleRow}>
+            <h1 className={styles.title}>{book.name}</h1>
+            {book.nameArabic && (
+              <p className={styles.titleArabic} dir="rtl" lang="ar">
+                {book.nameArabic}
+              </p>
+            )}
+          </div>
           <p className={styles.meta}>
             <span>
               {formatNumber(book.totalHadith)} {t("hadiths")}
@@ -79,34 +82,35 @@ export default function Book({ book, counts, error }) {
           </p>
         )}
 
+        <div className={styles.goRow}>
+          <GoToHadith book={book.slug} compact />
+        </div>
+
+        {/* Numbered list of the collection's books/chapters: number, name,
+            Arabic name (when the source has one), hadith count. */}
         <section aria-labelledby="book-chapters">
-          <h2 id="book-chapters" className="visually_hidden">
-            {t("chapter")}
+          <h2 id="book-chapters" className={styles.sectionTitle}>
+            {formatNumber(chapters.length)} {t("chapters")}
           </h2>
           {chapters.length === 0 ? (
             <EmptyState>{t("noHadiths")}</EmptyState>
           ) : (
-            <ol className={`${styles.grid} ${styles.grid3}`}>
+            <ol className={styles.chapterList}>
               {chapters.map((chapter) => {
                 const unassigned = chapter.chapterNo === UNASSIGNED_CHAPTER;
                 return (
                   <li key={chapter.chapterNo}>
-                    <Link href={chapterPath(book.slug, chapter.chapterNo)} className={styles.tile}>
-                      <span className={styles.tileNumber} aria-hidden={unassigned ? "true" : undefined}>
+                    <Link href={chapterPath(book.slug, chapter.chapterNo)} className={styles.chapterRow}>
+                      <span className={styles.chapterNo} aria-hidden={unassigned ? "true" : undefined}>
                         {unassigned ? "–" : chapter.chapterNo}
                       </span>
-                      <span className={styles.tileBody}>
-                        <span className={styles.tileTitle}>
-                          {unassigned ? t("unassignedChapter") : chapter.name}
-                        </span>
-                        {chapter.nameArabic && (
-                          <span className={styles.tileArabic} dir="rtl" lang="ar">
-                            {chapter.nameArabic}
-                          </span>
-                        )}
-                        <span className={styles.tileMeta}>
-                          {formatNumber(chapter.totalHadith)} {t("hadiths")}
-                        </span>
+                      <span className={styles.chapterName}>{unassigned ? t("unassignedChapter") : chapter.name}</span>
+                      <span className={styles.chapterArabic} dir="rtl" lang="ar">
+                        {chapter.nameArabic || ""}
+                      </span>
+                      <span className={styles.chapterCount}>
+                        {formatNumber(chapter.totalHadith)}
+                        <span className={styles.chapterCountLabel}> {t("hadiths")}</span>
                       </span>
                     </Link>
                   </li>

@@ -51,3 +51,20 @@
     font-size: 22px;
   }
 }
+
+.sources {
+  padding: 14px 16px;
+  border: 1px dashed var(--bdr13);
+  border-radius: 8px;
+  text-align: center;
+
+  a {
+    color: var(--main-color);
+    font-weight: 600;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+}

@@ -1,14 +1,10 @@
+// Grid of collection cards (home and /books).
 .list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
-}
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 12px;
 
-@media only screen and (min-width: 1024px) {
-  .list {
-    gap: 12px;
-  }
-  .twoColumns {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  > li {
+    display: flex;
   }
 }

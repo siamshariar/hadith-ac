@@ -34,21 +34,21 @@ export default function BookCard({ book, index, showTranslation = false }) {
 
   return (
     <Link href={bookPath(book)} className={styles.item}>
-      <span className={styles.number}>{index}</span>
-      <span className={styles.left}>
-        <span className={styles.name}>{book.name}</span>
-        <span className={styles.bottom}>{counts.join(" · ")}</span>
-        {notes.map((note) => (
-          <span key={note.key} className={`${styles.translation} ${note.strong ? styles.hasTranslation : ""}`}>
-            {note.text}
+      <span className={styles.top}>
+        <span className={styles.number}>{index}</span>
+        {book.nameArabic && (
+          <span className={styles.arabic} dir="rtl" lang="ar">
+            {book.nameArabic}
           </span>
-        ))}
+        )}
       </span>
-      {book.nameArabic && (
-        <span className={styles.right} dir="rtl" lang="ar">
-          {book.nameArabic}
+      <span className={styles.name}>{book.name}</span>
+      <span className={styles.bottom}>{counts.join(" · ")}</span>
+      {notes.map((note) => (
+        <span key={note.key} className={`${styles.translation} ${note.strong ? styles.hasTranslation : ""}`}>
+          {note.text}
         </span>
-      )}
+      ))}
     </Link>
   );
 }

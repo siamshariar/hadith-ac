@@ -65,7 +65,10 @@ export default function Chapter({ data, neighbours, onlyReadable, readableCount,
           <p className={styles.eyebrow}>
             {book.name} · {chapterLabel(chapter, t)}
           </p>
-          <h1 className={styles.title}>{title}</h1>
+          <h1 className={styles.title}>
+            {!unassigned && <span className={styles.titleNumber}>{chapter.chapterNo}</span>}
+            {title}
+          </h1>
           {chapter.nameArabic && (
             <p className={styles.titleArabic} dir="rtl" lang="ar">
               {chapter.nameArabic}
