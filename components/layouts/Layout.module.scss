@@ -22,15 +22,18 @@
 .sidebar {
   display: none;
 }
+// min-width: 0 so wide content (a long select, a table) can't stretch the page
 .content {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   width: 100%;
+  min-width: 0;
   height: 100%;
 }
 .container {
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
   padding-top: 16px;
   height: 100%;

@@ -53,20 +53,11 @@ body {
   color: var(--txt11);
 }
 
-// viewport
+// viewport: the page itself scrolls (below the fixed 54px mobile header)
 .viewport {
   display: block;
   padding-top: 54px;
   padding-bottom: 0;
-  padding-right: 24px;
-  margin-right: -24px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow-y: scroll;
-  overflow-x: hidden;
 }
 
 .viewport_no_footer {
@@ -80,16 +71,6 @@ body {
 @media only screen and (min-width: 1024px) {
   .viewport {
     padding-top: 0;
-    padding-bottom: 0;
-    padding-right: 0;
-    margin-right: 0;
-    position: relative;
-    top: auto;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    overflow-y: unset;
-    overflow-x: unset;
   }
   .viewport_surah {
     background-color: transparent;

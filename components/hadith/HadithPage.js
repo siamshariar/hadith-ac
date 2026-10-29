@@ -8,6 +8,7 @@ import {
   cleanText,
   hadithPath,
   isCategoryBook,
+  lettered,
   shortBookName,
 } from "../../lib/hadith";
 import { useLocale } from "../../contexts/LocaleContext";
@@ -43,7 +44,7 @@ export default function HadithPage({ hadith, languages, error }) {
       label: chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapter.chapterNo}`,
     });
   }
-  crumbs.push({ label: `${t("hadith")} ${hadith.referenceNumber}` });
+  crumbs.push({ label: `${t("hadith")} ${lettered(hadith.referenceNumber)}` });
 
   // Only describe the page with translation text that is in the page language.
   const translation = hadith.translation;

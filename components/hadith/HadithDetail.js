@@ -11,6 +11,7 @@ import {
   cleanText,
   hadithPath,
   isCategoryBook,
+  lettered,
   shortBookName,
   storedHadithRef,
 } from "../../lib/hadith";
@@ -140,7 +141,7 @@ function Details({ details }) {
 function HadithNavigation({ navigation, book, keepLang }) {
   const { t } = useLocale();
   if (!navigation || (!navigation.previous && !navigation.next)) return null;
-  const label = (item) => (item.referenceNumber ? `${shortBookName(book)} ${item.referenceNumber}` : null);
+  const label = (item) => (item.referenceNumber ? `${shortBookName(book)} ${lettered(item.referenceNumber)}` : null);
 
   return (
     <nav className={styles.navigation} aria-label={`${t("previousHadith")} / ${t("nextHadith")}`}>
@@ -214,7 +215,7 @@ export default function HadithDetail({ hadith, languages }) {
         <div className={styles.facts}>
           {hadith.referenceNumber && (
             <span className={styles.fact}>
-              {t("hadithNumber")}: <strong>{hadith.referenceNumber}</strong>
+              {t("hadithNumber")}: <strong>{lettered(hadith.referenceNumber)}</strong>
             </span>
           )}
           {hadith.title && <span className={styles.fact}>{reference}</span>}
@@ -266,7 +267,7 @@ export default function HadithDetail({ hadith, languages }) {
             {hadith.related.map((item) => (
               <li key={item.id}>
                 <Link href={`/hadiths/${item.id}${keepLang}`} className={styles.chip}>
-                  {item.bookSlug === "hadeethenc" ? "HadeethEnc" : item.bookName} {item.referenceNumber}
+                  {item.bookSlug === "hadeethenc" ? "HadeethEnc" : item.bookName} {lettered(item.referenceNumber)}
                 </Link>
               </li>
             ))}

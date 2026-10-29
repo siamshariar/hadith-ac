@@ -1,30 +1,30 @@
-import { server } from "../../lib/config";
 import Head from "next/head";
+import { useLocale } from "../../contexts/LocaleContext";
 
 export default function Meta(props) {
+  const { t, ui } = useLocale();
+
   return (
     <Head>
       <meta charSet="utf-8" />
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, uc-fitscreen=yes"
-      />
+      {/* Readers must be able to zoom (WCAG 1.4.4), e.g. into the Arabic text */}
+      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       <meta name="description" content={props.description || ""} />
       <meta name="author" content="" />
       <meta name="keywords" content="" />
       <meta httpEquiv="X-UA-Compatible" content="ie=edge" />
 
       {/* Android phone */}
-      <meta name="theme-color" content="#ea511d" />
+      <meta name="theme-color" content="#466548" />
       <meta name="mobile-web-app-capable" content="yes" />
 
       {/* iOS phone */}
       <meta name="apple-mobile-web-app-title" content="" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="#ea511d" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
       {/* Windows phone */}
-      <meta name="msapplication-navbutton-color" content="#ea511d" />
+      <meta name="msapplication-navbutton-color" content="#466548" />
       <meta name="msapplication-TileColor" content="#2B5797" />
       {/* <meta name="msapplication-TileImage" content="ms-icon-144x144.png`} /> */}
       {/* <meta name="msapplication-config" content="browserconfig.xml" /> */}
@@ -50,9 +50,6 @@ export default function Meta(props) {
       {/* imagemode - show image even in text only mode */}
       <meta name="imagemode" content="force" />
 
-      {/* Orientation */}
-      <meta name="screen-orientation" content="portrait" />
-
       {/* format-detection */}
       <meta name="format-detection" content="telephone=no" />
 
@@ -66,7 +63,7 @@ export default function Meta(props) {
         content={props.description || ""}
         key="ogdesc"
       />
-      <meta property="og:locale" content="en" key="oglocale" />
+      <meta property="og:locale" content={ui === "en" ? "en_US" : "vi_VN"} key="oglocale" />
       <meta property="og:site_name" content="Hadith.vn" key="ogsitename" />
 
       {/* meta information for twitter */}
@@ -176,10 +173,11 @@ export default function Meta(props) {
       <link rel="manifest" href="/site.webmanifest" />
 
       {props.canonical && <link rel="canonical" href={props.canonical} />}
+      {props.noindex && <meta name="robots" content="noindex" />}
 
       {/* page title */}
       <title>
-        {`${props.title != "" ? props.title + " | " : ""}Hadith in Vietnamese | Hadith.vn`}
+        {`${props.title ? props.title + " | " : ""}${t("siteHeading")} | Hadith.vn`}
       </title>
 
       {/* Manifest.json */}

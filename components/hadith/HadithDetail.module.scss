@@ -131,10 +131,19 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  max-width: 100%;
   margin-left: auto;
+  // Safari counts a select's longest option as overflow and widens the page
+  overflow: hidden;
+  overflow: clip;
 
   select {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
     max-width: 320px;
+    min-height: 40px;
     padding: 6px 28px 6px 10px;
     border: 1px solid var(--bdr13);
     border-radius: 6px;
@@ -146,7 +155,7 @@
 
     &:focus-visible {
       outline: 2px solid var(--theme-color);
-      outline-offset: 1px;
+      outline-offset: -2px; // inside the clipped label
     }
   }
 }

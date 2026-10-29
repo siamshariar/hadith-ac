@@ -23,6 +23,10 @@
   }
 
   a {
+    // tall enough to tap (WCAG 2.5.8) without changing the line's look
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
     color: var(--txt12);
     transition: color 0.2s ease;
 

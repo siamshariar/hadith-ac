@@ -44,6 +44,9 @@
 }
 
 .citation {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
   color: var(--main-color);
   font-size: 15px;
   font-weight: 500;
@@ -116,6 +119,7 @@
 }
 
 .toggle {
+  min-height: 40px;
   padding: 4px 0;
   border: 0;
   background: none;
@@ -132,6 +136,9 @@
 }
 
 .details {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   color: var(--main-color);
   font-size: 14px;
   font-weight: 500;
