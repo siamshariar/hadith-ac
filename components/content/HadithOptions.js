@@ -4,8 +4,8 @@ import { useState, useEffect, useContext } from "react";
 import { PinContext } from "../../contexts/PinContext";
 import { BookmarkContext } from "../../contexts/BookmarkContext";
 import { useLocale } from "../../contexts/LocaleContext";
-import { server } from "../../lib/config";
-import { citation, cleanText, hadithPath, isCurrentStoredRef, storedHadithRef } from "../../lib/hadith";
+import { isCurrentStoredRef, storedHadithRef } from "../../lib/hadith";
+import { buildText } from "../../lib/citation";
 import Popover from "@mui/material/Popover";
 import MenuList from "@mui/material/MenuList";
 import MenuItem from "@mui/material/MenuItem";
@@ -18,25 +18,21 @@ import BookmarkBorder from "../icons/BookmarkBorder";
 import MoreIcon from "../icons/MoreVert";
 import UnpinIcon from "../icons/Pin";
 import PinIcon from "../icons/PinOutline";
-import Share from "../core/share";
-import LinkIcon from "../icons/Link";
 import FileCopyIcon from "../icons/FileCopy";
-import ShareIcon from "../icons/Share";
 
 import styles from "./HadithOptions.module.scss";
 
+// The ⋮ menu: bookmark, pin, copy text. Citation, permalink and share are
+// visible buttons in the reference block (components/hadith/HadithReference).
 // `hadith` is an API hadith object, `book` its collection ({ name, slug ... }).
 const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage }) => {
-  const { t, languageName } = useLocale();
+  const locale = useLocale();
+  const { t } = locale;
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const handlePopoverOpen = (event) => setAnchorEl(event.currentTarget);
   const handlePopoverClose = () => setAnchorEl(null);
-
-  const reference = citation(hadith, book) || `#${hadith.id}`;
-  const url = `${server}${hadithPath(hadith)}`;
-  const shareTitle = `${reference} | Hadith | hadith.vn`;
 
   //snackbar
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -48,70 +44,15 @@ const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage }) =>
     setSnackbarOpen(false);
   };
 
-  const copyText = (text) => {
+  // Arabic and the translation(s) shown, each labelled with language and author.
+  const handleCopyText = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(text).catch(() => {});
+      navigator.clipboard
+        .writeText(buildText(hadith, book, locale))
+        .then(() => setSnackbarOpen(true))
+        .catch(() => {});
     }
     handlePopoverClose();
-    setSnackbarOpen(true);
-  };
-
-  const handleCopyLink = () => copyText(url);
-
-  // The copied text keeps the same labels as the page: a fallback translation
-  // is marked as such, and grades keep their grader names.
-  const handleCopyFile = () => {
-    const parts = [reference];
-    if (hadith.title) parts.push(cleanText(hadith.title));
-    if (hadith.arabic) parts.push(cleanText(hadith.arabic));
-
-    const translation = hadith.translation;
-    const linked = hadith.linkedTranslation;
-    const ownIsNative = translation && translation.text && !translation.isFallback;
-    if (!ownIsNative && linked && linked.text) {
-      // HadeethEnc's translation of the quoted wording, labelled as such.
-      const label = t("linkedTranslation", { language: languageName(linked.languageCode) });
-      parts.push(`[${label}] ${cleanText(linked.text)}`);
-    }
-    if (translation && translation.text) {
-      const label = translation.isFallback ? `[${t("fallbackTranslation")}] ` : "";
-      parts.push(`${label}${cleanText(translation.text)}`);
-    }
-
-    const grades = [];
-    if (hadith.gradeText) grades.push(hadith.gradeText);
-    (hadith.grades || []).forEach((grade) => grades.push(`${grade.graderName}: ${grade.grade}`));
-    if (grades.length) parts.push(`${t("grades")}: ${grades.join("; ")}`);
-
-    parts.push(url);
-    copyText(parts.join("\n\n"));
-  };
-
-  // share option
-  const [shareOpen, setShareOpen] = useState(false);
-
-  const handleShareClose = (open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-    setShareOpen(open);
-  };
-
-  const handleWebShare = () => {
-    handlePopoverClose();
-    setShareOpen(true);
-  };
-
-  const handleMobileShare = () => {
-    handlePopoverClose();
-    if (typeof navigator !== "undefined" && navigator.share) {
-      navigator.share({ title: shareTitle, url }).catch(() => {});
-    } else {
-      setShareOpen(true);
-    }
   };
 
   // bookmarks (only entries saved against the current API ids count)
@@ -187,8 +128,6 @@ const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage }) =>
         message={t("copied")}
       />
 
-      <Share open={shareOpen} closer={handleShareClose} url={url} title={shareTitle} />
-
       <AddBookmark
         open={addBookmarkOpen}
         closer={handleBookmarkClose}
@@ -232,20 +171,6 @@ const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage }) =>
             classes={{ paper: styles.custom_paper }}
           >
             <MenuList>
-              <MenuItem classes={{ root: styles.mobile_share }} onClick={handleMobileShare}>
-                <span className={styles.icon}>
-                  <ShareIcon />
-                </span>
-                <span className={styles.text}>{t("share")}</span>
-              </MenuItem>
-
-              <MenuItem classes={{ root: styles.web_share }} onClick={handleWebShare}>
-                <span className={styles.icon}>
-                  <ShareIcon />
-                </span>
-                <span className={styles.text}>{t("share")}</span>
-              </MenuItem>
-
               {isBookmarked ? (
                 <MenuItem onClick={handleRemoveBookmark}>
                   <span className={styles.icon}>
@@ -278,18 +203,11 @@ const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage }) =>
                 </MenuItem>
               )}
 
-              <MenuItem onClick={handleCopyFile}>
+              <MenuItem onClick={handleCopyText}>
                 <span className={styles.icon}>
                   <FileCopyIcon />
                 </span>
-                <span className={styles.text}>{t("copy")}</span>
-              </MenuItem>
-
-              <MenuItem onClick={handleCopyLink}>
-                <span className={styles.icon}>
-                  <LinkIcon />
-                </span>
-                <span className={styles.text}>{t("copyLink")}</span>
+                <span className={styles.text}>{t("copyText")}</span>
               </MenuItem>
             </MenuList>
           </Popover>

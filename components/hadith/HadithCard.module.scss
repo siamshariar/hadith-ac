@@ -5,6 +5,7 @@
 }
 
 .card {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -72,20 +73,39 @@
   }
 }
 
-.body {
+.texts {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.arabicCol,
+.translationCol {
+  min-width: 0;
+}
+
+// Wide cards: translation on the left, Arabic on the right.
+@container (min-width: 760px) {
+  .texts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  .arabicCol {
+    order: 2;
+  }
+  .translationCol {
+    order: 1;
+  }
 }
 
 .foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--bdr11);
 }
 
 .actions {

@@ -8,13 +8,15 @@ import {
   bookPath,
   categoryPath,
   chapterPath,
-  citation,
   cleanText,
+  hadithPath,
   isCategoryBook,
+  shortBookName,
   storedHadithRef,
 } from "../../lib/hadith";
+import { referenceText } from "../../lib/citation";
 import HadithOptions from "../content/HadithOptions";
-import Grades from "./Grades";
+import HadithReference from "./HadithReference";
 import { ArabicText, HadithTranslations } from "./HadithText";
 import styles from "./HadithDetail.module.scss";
 
@@ -133,6 +135,39 @@ function Details({ details }) {
   );
 }
 
+// Previous / next hadith in the same collection (API `navigation`, linked by
+// id; some records have no referenceNumber). Renders nothing without it.
+function HadithNavigation({ navigation, book, keepLang }) {
+  const { t } = useLocale();
+  if (!navigation || (!navigation.previous && !navigation.next)) return null;
+  const label = (item) => (item.referenceNumber ? `${shortBookName(book)} ${item.referenceNumber}` : null);
+
+  return (
+    <nav className={styles.navigation} aria-label={`${t("previousHadith")} / ${t("nextHadith")}`}>
+      {navigation.previous ? (
+        <Link href={`${hadithPath(navigation.previous)}${keepLang}`} className={styles.navLink} rel="prev">
+          <span className={styles.navDirection}>
+            <span aria-hidden="true">‹ </span>
+            {t("previousHadith")}
+          </span>
+          {label(navigation.previous) && <span className={styles.navRef}>{label(navigation.previous)}</span>}
+        </Link>
+      ) : (
+        <span />
+      )}
+      {navigation.next && (
+        <Link href={`${hadithPath(navigation.next)}${keepLang}`} className={`${styles.navLink} ${styles.navNext}`} rel="next">
+          <span className={styles.navDirection}>
+            {t("nextHadith")}
+            <span aria-hidden="true"> ›</span>
+          </span>
+          {label(navigation.next) && <span className={styles.navRef}>{label(navigation.next)}</span>}
+        </Link>
+      )}
+    </nav>
+  );
+}
+
 export default function HadithDetail({ hadith, languages }) {
   const { t } = useLocale();
   const router = useRouter();
@@ -152,7 +187,7 @@ export default function HadithDetail({ hadith, languages }) {
       ? t("unassignedChapter")
       : `${t("chapter")} ${chapter.chapterNo}: ${chapter.name}`
     : null;
-  const reference = citation(hadith, book);
+  const reference = referenceText(hadith, book, t);
 
   return (
     <article className={styles.detail}>
@@ -177,23 +212,31 @@ export default function HadithDetail({ hadith, languages }) {
         </h1>
 
         <div className={styles.facts}>
-          <span className={styles.fact}>
-            {t("hadithNumber")}: <strong>{hadith.referenceNumber}</strong>
-          </span>
+          {hadith.referenceNumber && (
+            <span className={styles.fact}>
+              {t("hadithNumber")}: <strong>{hadith.referenceNumber}</strong>
+            </span>
+          )}
           {hadith.title && <span className={styles.fact}>{reference}</span>}
           <LanguageSwitch available={hadith.availableLanguages} languages={languages} linked={hadith.linkedTranslation} />
         </div>
       </header>
 
-      <section className={styles.arabicBlock} aria-label={t("arabicText")}>
-        <ArabicText text={hadith.arabic} large />
-      </section>
+      {/* Side by side on wide screens (translation left, Arabic right),
+          stacked on phones with the Arabic first. */}
+      <div className={styles.texts}>
+        <section className={styles.arabicBlock} aria-label={t("arabicText")}>
+          <ArabicText text={hadith.arabic} large />
+        </section>
 
-      <section className={styles.translationBlock}>
-        <HadithTranslations hadith={hadith} showNote />
-      </section>
+        <section className={styles.translationBlock}>
+          <HadithTranslations hadith={hadith} showNote />
+        </section>
+      </div>
 
-      <Grades grades={hadith.grades} gradeText={hadith.gradeText} variant="full" />
+      <HadithReference hadith={hadith} book={book} />
+
+      <HadithNavigation navigation={hadith.navigation} book={book} keepLang={keepLang} />
 
       <Details details={hadith.details} />
 

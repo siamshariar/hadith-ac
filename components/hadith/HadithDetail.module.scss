@@ -1,7 +1,68 @@
 .detail {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.texts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// Wide: translation (left) beside the Arabic (right).
+@container (min-width: 820px) {
+  .texts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  .arabicBlock {
+    order: 2;
+  }
+  .translationBlock {
+    order: 1;
+  }
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.navLink {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 48%;
+  padding: 10px 14px;
+  border: 1px solid var(--bdr11);
+  border-radius: 8px;
+  color: var(--txt11);
+  transition: border-color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--theme-color);
+  }
+}
+
+.navNext {
+  align-items: flex-end;
+  text-align: end;
+}
+
+.navDirection {
+  color: var(--txt12);
+  font-size: var(--text-sm);
+}
+
+.navRef {
+  color: var(--main-color);
+  font-weight: 500;
 }
 
 .header {
@@ -73,7 +134,7 @@
   margin-left: auto;
 
   select {
-    max-width: 220px;
+    max-width: 320px;
     padding: 6px 28px 6px 10px;
     border: 1px solid var(--bdr13);
     border-radius: 6px;

@@ -8,6 +8,7 @@ import {
   cleanText,
   hadithPath,
   isCategoryBook,
+  shortBookName,
 } from "../../lib/hadith";
 import { useLocale } from "../../contexts/LocaleContext";
 import Meta from "../core/meta";
@@ -34,7 +35,7 @@ export default function HadithPage({ hadith, languages, error }) {
   const crumbs = [
     { href: "/", label: t("home") },
     { href: "/books", label: t("books") },
-    { href: bookPath(book), label: book.name },
+    { href: bookPath(book), label: shortBookName(book) },
   ];
   if (chapter && !isCategoryBook(book)) {
     crumbs.push({

@@ -1,0 +1,127 @@
+.reference {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--bdr11);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--txt11);
+}
+
+.rows {
+  display: grid;
+  gap: 4px;
+}
+
+// term : value, aligned in a column on wider screens
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+
+  dd {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  a {
+    color: var(--main-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+.term {
+  color: var(--txt12);
+
+  &::after {
+    content: ":";
+  }
+}
+
+.gradeText .term::after {
+  content: none;
+}
+
+// Wider screens: one two-column grid for all rows, so values line up.
+@media only screen and (min-width: 600px) {
+  .rows {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 4px 16px;
+  }
+  .row {
+    display: contents;
+  }
+}
+
+.grades {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gradeText strong {
+  color: var(--grade-txt);
+  font-weight: 600;
+}
+
+.gradeTable {
+  width: 100%;
+  max-width: 560px;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+
+  th,
+  td {
+    padding: 6px 10px;
+    border: 1px solid var(--bdr11);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  th {
+    background: var(--bg12);
+    color: var(--txt12);
+    font-weight: 500;
+  }
+
+  td:last-child {
+    color: var(--grade-txt);
+    font-weight: 500;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--bdr11);
+  border-radius: 999px;
+  background: var(--bg11);
+  color: var(--txt11);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--theme-color);
+    color: var(--main-color);
+  }
+}

@@ -2,9 +2,10 @@ import { useState } from "react";
 import Link from "next/link";
 import Skeleton from "react-loading-skeleton";
 import { useLocale } from "../../contexts/LocaleContext";
-import { citation, cleanText, hadithPath } from "../../lib/hadith";
+import { cleanText, hadithPath } from "../../lib/hadith";
+import { referenceText } from "../../lib/citation";
 import HadithOptions from "../content/HadithOptions";
-import Grades from "./Grades";
+import HadithReference from "./HadithReference";
 import { ArabicText, HadithTranslations, needsClamp } from "./HadithText";
 import styles from "./HadithCard.module.scss";
 
@@ -22,7 +23,7 @@ export default function HadithCard({ hadith, book, context, isBookmarkPage, upda
       <header className={styles.head}>
         <div className={styles.reference}>
           <Link href={href} className={styles.citation}>
-            {citation(hadith, book) || `${t("hadith")} ${hadith.referenceNumber}`}
+            {referenceText(hadith, book, t)}
           </Link>
           {context && <span className={styles.context}>{context}</span>}
         </div>
@@ -42,13 +43,21 @@ export default function HadithCard({ hadith, book, context, isBookmarkPage, upda
         </h3>
       )}
 
-      <div className={styles.body}>
-        <ArabicText text={hadith.arabic} clamped={clamped} />
-        <HadithTranslations hadith={hadith} clamped={clamped} />
+      {/* Arabic and translation side by side when the card is wide enough
+          (container query), stacked otherwise; the Arabic comes first in the
+          reading order. */}
+      <div className={styles.texts}>
+        <div className={styles.arabicCol}>
+          <ArabicText text={hadith.arabic} clamped={clamped} />
+        </div>
+        <div className={styles.translationCol}>
+          <HadithTranslations hadith={hadith} clamped={clamped} />
+        </div>
       </div>
 
+      <HadithReference hadith={hadith} book={book} />
+
       <footer className={styles.foot}>
-        <Grades grades={hadith.grades} gradeText={hadith.gradeText} />
         <div className={styles.actions}>
           {clampable && (
             <button
@@ -75,7 +84,7 @@ export function HadithCardSkeleton({ count = 3 }) {
       <div className={styles.head}>
         <Skeleton width={160} height={18} />
       </div>
-      <div className={styles.body}>
+      <div className={styles.texts}>
         <div className={styles.skeletonArabic}>
           <Skeleton count={2} height={26} />
           <Skeleton width="60%" height={26} />
