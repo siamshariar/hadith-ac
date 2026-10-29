@@ -6,7 +6,7 @@
 
 // custom styles
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: var(--font-ui-family), "Segoe UI", sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: var(--txt11);
@@ -203,4 +203,30 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+// Keyboard focus is always visible (the reset removes outlines globally).
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+[role="switch"]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+// search matches (components/hadith/Highlight)
+mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: #fde68a;
+  color: inherit;
+}
+
+.dark mark {
+  background: #6b5a2a;
 }

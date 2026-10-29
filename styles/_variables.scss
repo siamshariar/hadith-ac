@@ -12,7 +12,7 @@
   --txt00: #000000; // arabic text color
   --txt11: #2e3031; // bold text
   --txt12: #666666; // normal text
-  --txt13: #9eabbe; // light text
+  --txt13: #627083; // light text (4.6:1 on white; was #9eabbe, 2.3:1)
 
   --bg11: #ffffff; // main bg
   --bg12: #f4f4f4; // main bg rev
@@ -39,11 +39,25 @@
   --sidebar-icon-color: rgba(0, 0, 0, 0.54);
   --snsic: #138025;
 
+  // type scale (interface)
+  --text-xs: 0.75rem; // 12
+  --text-sm: 0.875rem; // 14
+  --text-base: 1rem; // 16
+  --text-md: 1.125rem; // 18
+  --text-lg: 1.25rem; // 20
+  --text-xl: 1.5rem; // 24
+  --text-2xl: 1.875rem; // 30
+  --leading-tight: 1.3;
+  --leading-normal: 1.55;
+  --reading-width: 72ch;
+
   // reading typography (overridden from the reader's settings)
   --fs-arabic: 28px;
   --fs-trans: 18px;
-  --font-arabic: "Amiri", "Noto Naskh Arabic", "Traditional Arabic", serif;
-  --font-trans: "Roboto", "Amiri", -apple-system, "Segoe UI", sans-serif;
+  --font-arabic: var(--font-amiri-family), "Noto Naskh Arabic", "Traditional Arabic", serif;
+  --font-trans: var(--font-ui-family), var(--font-amiri-family), "Segoe UI", sans-serif;
+
+  --focus-ring: #2f5c33;
 
   // hadith content states
   --accent-soft: rgba(70, 101, 72, 0.1); // light tint of the main green
@@ -87,7 +101,8 @@
   --grade-bg: #2c3a35;
   --grade-txt: #cfe3d1;
   --error-txt: #f2b8b5;
-  --txt13: #9eabbe;
+  --txt13: #a9b4c4;
+  --focus-ring: #9fd3a3;
 }
 
 .blue {

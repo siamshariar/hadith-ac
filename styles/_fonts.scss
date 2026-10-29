@@ -1,8 +1,8 @@
 /*------- custom fonts -------*/
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap");
-// Naskh face for hadith Arabic: full diacritics (harakat) support, calm at reading sizes.
-@import url("https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap");
+// Be Vietnam Pro (interface, translations) and Amiri (Arabic) come from
+// next/font in pages/_app.js: self-hosted, no layout shift.
 
 @font-face {
   font-family: PDMSIslam;

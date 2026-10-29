@@ -4,9 +4,23 @@ import { settings as defaultSettings, fontStacks } from "../lib/settings";
 
 // Settings saved before version 2 never let the reader choose the Arabic font
 // or size (those controls were hidden), so they get the new defaults.
+// Version 3 changes the default translation face from Roboto to Be Vietnam
+// Pro (full Vietnamese support); saved Roboto (the old default) follows it.
 const migrateSettings = (saved) => {
   if (!saved || typeof saved !== "object") return defaultSettings;
   if (saved.version === defaultSettings.version) return saved;
+  if (saved.version === 2) {
+    const family = saved.fontFamily || {};
+    return {
+      ...saved,
+      fontFamily: {
+        ...defaultSettings.fontFamily,
+        ...family,
+        translation: !family.translation || family.translation === "Roboto" ? defaultSettings.fontFamily.translation : family.translation,
+      },
+      version: defaultSettings.version,
+    };
+  }
   return {
     ...defaultSettings,
     ...saved,
@@ -34,7 +48,7 @@ const applyTypography = (settings) => {
   root.setProperty("--fs-arabic", `${size.arabic || defaultSettings.fontSize.arabic}px`);
   root.setProperty("--fs-trans", `${size.translation || defaultSettings.fontSize.translation}px`);
   root.setProperty("--font-arabic", fontStacks[family.arabic] || fontStacks.Amiri);
-  root.setProperty("--font-trans", fontStacks[family.translation] || fontStacks.Roboto);
+  root.setProperty("--font-trans", fontStacks[family.translation] || fontStacks.BeVietnamPro);
 };
 
 export const SettingsContext = createContext();
