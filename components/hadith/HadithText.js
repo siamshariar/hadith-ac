@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useLocale } from "../../contexts/LocaleContext";
 import { cleanText, hadithPath } from "../../lib/hadith";
+import { Highlighted } from "./Highlight";
 import styles from "./hadith.module.scss";
 
 // Arabic is always present and always rendered right-to-left.
@@ -12,7 +13,7 @@ export function ArabicText({ text, clamped = false, large = false }) {
       dir="rtl"
       lang="ar"
     >
-      {cleanText(text)}
+      <Highlighted text={cleanText(text)} field="arabic" />
     </div>
   );
 }
@@ -58,7 +59,7 @@ export function Translation({ translation, clamped = false, showNote = false }) 
         lang={code}
         dir={directionOf(code)}
       >
-        {cleanText(translation.text)}
+        <Highlighted text={cleanText(translation.text)} field={code} />
       </div>
     </div>
   );

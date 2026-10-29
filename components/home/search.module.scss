@@ -1,6 +1,10 @@
 .parent {
-  display: block;
-  padding: 16px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .search {
@@ -8,8 +12,6 @@
   display: flex;
   align-items: stretch;
   width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
   border: 1px solid var(--bdr13);
   border-radius: 999px;
   background-color: var(--bg11);
@@ -43,27 +45,28 @@
   background: transparent;
   color: var(--txt11);
   font: inherit;
-  font-size: 16px; // 16px avoids iOS zoom on focus
-  line-height: 46px;
+  font-size: var(--text-base); // 16px avoids iOS zoom on focus
+  line-height: 50px;
   appearance: none;
 
   &::placeholder {
     color: var(--txt13);
   }
 
-  &::-webkit-search-cancel-button {
-    cursor: pointer;
+  &:focus-visible {
+    outline: none; // the whole field shows focus (see :focus-within)
   }
 }
 
 .search button {
   flex: 0 0 auto;
-  padding: 0 22px;
+  padding: 0 24px;
   border: 0;
   background-color: var(--theme-color);
   color: #fff;
   font: inherit;
-  font-size: 15px;
+  font-size: var(--text-base);
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
 
@@ -73,8 +76,65 @@
   }
 }
 
-@media only screen and (min-width: 1024px) {
-  .parent {
-    padding: 28px 0 8px;
+// "Go to hadith" mini form
+.goTo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.goLabel {
+  color: var(--txt12);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.goField {
+  display: flex;
+  flex: 1 1 240px;
+  max-width: 360px;
+
+  input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--bdr13);
+    border-right: 0;
+    border-radius: 6px 0 0 6px;
+    background: var(--bg11);
+    color: var(--txt11);
+    font: inherit;
+    font-size: var(--text-base);
+
+    &::placeholder {
+      color: var(--txt13);
+    }
   }
+
+  button {
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid var(--theme-color);
+    border-radius: 0 6px 6px 0;
+    background: var(--bg11);
+    color: var(--main-color);
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--theme-color);
+      color: #fff;
+    }
+  }
+}
+
+.goCompact .goField {
+  flex-basis: 180px;
+  max-width: 260px;
 }
