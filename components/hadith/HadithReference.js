@@ -142,6 +142,16 @@ export default function HadithReference({ hadith, book }) {
             <dt className={styles.term}>{linkedLabel(linked, t, languageName)}</dt>
             <dd>
               <Link href={hadithPath({ id: linked.hadithId })}>{linked.author || "HadeethEnc.com"}</Link>
+              {linked.edition && linked.edition.code && ` · ${t("edition")} ${linked.edition.code}`}
+              {linked.edition && linked.edition.sourceUrl && (
+                <>
+                  {" · "}
+                  <a href={linked.edition.sourceUrl} target="_blank" rel="noopener noreferrer">
+                    {t("sourceLink")}
+                    <span className="visually_hidden"> ({linked.edition.code})</span>
+                  </a>
+                </>
+              )}
             </dd>
           </div>
         )}

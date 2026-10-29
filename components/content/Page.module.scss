@@ -424,7 +424,7 @@
 
 @media only screen and (min-width: 768px) {
   .chapterRow {
-    grid-template-columns: 56px minmax(0, 1fr) minmax(0, 0.8fr) 110px;
+    grid-template-columns: 56px minmax(0, 1fr) minmax(0, 0.8fr) 130px;
     grid-template-areas: "no name arabic count";
     padding: 14px 12px;
   }
@@ -578,4 +578,23 @@
   gap: 4px 16px;
   color: var(--txt12);
   font-size: var(--text-sm);
+}
+
+// citable numbers of a chapter ("1–7", Muslim "8a–222b")
+.chapterCount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.chapterRange {
+  color: var(--txt11);
+  font-weight: 500;
+}
+
+.dataTable a {
+  color: var(--main-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }

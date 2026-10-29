@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { server } from "../lib/config";
-import { getBookHadith, getBooks, getLanguages, loadPage } from "../lib/api";
+import { getBooks, getEditions, getLanguages, loadPage } from "../lib/api";
 import { bookPath, shortBookName } from "../lib/hadith";
 import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
@@ -36,10 +36,10 @@ const COPY = {
       `${own} trong ${hencTotal} hadith của HadeethEnc có bản dịch tiếng Việt của HadeethEnc. Thêm ${linked} hadith trong các bộ sưu tập khác đọc được qua bản dịch HadeethEnc của phần lời văn trùng khớp${linkedBooks ? ` (${linkedBooks})` : ""}. Các bộ sưu tập kinh điển chưa có bản dịch tiếng Việt riêng: với các hadith đó, nguyên văn tiếng Ả Rập và bản dịch tiếng Anh được hiển thị, có ghi nhãn. Tổng cộng ${readable} trong ${total} hadith đọc được bằng tiếng Việt.`,
     translatorsTitle: "Người dịch theo ngôn ngữ",
     translatorsIntro:
-      "Bản dịch các bộ sưu tập kinh điển (Fawaz hadith-api), theo dữ liệu API. Mọi bản dịch của HadeethEnc là của HadeethEnc.com.",
+      "Mọi ấn bản bản dịch theo dữ liệu API: bộ sưu tập, người dịch theo cách nguồn ghi, và mã ấn bản (liên kết tới tệp nguồn).",
     language: "Ngôn ngữ",
     translator: "Người dịch",
-    unknownTranslator: "không ghi tên",
+    unknownTranslator: "Không rõ (theo nguồn)",
     hencLanguages: (count) => `HadeethEnc.com: bản dịch bằng ${count} ngôn ngữ.`,
     unavailable: "Không tải được danh sách người dịch lúc này.",
   },
@@ -66,10 +66,10 @@ const COPY = {
       `${own} of HadeethEnc's ${hencTotal} hadiths have HadeethEnc's Vietnamese translation. Another ${linked} hadiths in other collections can be read through HadeethEnc's translation of a matching wording${linkedBooks ? ` (${linkedBooks})` : ""}. The canonical collections have no Vietnamese translation of their own: for those hadiths the Arabic and the labelled English translation are shown. In all, ${readable} of ${total} hadiths can be read in Vietnamese.`,
     translatorsTitle: "Translators by language",
     translatorsIntro:
-      "Translations of the canonical collections (Fawaz hadith-api), as the API reports them. All HadeethEnc translations are by HadeethEnc.com.",
+      "Every translation edition the API lists: the collection, the translator as the source names them, and the edition code (linked to the source file).",
     language: "Language",
     translator: "Translator",
-    unknownTranslator: "not named",
+    unknownTranslator: "Not named (per the source)",
     hencLanguages: (count) => `HadeethEnc.com: translations in ${count} languages.`,
     unavailable: "The list of translators could not be loaded right now.",
   },
@@ -194,10 +194,21 @@ export default function Sources({ books, vietnamese, translators, hencLanguages 
                       </th>
                       <td>
                         <ul className={styles.translatorList}>
-                          {row.books.map((item) => (
-                            <li key={item.slug}>
-                              <span>{item.name}</span>: {item.author || copy.unknownTranslator}{" "}
-                              <span className={styles.tableNote}>({formatNumber(item.count)})</span>
+                          {row.editions.map((item) => (
+                            <li key={item.code}>
+                              <span>{item.name}</span>:{" "}
+                              {item.author || <span className={styles.tableNote}>{copy.unknownTranslator}</span>}{" "}
+                              <span className={styles.tableNote}>
+                                ·{" "}
+                                {item.sourceUrl ? (
+                                  <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer">
+                                    {item.code}
+                                  </a>
+                                ) : (
+                                  item.code
+                                )}{" "}
+                                ({formatNumber(item.count)})
+                              </span>
                             </li>
                           ))}
                         </ul>
@@ -220,26 +231,30 @@ Sources.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
-// Translators per language for the canonical (Fawaz) collections: the
-// languages come from the first hadith of each collection (availableLanguages),
-// the names from the books list in each language (translationAuthor).
-async function loadTranslators(fawazBooks, languages) {
-  const firsts = await Promise.all(fawazBooks.map((book) => getBookHadith(book.slug, 1, "en").catch(() => null)));
-  const codes = new Set();
-  firsts.forEach((hadith) => ((hadith && hadith.availableLanguages) || []).forEach((code) => code !== "ar" && codes.add(code)));
-
-  const byCode = new Map(languages.map((language) => [language.code, language]));
-  const rows = await Promise.all(
-    [...codes].map(async (code) => {
-      const list = await getBooks(code).catch(() => []);
-      const translated = list
-        .filter((book) => book.source === "fawaz" && book.totalTranslated > 0)
-        .map((book) => ({ slug: book.slug, name: shortBookName(book), author: book.translationAuthor || null, count: book.totalTranslated }));
-      const info = byCode.get(code) || { code, name: code, nativeName: code };
-      return translated.length ? { code, name: info.name, nativeName: info.nativeName, books: translated } : null;
-    })
-  );
-  return rows.filter(Boolean).sort((a, b) => (a.code === "en" ? -1 : b.code === "en" ? 1 : a.name.localeCompare(b.name)));
+// Translators by language from /hadith/editions: one row per language, one
+// entry per edition (collection, translator as the source names them,
+// edition code linked to the source file).
+function translatorsByLanguage(editions) {
+  const byCode = new Map();
+  (editions || []).forEach((edition) => {
+    if (!byCode.has(edition.languageCode)) {
+      byCode.set(edition.languageCode, {
+        code: edition.languageCode,
+        name: edition.languageName || edition.languageCode,
+        nativeName: edition.languageNativeName || edition.languageName || edition.languageCode,
+        editions: [],
+      });
+    }
+    byCode.get(edition.languageCode).editions.push({
+      code: edition.code,
+      name: edition.source === "hadeethenc" ? "HadeethEnc" : edition.bookName,
+      author: edition.author || null,
+      sourceUrl: edition.sourceUrl || null,
+      count: edition.totalHadith || 0,
+    });
+  });
+  const rank = (code) => (code === "vi" ? 0 : code === "en" ? 1 : 2);
+  return [...byCode.values()].sort((x, y) => rank(x.code) - rank(y.code) || x.name.localeCompare(y.name));
 }
 
 export async function getServerSideProps(context) {
@@ -264,10 +279,8 @@ export async function getServerSideProps(context) {
       };
     }
 
-    const translators = await loadTranslators(
-      books.filter((book) => book.source === "fawaz"),
-      languages
-    ).catch(() => null);
+    const editions = await getEditions().catch(() => null);
+    const translators = editions ? translatorsByLanguage(editions) : null;
 
     return {
       props: {

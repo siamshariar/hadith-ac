@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { server } from "../../../lib/config";
 import { getBook, getBooks, loadPage } from "../../../lib/api";
-import { UNASSIGNED_CHAPTER, bookPath, chapterPath, isCategoryBook } from "../../../lib/hadith";
+import { UNASSIGNED_CHAPTER, bookPath, chapterPath, chapterRange, isCategoryBook } from "../../../lib/hadith";
 import { useLocale } from "../../../contexts/LocaleContext";
 import Meta from "../../../components/core/meta";
 import Breadcrumbs from "../../../components/core/breadcrumbs";
@@ -98,6 +98,7 @@ export default function Book({ book, counts, error }) {
             <ol className={styles.chapterList}>
               {chapters.map((chapter) => {
                 const unassigned = chapter.chapterNo === UNASSIGNED_CHAPTER;
+                const range = chapterRange(chapter, book);
                 return (
                   <li key={chapter.chapterNo}>
                     <Link href={chapterPath(book.slug, chapter.chapterNo)} className={styles.chapterRow}>
@@ -105,12 +106,15 @@ export default function Book({ book, counts, error }) {
                         {unassigned ? "–" : chapter.chapterNo}
                       </span>
                       <span className={styles.chapterName}>{unassigned ? t("unassignedChapter") : chapter.name}</span>
+                      {/* Empty until the source has Arabic chapter names. */}
                       <span className={styles.chapterArabic} dir="rtl" lang="ar">
                         {chapter.nameArabic || ""}
                       </span>
                       <span className={styles.chapterCount}>
-                        {formatNumber(chapter.totalHadith)}
-                        <span className={styles.chapterCountLabel}> {t("hadiths")}</span>
+                        {range && <span className={styles.chapterRange}>{range}</span>}
+                        <span>
+                          {formatNumber(chapter.totalHadith)} {t("hadiths")}
+                        </span>
                       </span>
                     </Link>
                   </li>

@@ -94,6 +94,19 @@ export function LinkedTranslation({ linked, clamped = false }) {
             {t("translator")}: {linked.author}
           </span>
         )}
+        {linked.edition && linked.edition.code && (
+          <span className={styles.author}>
+            {t("edition")} {linked.edition.code}
+            {linked.edition.sourceUrl && (
+              <>
+                {" · "}
+                <a href={linked.edition.sourceUrl} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
+                  {t("sourceLink")}
+                </a>
+              </>
+            )}
+          </span>
+        )}
       </div>
       {/* Said before the text, so it is read as what it is. */}
       <p className={styles.linkedNote}>
