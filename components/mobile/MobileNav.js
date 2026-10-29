@@ -307,6 +307,14 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
 
             <ul className={styles.menu}>
               <li>
+                <Link href="/sources">
+                  <span className={styles.icon}>
+                    <InfoIcon />
+                  </span>
+                  <span className={styles.text}>{t("sourcesAndMethod")}</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/about">
 
                   <span className={styles.icon}>

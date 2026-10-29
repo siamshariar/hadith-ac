@@ -1,8 +1,10 @@
 import Link from "next/link";
 import Container from "../core/container";
+import { useLocale } from "../../contexts/LocaleContext";
 import styles from "./Footer.module.scss";
 
 export default function FooterWeb() {
+  const { t } = useLocale();
   return (
     <div className={styles.footer}>
       <Container>
@@ -16,6 +18,9 @@ export default function FooterWeb() {
           </p>
 
           <ul className={styles.menu}>
+            <li>
+              <Link href="/sources">{t("sourcesAndMethod")}</Link>
+            </li>
             <li>
               <Link href="/support">
                 Support
