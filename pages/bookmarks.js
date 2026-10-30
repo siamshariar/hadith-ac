@@ -1,27 +1,42 @@
 import { useRouter } from "next/router";
 import { server } from "../lib/config";
 import { loadPage } from "../lib/api";
+import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
+import Breadcrumbs from "../components/core/breadcrumbs";
 import Layout from "../components/layouts/LayoutSecondary";
 import BookmarkContent from "../components/bookmark/page";
 import BookmarkMobile from "../components/mobile/Storage";
+import styles from "../components/content/Page.module.scss";
 
-// /bookmarks?key={folder}: one bookmark folder. Without a key: the saved
-// lists (bookmarks, pins, last read) as tabs.
+// /bookmarks?key={folder}: one bookmark folder (its own heading). Without a
+// key: the saved lists (bookmarks, pins, last read) as tabs.
 export default function Bookmark() {
   const router = useRouter();
+  const { t } = useLocale();
   const key = typeof router.query.key === "string" ? router.query.key : null;
 
   return (
     <>
       <Meta
-        title="Bookmarks"
-        description="Bookmarks. Hadith application in Vietnamese."
+        title={t("savedLists")}
+        description={`${t("bookmarks")}, ${t("pins").toLowerCase()}, ${t("lastRead").toLowerCase()}.`}
         url={`${server}/bookmarks`}
         image={`${server}/img/s_logo.png`}
         type="website"
+        noindex
       />
-      {key ? <BookmarkContent folderKey={key} /> : <BookmarkMobile />}
+      {key ? (
+        <BookmarkContent folderKey={key} />
+      ) : (
+        <div className={styles.page}>
+          <Breadcrumbs items={[{ href: "/", label: t("home") }, { label: t("savedLists") }]} />
+          <header className={styles.header}>
+            <h1 className={styles.title}>{t("savedLists")}</h1>
+          </header>
+          <BookmarkMobile />
+        </div>
+      )}
     </>
   );
 }

@@ -11,6 +11,7 @@ import LastReadList from "./StorageLastRead";
 import PinIcon from "../icons/PinOutline";
 import BookmarkBorderIcon from "../icons/BookmarkBorder";
 import AutoStoriesIcon from "../icons/AutoStories";
+import { useLocale } from "../../contexts/LocaleContext";
 import styles from "./Storage.module.scss";
 
 function TabPanel(props) {
@@ -45,6 +46,7 @@ export default function Save() {
   const { bookmarkOpen, changeBookmarkOpen } = useContext(SidenavContext);
   const [value, setValue] = useState(0);
   const [isClient, setIsClient] = useState(false);
+  const { t } = useLocale();
 
   useEffect(() => {
     setIsClient(true);
@@ -66,7 +68,7 @@ export default function Save() {
   if (!isClient) {
     return (
       <div className={styles.wrapper}>
-        <div>Loading...</div>
+        <div>{t("loading")}</div>
       </div>
     );
   }
@@ -80,7 +82,7 @@ export default function Save() {
         }}
         value={value}
         onChange={handleChange}
-        aria-label="Bookmark tabs"
+        aria-label={t("savedLists")}
       >
         <Tab
           classes={{
@@ -88,7 +90,7 @@ export default function Save() {
             wrapper: styles.tab_wrapper,
           }}
           icon={<BookmarkBorderIcon />}
-          label="Bookmarks"
+          label={t("bookmarks")}
           disableRipple
           disableFocusRipple
           {...a11yProps(0)}
@@ -100,7 +102,7 @@ export default function Save() {
             wrapper: styles.tab_wrapper,
           }}
           icon={<PinIcon />}
-          label="Pin"
+          label={t("pins")}
           disableRipple
           disableFocusRipple
           {...a11yProps(1)}
@@ -112,7 +114,7 @@ export default function Save() {
             wrapper: styles.tab_wrapper,
           }}
           icon={<AutoStoriesIcon />}
-          label="Last Read"
+          label={t("lastRead")}
           disableRipple
           disableFocusRipple
           {...a11yProps(2)}
