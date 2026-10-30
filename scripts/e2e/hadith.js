@@ -45,7 +45,7 @@ module.exports = spec(module, 'hadith page', (h) => {
         assert.equal(data.translation.isFallback, false);
         // the label names the language; the interface is that language's and nothing is saved
         const tr = await interfaceStrings(code);
-        await waitForText(page.locator('section[class*="translationBlock"] span[class*="label"]').first(), tr.name(code));
+        await waitForText(page.locator('section[class*="translationBlock"] span[class*="label"]').first(), tr.language(code));
         assert.equal(await anyChip(page).getAttribute('data-translations'), code);
         assert.equal(await languageCookie(context), undefined, 'no language cookie written');
         assert.equal((await meta(page)).lang, code);

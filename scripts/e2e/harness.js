@@ -110,13 +110,13 @@ function i18n() {
 }
 
 // The strings of an interface as LocaleContext's t() gives them on a site: tr(key, vars), with
-// the site's name and content language filled in, plus tr.name(code) (a language inside a
+// the site's name and content language filled in, plus tr.language(code) (a language inside a
 // sentence) and tr.number(n). Default: the vn site.
 async function interfaceStrings(ui, { site = 'Hadith.vn', language = 'vi' } = {}) {
   const m = await i18n();
   const vars = { site, siteLanguage: m.languageName(ui, language) };
   const tr = (key, values) => m.translate(ui, key, { ...vars, ...values });
-  tr.name = (code) => m.languageName(ui, code);
+  tr.language = (code) => m.languageName(ui, code);
   tr.number = (value) => m.formatNumber(value, ui);
   return tr;
 }

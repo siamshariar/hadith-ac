@@ -109,7 +109,7 @@ module.exports = spec(module, 'search', (h) => {
     await waitForText(page.locator('#search-results'), en('searchResultsFor', { query: EN }));
     assert.equal(await page.evaluate(() => document.documentElement.lang), 'en');
     await expectCountLine(page, results, en);
-    assert.equal(norm(await page.locator('p[class*="searchedIn"] span').first().textContent()), en('searchedLanguage', { language: en.name('en') }));
+    assert.equal(norm(await page.locator('p[class*="searchedIn"] span').first().textContent()), en('searchedLanguage', { language: en.language('en') }));
     assert.deepEqual(await cardCitations(page), results.hadiths.map((hadith) => String(hadith.id)));
     const found = await until(async () => {
       const list = await marks(page);
@@ -215,7 +215,7 @@ module.exports = spec(module, 'search', (h) => {
     const link = page.getByRole('link', { name: 'Tìm trong bản dịch tiếng Anh' });
     await link.click();
     await h.waitForPath(page, (url) => url.searchParams.get('lang') === 'en' && url.searchParams.get('q') === VI, 'English search');
-    await waitForText(page.locator('p[class*="searchedIn"] span').first(), tr('searchedLanguage', { language: tr.name('en') }));
+    await waitForText(page.locator('p[class*="searchedIn"] span').first(), tr('searchedLanguage', { language: tr.language('en') }));
     if (en.pagination.total > 0) await expectCountLine(page, en, tr);
     else await waitForText(page.locator('#search-results'), tr('searchNoResults', { query: VI }));
   });

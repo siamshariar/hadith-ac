@@ -11,7 +11,8 @@ const { NAMES_FIXTURE, api, assert, breadcrumbs, interfaceStrings, loc, meta, na
 
 const BUKHARI = 'sahih-al-bukhari';
 const menuButton = (page) => page.locator('button[data-language-menu]').filter({ visible: true }).first();
-const panel = (page) => page.getByRole('dialog', { name: 'Ngôn ngữ' });
+// the open panel (its name is the interface's word for "language")
+const panel = (page) => page.locator('[role="dialog"][id^="language-menu-"]');
 const rows = (page) => page.locator('[role="menuitemradio"]');
 const htmlLang = (page) => page.evaluate(() => document.documentElement.lang);
 
@@ -81,9 +82,14 @@ module.exports = spec(module, 'language menu', (h) => {
         assert.equal(await page.evaluate(() => document.activeElement.dataset.languageMenu), 'vi', 'the focus is back on the button');
       } else {
         // a full-height sheet, closed by its 44px button
-        const sheet = await dialog.boundingBox();
-        const height = await page.evaluate(() => window.innerHeight);
-        assert.ok(Math.abs(sheet.height - height) < 2 && sheet.y < 2, `full height (${sheet.y}, ${sheet.height} of ${height})`);
+        assert.equal(await dialog.getAttribute('aria-labelledby') && (await dialog.locator('h2').innerText()), 'Ngôn ngữ');
+        await until(
+          () => dialog.evaluate((el) => {
+            const box = el.getBoundingClientRect();
+            return Math.abs(box.top) < 2 && Math.abs(box.bottom - window.innerHeight) < 2;
+          }),
+          'the sheet fills the screen'
+        );
         const close = dialog.getByRole('button', { name: 'Đóng' });
         const closeBox = await close.boundingBox();
         assert.ok(closeBox.width >= 44 && closeBox.height >= 44);

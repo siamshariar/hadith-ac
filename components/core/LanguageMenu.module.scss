@@ -141,9 +141,10 @@
   border-radius: 12px !important;
 }
 
-// Phones and tablets: a full-height sheet.
+// Phones and tablets: a full-height sheet, however short the list (MUI's paper is as tall
+// as its content).
 .sheet {
-  height: 100%;
+  height: 100% !important;
   border-radius: 14px 14px 0 0;
 }
 
