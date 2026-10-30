@@ -1,0 +1,26 @@
+{
+  "_comment": [
+    "One deployment per country: NEXT_PUBLIC_COUNTRY_CODE picks an entry (default vn), at build time.",
+    "Keys are the Quran API's countries.code; `localization` is that country's localizations.code",
+    "(the Quran apps' locale) and `language` the hadith language it maps to through",
+    "hadith_languages.localization_id. `ui` is the interface language wanted: it is used when",
+    "lib/locales has that catalog, otherwise the interface falls back to English.",
+    "Check against a running API: npm run check:sites"
+  ],
+  "vn": { "name": "Vietnam", "localization": "vn", "language": "vi", "ui": "vi", "ogLocale": "vi_VN", "siteName": "Hadith.vn", "logo": "/img/logo.png", "contactEmail": "quran.vn@gmail.com" },
+  "bd": { "name": "Bangladesh", "localization": "bn", "language": "bn", "ui": "bn", "ogLocale": "bn_BD" },
+  "usa": { "name": "United States", "localization": "en", "language": "en", "ui": "en", "ogLocale": "en_US" },
+  "kh": { "name": "Cambodia", "localization": "kh", "language": "km", "ui": "km", "ogLocale": "km_KH" },
+  "fr": { "name": "France", "localization": "fr", "language": "fr", "ui": "fr", "ogLocale": "fr_FR" },
+  "ph": { "name": "Philippines", "localization": "ph", "language": "tl", "ui": "tl", "ogLocale": "tl_PH" },
+  "jp": { "name": "Japan", "localization": "jp", "language": "ja", "ui": "ja", "ogLocale": "ja_JP" },
+  "de": { "name": "Germany", "localization": "de", "language": "de", "ui": "de", "ogLocale": "de_DE" },
+  "cn": { "name": "China", "localization": "cn", "language": "zh", "ui": "zh", "ogLocale": "zh_CN" },
+  "pt": { "name": "Portugal", "localization": "pt", "language": "pt", "ui": "pt", "ogLocale": "pt_PT" },
+  "kr": { "name": "Korea", "localization": "kr", "language": "en", "ui": "ko", "ogLocale": "ko_KR", "note": "No Korean hadith translation in the sources yet: content in English" },
+  "dk": { "name": "Denmark", "localization": "dk", "language": "da", "ui": "da", "ogLocale": "da_DK" },
+  "sa": { "name": "Saudi Arabia", "localization": "ar", "language": "ar", "ui": "ar", "ogLocale": "ar_AR" },
+  "pk": { "name": "Pakistan", "localization": "ur", "language": "ur", "ui": "ur", "ogLocale": "ur_PK" },
+  "ru": { "name": "Russian Federation", "localization": "ru", "language": "ru", "ui": "ru", "ogLocale": "ru_RU" },
+  "iq": { "name": "Iraq", "localization": "ku", "language": "ku", "ui": "ku", "ogLocale": "ku_TR" }
+}
