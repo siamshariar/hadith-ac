@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8090/api";
-const apiHostname = new URL(apiBaseUrl).hostname;
 
 const nextConfig = {
   reactStrictMode: true,
@@ -10,14 +8,11 @@ const nextConfig = {
     GOOGLE_ANALYTICS_ID: process.env.GOOGLE_ANALYTICS_ID || "",
   },
   images: {
-    // Allows next/image to load hadith images served from the API host.
-    // Add any additional CDN/media hostnames here as they come into use.
-    remotePatterns: [
-      {
-        protocol: apiBaseUrl.startsWith("https") ? "https" : "http",
-        hostname: apiHostname,
-      },
-    ],
+    // The site's images are small static files (logos), so next/image serves
+    // them as they are. This also switches off the /_next/image optimizer,
+    // whose known vulnerabilities (DoS, cache confusion, remote code execution
+    // with crafted AVIF/SVG) have no fix in Next.js 13.
+    unoptimized: true,
   },
   async headers() {
     return [
