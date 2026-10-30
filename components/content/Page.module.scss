@@ -578,6 +578,11 @@
   gap: 4px 16px;
   color: var(--txt12);
   font-size: var(--text-sm);
+
+  a {
+    display: inline-block;
+    padding: 4px 0; // 26px tap height
+  }
 }
 
 // citable numbers of a chapter ("1–7", Muslim "8a–222b")
@@ -594,7 +599,14 @@
 }
 
 .dataTable a {
+  display: inline-block;
+  padding: 4px 0; // 26px tap height
   color: var(--main-color);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.sourceItem h3 a {
+  display: inline-block;
+  padding: 2px 0;
 }

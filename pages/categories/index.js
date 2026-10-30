@@ -5,6 +5,7 @@ import Meta from "../../components/core/meta";
 import Breadcrumbs from "../../components/core/breadcrumbs";
 import ErrorState from "../../components/core/error";
 import Layout from "../../components/layouts/LayoutSecondary";
+import { sidebarCategoriesData } from "../../components/sidebar/data";
 import CategoryList from "../../components/home/category-list";
 import styles from "../../components/content/Page.module.scss";
 
@@ -54,6 +55,8 @@ export async function getServerSideProps(context) {
       ...category,
       children: children.map(({ children: _deeper, ...child }) => child),
     }));
-    return { props: { categories, total: all.length, backLink: "/" } };
+    return {
+      props: { categories, total: all.length, sidebarData: await sidebarCategoriesData(lang), backLink: "/" },
+    };
   });
 }

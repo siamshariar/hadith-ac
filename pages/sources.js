@@ -6,6 +6,7 @@ import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
 import Breadcrumbs from "../components/core/breadcrumbs";
 import Layout from "../components/layouts/LayoutSecondary";
+import { sidebarCategoriesData } from "../components/sidebar/data";
 import styles from "../components/content/Page.module.scss";
 
 const FAWAZ_URL = "https://github.com/fawazahmed0/hadith-api";
@@ -289,6 +290,7 @@ export async function getServerSideProps(context) {
         translators,
         hencLanguages: languages.filter((language) => language.code !== "ar").length,
         contentTitle: (COPY.vi || {}).title,
+        sidebarData: await sidebarCategoriesData(lang),
         backLink: "/",
       },
     };

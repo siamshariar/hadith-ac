@@ -5,6 +5,7 @@ import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
 import Breadcrumbs from "../components/core/breadcrumbs";
 import Layout from "../components/layouts/LayoutSecondary";
+import { sidebarCategoriesData } from "../components/sidebar/data";
 import BookmarkContent from "../components/bookmark/page";
 import BookmarkMobile from "../components/mobile/Storage";
 import styles from "../components/content/Page.module.scss";
@@ -48,5 +49,7 @@ Bookmark.getLayout = function getLayout(page) {
 // Server-rendered only to know the reader's language; the bookmarks
 // themselves live in this browser's localStorage.
 export async function getServerSideProps(context) {
-  return loadPage(context, async () => ({ props: { backLink: "/" } }));
+  return loadPage(context, async (lang) => ({
+    props: { sidebarData: await sidebarCategoriesData(lang), backLink: "/" },
+  }));
 }

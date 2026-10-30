@@ -89,12 +89,19 @@ function branchTo(categories, selectedId) {
   return open;
 }
 
+// `initial`: { categories, partial } from the server. A partial list (the
+// top level and the open branch) paints at once; the full list, needed for
+// the other branches and the filter, follows in the background.
 function CategoryTree({ selectedCategoryId, filter, initial, enabled }) {
   const { lang, t } = useLocale();
+  const partial = Boolean(initial && initial.partial);
   const { data, error, retry } = useApi(`categories:${lang}`, () => getCategories(lang), {
-    enabled: enabled && !initial,
+    enabled: enabled && (!initial || partial),
   });
-  const categories = useMemo(() => initial || (Array.isArray(data) ? data : []), [initial, data]);
+  const categories = useMemo(
+    () => (Array.isArray(data) && data.length ? data : (initial && initial.categories) || []),
+    [initial, data]
+  );
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
   // Server-provided data renders the open branch on the first paint.
   const [expanded, setExpanded] = useState(() => branchTo(categories, selectedCategoryId));
@@ -130,7 +137,7 @@ function CategoryTree({ selectedCategoryId, filter, initial, enabled }) {
   const renderNodes = (nodes, level = 0) =>
     nodes.map((category) => {
       const active = category.id === selectedCategoryId;
-      if (!category.children.length) {
+      if (!category.children.length && !(category.totalChildren > 0)) {
         return <CategoryLink key={category.id} category={category} active={active} level={level} />;
       }
       return (
@@ -146,7 +153,14 @@ function CategoryTree({ selectedCategoryId, filter, initial, enabled }) {
               <CategoryLink category={category} active={active} level={level} parent />
             </AccordionSummary>
             <AccordionDetails classes={detailClasses}>
-              <div className={styles.sub_item}>{renderNodes(category.children, level + 1)}</div>
+              <div className={styles.sub_item}>
+                {/* children not in the partial list yet: the full list is on its way */}
+                {category.children.length ? (
+                  renderNodes(category.children, level + 1)
+                ) : (
+                  <Skeleton count={3} height={18} style={{ marginBottom: 8 }} />
+                )}
+              </div>
             </AccordionDetails>
           </Accordion>
         </div>
@@ -282,7 +296,7 @@ function useShown(lazy) {
 
 // `data`: what the page's server props already hold (components/sidebar/
 // data.js), rendered on the first paint: { books, chapters: { slug: [...] } }
-// or { categories }. Anything missing is loaded in the browser; with `lazy`,
+// or { categories, partial }. Anything missing is loaded in the browser; with `lazy`,
 // only on screens that show the sidebar.
 export default function Sidebar({
   mode = "categories",
@@ -342,7 +356,7 @@ export default function Sidebar({
               <CategoryTree
                 selectedCategoryId={selectedCategoryId}
                 filter={search.trim()}
-                initial={data && data.categories ? data.categories : null}
+                initial={data && data.categories ? data : null}
                 enabled={enabled}
               />
             )}

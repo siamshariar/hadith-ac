@@ -1,10 +1,10 @@
-import { getBook, getBooks } from "../../lib/api";
+import { getBook, getBooks, getCategories } from "../../lib/api";
 
-// Server side (getServerSideProps): the books sidebar's data as a page prop
+// Server side (getServerSideProps): the sidebar's data as a page prop
 // (`sidebarData`), so the desktop sidebar comes with the page instead of
-// after hydration and two requests in a row. Only the fields the sidebar
-// shows; getBooks / getBook are memoised in lib/api, so pages that already
-// fetched them pay nothing. `book` is a slug or an already fetched book.
+// after hydration and one or two requests in a row. Only the fields the
+// sidebar shows; getBooks / getBook / getCategories are memoised in lib/api,
+// so pages that already fetched them pay nothing.
 const slimBook = ({ slug, code, source, name, nameArabic, totalHadith }) => ({
   slug,
   code,
@@ -16,6 +16,7 @@ const slimBook = ({ slug, code, source, name, nameArabic, totalHadith }) => ({
 
 const slimChapter = ({ chapterNo, name, totalHadith }) => ({ chapterNo, name, totalHadith });
 
+// Books mode. `book` is a slug or an already fetched book (its chapters).
 export async function sidebarBooksData(lang, { book = null, books = null } = {}) {
   const [list, current] = await Promise.all([
     books || getBooks(lang),
@@ -24,4 +25,35 @@ export async function sidebarBooksData(lang, { book = null, books = null } = {})
   const chapters = {};
   if (current && Array.isArray(current.chapters)) chapters[current.slug] = current.chapters.map(slimChapter);
   return { books: (list || []).map(slimBook), chapters };
+}
+
+const slimCategory = ({ id, parentId, slug, title, totalHadith, totalChildren }) => ({
+  id,
+  parentId: parentId ?? null,
+  slug: slug || null,
+  title,
+  totalHadith,
+  totalChildren: totalChildren || 0,
+});
+
+// Categories mode: the top level and the branch down to `selectedId` (with
+// its children), a few KB instead of the whole 493-category list; the
+// sidebar loads the rest in the browser. Null when the API fails (the
+// sidebar then loads everything itself).
+export async function sidebarCategoriesData(lang, selectedId = null) {
+  try {
+    const all = await getCategories(lang);
+    const byId = new Map(all.map((category) => [category.id, category]));
+    const open = new Set();
+    let current = selectedId != null ? byId.get(selectedId) : null;
+    if (current && current.totalChildren > 0) open.add(current.id);
+    while (current && current.parentId != null) {
+      open.add(current.parentId);
+      current = byId.get(current.parentId);
+    }
+    const shown = all.filter((category) => category.parentId == null || open.has(category.parentId));
+    return { categories: shown.map(slimCategory), partial: shown.length < all.length };
+  } catch (_) {
+    return null;
+  }
 }

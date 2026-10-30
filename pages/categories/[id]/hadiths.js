@@ -10,6 +10,7 @@ import Breadcrumbs from "../../../components/core/breadcrumbs";
 import ErrorState, { EmptyState } from "../../../components/core/error";
 import Pagination, { pageHref } from "../../../components/core/pagination";
 import Layout from "../../../components/layouts/LayoutSecondary";
+import { sidebarCategoriesData } from "../../../components/sidebar/data";
 import HadithCard, { HadithList } from "../../../components/hadith/HadithCard";
 import styles from "../../../components/content/Page.module.scss";
 
@@ -198,6 +199,7 @@ export async function getServerSideProps(context) {
         filtered,
         counts: { translated: translatedCount, all: allCount },
         books: await booksForHadiths(data.hadiths, lang),
+        sidebarData: await sidebarCategoriesData(lang, data.category.id),
         backLink: categoryPath(data.category),
       },
     };

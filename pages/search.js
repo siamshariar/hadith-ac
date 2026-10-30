@@ -21,6 +21,7 @@ import Breadcrumbs from "../components/core/breadcrumbs";
 import ErrorState, { EmptyState } from "../components/core/error";
 import Pagination, { pageHref } from "../components/core/pagination";
 import Layout from "../components/layouts/LayoutSecondary";
+import { sidebarCategoriesData } from "../components/sidebar/data";
 import HadithCard, { HadithList } from "../components/hadith/HadithCard";
 import { HighlightProvider } from "../components/hadith/Highlight";
 import { GoToHadith } from "../components/home/search";
@@ -352,6 +353,7 @@ export async function getServerSideProps(context) {
             const rank = (code) => (code === "vi" ? 0 : code === "en" ? 1 : 2);
             return rank(a.code) - rank(b.code) || a.name.localeCompare(b.name);
           }),
+        sidebarData: await sidebarCategoriesData(lang),
         backLink: "/",
       },
     };

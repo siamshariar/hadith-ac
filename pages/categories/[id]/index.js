@@ -7,6 +7,7 @@ import Meta from "../../../components/core/meta";
 import Breadcrumbs from "../../../components/core/breadcrumbs";
 import ErrorState, { EmptyState } from "../../../components/core/error";
 import Layout from "../../../components/layouts/LayoutSecondary";
+import { sidebarCategoriesData } from "../../../components/sidebar/data";
 import HadithCard, { HadithList } from "../../../components/hadith/HadithCard";
 import styles from "../../../components/content/Page.module.scss";
 
@@ -174,6 +175,7 @@ export async function getServerSideProps(context) {
         preview,
         previewFiltered,
         books: await booksForHadiths(preview.hadiths, lang),
+        sidebarData: await sidebarCategoriesData(lang, category.id),
         backLink: category.breadcrumbs && category.breadcrumbs.length
           ? categoryPath(category.breadcrumbs[category.breadcrumbs.length - 1])
           : "/categories",
