@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Drawer from "@mui/material/Drawer";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -80,6 +80,15 @@ export default function TranslationPicker({ translations, book = null, variant =
   const [query, setQuery] = useState("");
   const [showAll, setShowAll] = useState(false);
   const wide = useMediaQuery("(min-width:1024px)", { noSsr: true });
+  // A language moves between the lists when it is (un)ticked: its checkbox
+  // keeps the keyboard focus in its new place.
+  const refocus = useRef(null);
+  useEffect(() => {
+    if (!refocus.current || typeof document === "undefined") return;
+    const box = document.getElementById(`tr-${variant}-${refocus.current}`);
+    refocus.current = null;
+    if (box) box.focus();
+  }, [draft, variant]);
 
   const languagesState = useApi("languages", () => getLanguages(), { enabled: open });
   const editionsState = useApi("editions", () => getEditions(), { enabled: open });
@@ -165,10 +174,12 @@ export default function TranslationPicker({ translations, book = null, variant =
 
   const add = (code) => {
     if (draft.includes(code) || full) return;
+    refocus.current = code;
     setDraft([...draft, code]);
   };
   const remove = (code) => {
     if (draft.length < 2) return;
+    refocus.current = code;
     setDraft(draft.filter((item) => item !== code));
   };
   const move = (index, offset) => {
@@ -176,6 +187,9 @@ export default function TranslationPicker({ translations, book = null, variant =
     if (target < 0 || target >= draft.length) return;
     const next = [...draft];
     [next[index], next[target]] = [next[target], next[index]];
+    // At the top or the bottom the button just pressed turns disabled and
+    // drops the focus: it goes to the language's checkbox instead.
+    if (target === 0 || target === draft.length - 1) refocus.current = draft[index];
     setDraft(next);
   };
 
