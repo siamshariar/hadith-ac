@@ -5,7 +5,8 @@ import Meta from "../../components/core/meta";
 import Breadcrumbs from "../../components/core/breadcrumbs";
 import ErrorState from "../../components/core/error";
 import Layout from "../../components/layouts/LayoutSecondary";
-import BookList from "../../components/home/book-list";
+import { sidebarBooksData } from "../../components/sidebar/data";
+import { BookGroups } from "../../components/home/book-list";
 import styles from "../../components/content/Page.module.scss";
 
 export default function Books({ books, error }) {
@@ -58,7 +59,7 @@ export default function Books({ books, error }) {
                 {t("contentLanguageNote")}
               </p>
             )}
-            <BookList books={list} showTranslation />
+            <BookGroups books={list} showTranslation level={2} />
           </>
         )}
       </div>
@@ -77,10 +78,14 @@ export async function getServerSideProps(context) {
     return { redirect: { destination: `/books/${legacyBook}`, permanent: true } };
   }
 
-  return loadPage(context, async (lang) => ({
-    props: {
-      books: await getBooks(lang),
-      backLink: "/",
-    },
-  }));
+  return loadPage(context, async (lang) => {
+    const books = await getBooks(lang);
+    return {
+      props: {
+        books,
+        sidebarData: await sidebarBooksData(lang, { books }),
+        backLink: "/",
+      },
+    };
+  });
 }

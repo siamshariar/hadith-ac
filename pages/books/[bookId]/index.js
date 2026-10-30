@@ -1,17 +1,20 @@
 import Link from "next/link";
 import { server } from "../../../lib/config";
-import { getBook, getBooks, loadPage } from "../../../lib/api";
-import { UNASSIGNED_CHAPTER, bookPath, chapterPath, chapterRange, isCategoryBook } from "../../../lib/hadith";
+import { getBook, getBooks, getEditions, loadPage } from "../../../lib/api";
+import { bookPath, isCategoryBook } from "../../../lib/hadith";
 import { useLocale } from "../../../contexts/LocaleContext";
 import Meta from "../../../components/core/meta";
 import Breadcrumbs from "../../../components/core/breadcrumbs";
 import ErrorState, { EmptyState } from "../../../components/core/error";
 import Layout from "../../../components/layouts/LayoutSecondary";
+import { sidebarBooksData } from "../../../components/sidebar/data";
 import { GoToHadith } from "../../../components/home/search";
+import BookIntro from "../../../components/home/BookIntro";
+import ChapterList from "../../../components/home/ChapterList";
 import styles from "../../../components/content/Page.module.scss";
 
-export default function Book({ book, counts, error }) {
-  const { t, lang, formatNumber, languageName } = useLocale();
+export default function Book({ book, counts, editions, error }) {
+  const { t, formatNumber } = useLocale();
 
   if (error || !book) {
     return (
@@ -22,12 +25,19 @@ export default function Book({ book, counts, error }) {
   }
 
   const chapters = book.chapters || [];
+  const description = [
+    book.nameArabic ? `${book.name} (${book.nameArabic})` : book.name,
+    `${formatNumber(book.totalHadith)} ${t("hadiths")}`,
+    chapters.length > 1 ? `${formatNumber(chapters.length)} ${t("chapters")}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <>
       <Meta
         title={book.name}
-        description={`${book.name} (${book.nameArabic || ""}): ${book.totalHadith} hadiths.`}
+        description={description}
         url={`${server}${bookPath(book)}`}
         image={`${server}/img/s_logo.png`}
         type="website"
@@ -42,39 +52,7 @@ export default function Book({ book, counts, error }) {
           ]}
         />
 
-        <header className={styles.header}>
-          <p className={styles.eyebrow}>{t("books")}</p>
-          <div className={styles.titleRow}>
-            <h1 className={styles.title}>{book.name}</h1>
-            {book.nameArabic && (
-              <p className={styles.titleArabic} dir="rtl" lang="ar">
-                {book.nameArabic}
-              </p>
-            )}
-          </div>
-          <p className={styles.meta}>
-            <span>
-              {formatNumber(book.totalHadith)} {t("hadiths")}
-            </span>
-            {chapters.length > 1 && (
-              <span>
-                {formatNumber(chapters.length)} {t("chapters")}
-              </span>
-            )}
-          </p>
-          {counts && lang !== "ar" && (counts.own > 0 || counts.linked > 0) && (
-            <p className={styles.meta}>
-              {counts.own > 0 && (
-                <span>{t("translationAvailability", { count: formatNumber(counts.own), language: languageName(lang) })}</span>
-              )}
-              {counts.linked > 0 && (
-                <span>
-                  {t("bookLinkedTranslations", { count: formatNumber(counts.linked), language: languageName(lang) })}
-                </span>
-              )}
-            </p>
-          )}
-        </header>
+        <BookIntro book={book} chapterCount={chapters.length} counts={counts} editions={editions || []} />
 
         {isCategoryBook(book) && (
           <p className={styles.notice}>
@@ -86,8 +64,6 @@ export default function Book({ book, counts, error }) {
           <GoToHadith book={book.slug} compact />
         </div>
 
-        {/* Numbered list of the collection's books/chapters: number, name,
-            Arabic name (when the source has one), hadith count. */}
         <section aria-labelledby="book-chapters">
           <h2 id="book-chapters" className={styles.sectionTitle}>
             {formatNumber(chapters.length)} {t("chapters")}
@@ -95,32 +71,7 @@ export default function Book({ book, counts, error }) {
           {chapters.length === 0 ? (
             <EmptyState>{t("noHadiths")}</EmptyState>
           ) : (
-            <ol className={styles.chapterList}>
-              {chapters.map((chapter) => {
-                const unassigned = chapter.chapterNo === UNASSIGNED_CHAPTER;
-                const range = chapterRange(chapter, book);
-                return (
-                  <li key={chapter.chapterNo}>
-                    <Link href={chapterPath(book.slug, chapter.chapterNo)} className={styles.chapterRow}>
-                      <span className={styles.chapterNo} aria-hidden={unassigned ? "true" : undefined}>
-                        {unassigned ? "–" : chapter.chapterNo}
-                      </span>
-                      <span className={styles.chapterName}>{unassigned ? t("unassignedChapter") : chapter.name}</span>
-                      {/* Empty until the source has Arabic chapter names. */}
-                      <span className={styles.chapterArabic} dir="rtl" lang="ar">
-                        {chapter.nameArabic || ""}
-                      </span>
-                      <span className={styles.chapterCount}>
-                        {range && <span className={styles.chapterRange}>{range}</span>}
-                        <span>
-                          {formatNumber(chapter.totalHadith)} {t("hadiths")}
-                        </span>
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ol>
+            <ChapterList book={book} chapters={chapters} />
           )}
         </section>
       </div>
@@ -139,16 +90,29 @@ Book.getLayout = function getLayout(page) {
 
 export async function getServerSideProps(context) {
   return loadPage(context, async (lang) => {
-    const [book, books] = await Promise.all([
+    const [book, books, editions] = await Promise.all([
       getBook(context.params.bookId, lang),
       // The book endpoint has no per-language counts; the (cached) list does.
       getBooks(lang).catch(() => []),
+      // Cached; the page works without them.
+      getEditions().catch(() => []),
     ]);
     const listed = books.find((item) => item.slug === book.slug);
     return {
       props: {
         book,
         counts: listed ? { own: listed.totalTranslated || 0, linked: listed.totalLinkedTranslated || 0 } : null,
+        editions: editions
+          .filter((edition) => edition.bookSlug === book.slug)
+          .map(({ code, languageCode, languageName, languageNativeName, author, sourceUrl }) => ({
+            code,
+            languageCode,
+            languageName,
+            languageNativeName,
+            author: author || null,
+            sourceUrl: sourceUrl || null,
+          })),
+        sidebarData: await sidebarBooksData(lang, { book, books: books.length ? books : null }),
         backLink: "/books",
       },
     };
