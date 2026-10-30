@@ -218,7 +218,10 @@ export function ExtraTranslation({ slot, collapsible = false, compact = false })
       <div className={styles.labelRow}>
         {linked ? (
           <span className={styles.linkedBadge}>
-            <WithLanguage text={t("topicTranslation")} name={name} />
+            {/* one inline run: as flex items, the words around the name would lose their spaces */}
+            <span>
+              <WithLanguage text={t("topicTranslation")} name={name} />
+            </span>
           </span>
         ) : (
           <span className={styles.label}>
