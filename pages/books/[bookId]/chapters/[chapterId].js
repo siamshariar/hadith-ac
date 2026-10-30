@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { server, config } from "../../../../lib/config";
+import { server, config, shareImage } from "../../../../lib/config";
 import { getBook, getChapterHadiths, loadPage, parsePage } from "../../../../lib/api";
 import { UNASSIGNED_CHAPTER, bookPath, chapterPath, shortBookName } from "../../../../lib/hadith";
 import { useLocale } from "../../../../contexts/LocaleContext";
@@ -84,7 +84,7 @@ export default function Chapter({ data, chapters, neighbours, onlyReadable, read
         title={`${title} - ${book.name}`}
         description={`${book.name}, ${chapterLabel(chapter, t)}: ${title}.`}
         url={`${server}${pageHref(basePath, {}, pagination.page)}`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 

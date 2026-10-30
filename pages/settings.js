@@ -1,4 +1,4 @@
-import { server } from "../lib/config";
+import { server, shareImage } from "../lib/config";
 import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
 import Layout from "../components/layouts/LayoutTertiary";
@@ -16,7 +16,7 @@ export default function SettingsPage() {
         title={t("settingsTitle")}
         description={t("settingsNote")}
         url={`${server}/settings`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
         noindex
       />

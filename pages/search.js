@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { server, config } from "../lib/config";
+import { server, config, shareImage } from "../lib/config";
 import {
   ApiError,
   MIN_SEARCH_LENGTH,
@@ -182,7 +182,7 @@ export default function Search({ query, book, results, books, languages, notFoun
         title={query ? `${t("search")}: ${query}` : t("search")}
         description={t("searchTips")}
         url={`${server}/search`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { server, config } from "../../../lib/config";
+import { server, config, shareImage } from "../../../lib/config";
 import { booksForHadiths, getCategoryHadiths, loadPage, parsePage } from "../../../lib/api";
 import { categoryCrumbs, categoryHadithsPath, categoryPath } from "../../../lib/hadith";
 import { useLocale } from "../../../contexts/LocaleContext";
@@ -53,7 +53,7 @@ export default function CategoryHadiths({ data, books, direct, filtered, counts,
         title={`${t("hadithsInCategory")}: ${category.title}`}
         description={`${category.title}: ${pagination.total} hadiths.`}
         url={`${server}${pageHref(basePath, query, pagination.page)}`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 

@@ -1,4 +1,4 @@
-import { server } from "../../lib/config";
+import { server, shareImage } from "../../lib/config";
 import { buildCategoryTree, getCategories, loadPage } from "../../lib/api";
 import { useLocale } from "../../contexts/LocaleContext";
 import Meta from "../../components/core/meta";
@@ -19,7 +19,7 @@ export default function Categories({ categories, total, error }) {
         title={t("categories")}
         description="Hadith categories: creed, jurisprudence, virtues and manners, the Quran and its sciences, and more."
         url={`${server}/categories`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 

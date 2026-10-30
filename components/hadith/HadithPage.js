@@ -1,4 +1,4 @@
-import { server } from "../../lib/config";
+import { server, shareImage } from "../../lib/config";
 import { loadPage } from "../../lib/api";
 import {
   UNASSIGNED_CHAPTER,
@@ -66,7 +66,7 @@ export default function HadithPage({ hadith, translations, error }) {
         description={snippet || `${reference} - ${book.name}`}
         url={url}
         canonical={url}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="article"
       />
 

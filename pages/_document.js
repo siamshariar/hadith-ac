@@ -6,6 +6,12 @@ import { ServerStyleSheets } from "@mui/styles";
 
 import { GA_TRACKING_ID } from "../lib/gtag";
 import { INTERFACE_DIRECTION, INTERFACE_LANGUAGE, INTERNATIONAL, isInterfaceLanguage } from "../lib/language";
+import { accentGradient } from "../lib/sites";
+
+// The site's ribbon (header, hero bar, menu: --brand-ribbon in styles/_variables.scss) from
+// its accent colours (config/countries.json); without one, the stylesheet's neutral one.
+const ribbon = accentGradient();
+const ribbonStyle = ribbon ? { "--brand-ribbon": ribbon } : undefined;
 
 class CustomDocument extends Document {
   static async getInitialProps(ctx) {
@@ -21,7 +27,7 @@ class CustomDocument extends Document {
     const pageProps = (this.props.__NEXT_DATA__ && this.props.__NEXT_DATA__.props && this.props.__NEXT_DATA__.props.pageProps) || {};
     const lang = INTERNATIONAL && isInterfaceLanguage(pageProps.uiLang) ? pageProps.uiLang : INTERFACE_LANGUAGE;
     return (
-      <Html lang={lang} dir={INTERFACE_DIRECTION}>
+      <Html lang={lang} dir={INTERFACE_DIRECTION} style={ribbonStyle}>
         <Head>
           {/* Global Site Tag (gtag.js) - Google Analytics, only when an ID is configured
               (next.config.js accepts letters, digits and dashes only) */}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { server } from "../lib/config";
+import { server, shareImage } from "../lib/config";
 import { getHome, loadPage } from "../lib/api";
 import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
@@ -23,7 +23,7 @@ export default function Home({ home, error }) {
         title={t("home")}
         description={t("siteTagline")}
         url={server}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 

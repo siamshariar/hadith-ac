@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { server } from "../lib/config";
+import { server, shareImage } from "../lib/config";
 import { getBooks, getEditions, getLanguages, loadPage } from "../lib/api";
 import { bookPath, shortBookName } from "../lib/hadith";
 import { DEFAULT_LANGUAGE, INTERNATIONAL, compareLanguages, resolveInterfaceLanguage } from "../lib/language";
@@ -166,7 +166,7 @@ export default function Sources({ books, coverage, translators, hencLanguages })
         title={copy.title}
         description={copy.intro}
         url={`${server}/sources`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 

@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { server } from "../lib/config";
+import { server, shareImage } from "../lib/config";
 import { loadPage } from "../lib/api";
 import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
@@ -23,7 +23,7 @@ export default function Bookmark() {
         title={t("savedLists")}
         description={`${t("bookmarks")}, ${t("pins").toLowerCase()}, ${t("lastRead").toLowerCase()}.`}
         url={`${server}/bookmarks`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
         noindex
       />

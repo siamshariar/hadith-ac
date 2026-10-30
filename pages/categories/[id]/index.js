@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { server } from "../../../lib/config";
+import { server, shareImage } from "../../../lib/config";
 import { booksForHadiths, getCategory, getCategoryHadiths, loadPage } from "../../../lib/api";
 import { categoryCrumbs, categoryHadithsPath, categoryPath } from "../../../lib/hadith";
 import { useLocale } from "../../../contexts/LocaleContext";
@@ -39,7 +39,7 @@ export default function Category({ category, preview, previewFiltered, books, er
         title={category.title}
         description={`${category.title} (${category.titleArabic || ""}): ${total} hadiths.`}
         url={`${server}${categoryPath(category)}`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 

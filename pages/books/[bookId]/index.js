@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { server } from "../../../lib/config";
+import { server, shareImage } from "../../../lib/config";
 import { getBook, getBooks, getEditions, loadPage } from "../../../lib/api";
 import { bookPath, isCategoryBook } from "../../../lib/hadith";
 import { useLocale } from "../../../contexts/LocaleContext";
@@ -39,7 +39,7 @@ export default function Book({ book, counts, editions, error }) {
         title={book.name}
         description={description}
         url={`${server}${bookPath(book)}`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 

@@ -1,4 +1,4 @@
-import { server } from "../lib/config";
+import { server, shareImage } from "../lib/config";
 import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
 import Layout from "../components/layouts/LayoutTertiary";
@@ -12,7 +12,7 @@ export default function PrivacyPolicyPage() {
         title={t("privacyPolicy")}
         description={t("privacyText")}
         url={`${server}/privacy-policy`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 

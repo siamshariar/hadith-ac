@@ -1,4 +1,4 @@
-import { server } from "../../lib/config";
+import { server, shareImage } from "../../lib/config";
 import { getBooks, loadPage } from "../../lib/api";
 import { useLocale } from "../../contexts/LocaleContext";
 import Meta from "../../components/core/meta";
@@ -22,7 +22,7 @@ export default function Books({ books, error }) {
         title={t("books")}
         description="Hadith collections: Sahih al-Bukhari, Sahih Muslim, the Sunan, Muwatta Malik, the forty-hadith books and HadeethEnc."
         url={`${server}/books`}
-        image={`${server}/img/s_logo.png`}
+        image={shareImage}
         type="website"
       />
 
