@@ -1,0 +1,295 @@
+// The hadith page: the language switch (?lang=, the saved preference stays),
+// grades, "Cũng có trong", the reference block and "Báo lỗi", canonical and
+// og:url, the legacy per-language URL, and the texts shown against the API.
+'use strict';
+
+const { BASE, api, assert, cleanText, lettered, loc, meta, norm, spec, until, waitForH1, waitForText } = require('./harness');
+
+// Translations are compared without whitespace: the English narrator line
+// ("Narrated 'Umar:") is set on its own line, which adds or removes a space
+// at that point; every other character must be the API's, in order.
+const squash = (value) => String(value || '').replace(/\s+/g, '');
+
+const BUKHARI = 'sahih-al-bukhari';
+const translationBlock = (page, code) => page.locator(`section[class*="translationBlock"] div[lang="${code}"]`).first();
+const arabicBlock = (page) => page.locator('section[class*="arabicBlock"] div[lang="ar"]');
+const languageCookie = async (context) => (await context.cookies()).find((c) => c.name === 'hadith_lang');
+
+// The site URL the app builds permalinks from: the canonical of a page we
+// know, checked against the citable path below.
+async function siteOf(page) {
+  const { canonical } = await meta(page);
+  return canonical.replace(/\/books\/.*$/, '');
+}
+
+module.exports = spec(module, 'hadith page', (h) => {
+  h.test(
+    'language switch: ?lang= changes the text, not the saved preference',
+    async (t) => {
+      const [vi, en, bn] = await Promise.all(['vi', 'en', 'bn'].map((lang) => api(`/books/bukhari/hadiths/1${loc(lang)}`)));
+      const languages = await api('/languages');
+      const { page, context } = await h.open(t, `/books/${BUKHARI}/hadiths/1`);
+      const select = page.getByRole('combobox', { name: 'Đọc bằng' });
+      const codes = await select.locator('option').evaluateAll((options) => options.map((o) => o.value));
+      const expected = vi.availableLanguages.includes('vi') ? vi.availableLanguages : ['vi', ...vi.availableLanguages];
+      assert.deepEqual(codes, expected, 'the languages this hadith can be read in');
+      assert.equal(await select.inputValue(), 'vi');
+      assert.equal(norm(await select.locator('option[value="vi"]').textContent()), 'Tiếng Việt – chưa có bản dịch', 'says Vietnamese is missing');
+      assert.equal(squash(await translationBlock(page, 'en').innerText()), squash(cleanText(vi.translation.text)), 'Vietnamese page shows the English fallback');
+      await waitForText(page.locator('section[class*="translationBlock"] span[class*="fallbackBadge"]'), 'Bản dịch tiếng Anh');
+
+      for (const [code, data] of [['en', en], ['bn', bn]]) {
+        await page.getByRole('combobox', { name: 'Đọc bằng' }).selectOption(code);
+        await h.waitForPath(page, (url) => url.searchParams.get('lang') === code, `?lang=${code}`);
+        await until(async () => (await translationBlock(page, code).count()) === 1, `${code} translation shown`);
+        assert.equal(squash(await translationBlock(page, code).innerText()), squash(cleanText(data.translation.text)), `${code} text is the API's`);
+        assert.equal(data.translation.isFallback, false);
+        // the interface stays Vietnamese and nothing is saved
+        const name = code === 'en' ? 'tiếng Anh' : languages.find((l) => l.code === code).nativeName;
+        await waitForText(page.locator('section[class*="translationBlock"] span[class*="label"]').first(), `Bản dịch ${name}`);
+        assert.equal(await languageCookie(context), undefined, 'no language cookie written');
+        assert.equal((await meta(page)).lang, 'vi');
+      }
+
+      // Arabic: the original, with the English translation labelled as such
+      await page.getByRole('combobox', { name: 'Đọc bằng' }).selectOption('ar');
+      await h.waitForPath(page, (url) => url.searchParams.get('lang') === 'ar', '?lang=ar');
+      assert.equal(norm(await arabicBlock(page).innerText()), norm(cleanText(vi.arabic)));
+      assert.equal(await languageCookie(context), undefined);
+
+      // the next page without ?lang= is Vietnamese again
+      await h.goto(page, `/books/${BUKHARI}/hadiths/2`);
+      assert.equal(await page.getByRole('combobox', { name: 'Đọc bằng' }).inputValue(), 'vi');
+      // a hadith read through HadeethEnc's translation says so in the switch
+      await h.goto(page, `/books/${BUKHARI}/hadiths/3`);
+      assert.equal(
+        norm(await page.getByRole('combobox', { name: 'Đọc bằng' }).locator('option[value="vi"]').textContent()),
+        'Tiếng Việt – HadeethEnc'
+      );
+    },
+    { smoke: true }
+  );
+
+  h.test('grades: the badge and the table are the API grades', async (t) => {
+    const [abuDawud, bukhari, bukhari3] = await Promise.all([
+      api(`/books/abudawud/hadiths/2${loc()}`),
+      api(`/books/bukhari/hadiths/1${loc()}`),
+      api(`/books/bukhari/hadiths/3${loc()}`),
+    ]);
+    const henc = await api(`/hadiths/${bukhari3.linkedTranslation.hadithId}${loc()}`);
+    const { page } = await h.open(t, `/books/${abuDawud.book.slug}/hadiths/2`);
+    const badge = page.locator('header span[class*="gradeBadge"]').first();
+    const [first, ...rest] = abuDawud.grades;
+    assert.equal(await badge.getAttribute('title'), `Đánh giá độ xác thực: ${abuDawud.grades.map((g) => `${g.graderName}: ${g.grade}`).join('; ')}`);
+    assert.equal(norm(await badge.locator('bdi').textContent()), first.grade);
+    assert.equal(norm(await badge.locator('span[class*="gradeBadgeGrader"]').textContent()), `· ${first.graderName}`);
+    if (rest.length) assert.equal(norm(await badge.locator('span[aria-hidden="true"]').textContent()), `+${rest.length}`);
+    const rows = await page.locator('table tbody tr').evaluateAll((trs) => trs.map((tr) => [...tr.cells].map((td) => td.textContent.trim())));
+    assert.deepEqual(rows, abuDawud.grades.map((g) => [g.graderName, g.grade]), 'one row per grader');
+
+    // Bukhari: the source gives no per-hadith grade, so none is shown
+    assert.deepEqual(bukhari.grades, []);
+    await h.goto(page, `/books/${BUKHARI}/hadiths/1`);
+    assert.equal(await page.locator('span[class*="gradeBadge"]').count(), 0, 'no badge');
+    assert.equal(await page.locator('table').count(), 0, 'no grades table');
+
+    // HadeethEnc: its own grade text, and its grader row
+    await h.goto(page, `/hadiths/${henc.id}`);
+    assert.equal(norm(await page.locator('header span[class*="gradeBadge"] bdi').first().textContent()), henc.gradeText);
+    const hencRows = await page.locator('table tbody tr').evaluateAll((trs) => trs.map((tr) => [...tr.cells].map((td) => td.textContent.trim())));
+    assert.deepEqual(hencRows, henc.grades.map((g) => [g.graderName, g.grade]));
+  });
+
+  h.test(
+    '"Cũng có trong" links resolve in both directions',
+    async (t) => {
+      const bukhari3 = await api(`/books/bukhari/hadiths/3${loc()}`);
+      const henc = await api(`/hadiths/${bukhari3.linkedTranslation.hadithId}${loc()}`);
+      assert.ok(henc.related.some((r) => r.id === bukhari3.id), 'the API relates them');
+      const { page } = await h.open(t, `/hadiths/${henc.id}`);
+      const alsoIn = page.locator('p[class*="alsoIn"]');
+      await waitForText(alsoIn, `Cũng có trong: ${henc.related.map((r) => `${r.bookSlug === 'hadeethenc' ? 'HadeethEnc' : r.bookName} ${lettered(r.referenceNumber)}`).join(', ')}`);
+      await alsoIn.getByRole('link', { name: 'Sahih al-Bukhari 3' }).click();
+      await h.waitForPath(page, (url) => url.pathname === `/books/${BUKHARI}/hadiths/3`, 'related hadith');
+      await waitForH1(page, 'Sahih al-Bukhari 3');
+
+      const back = page.locator('p[class*="alsoIn"]').getByRole('link', { name: `HadeethEnc ${henc.referenceNumber}` });
+      assert.equal(await back.getAttribute('href'), `/books/hadeethenc/hadiths/${henc.referenceNumber}`);
+      await back.click();
+      await h.waitForPath(page, (url) => url.pathname === `/books/hadeethenc/hadiths/${henc.referenceNumber}`, 'back to HadeethEnc');
+      await waitForH1(page, norm(cleanText(henc.title)));
+      // the same links in the "same wording" section
+      const chips = page.locator('section[aria-labelledby="hadith-related"] a');
+      assert.deepEqual(
+        await chips.evaluateAll((links) => links.map((a) => a.getAttribute('href'))),
+        henc.related.map((r) => `/books/${r.bookSlug}/hadiths/${lettered(r.referenceNumber)}`)
+      );
+    },
+    { smoke: true }
+  );
+
+  h.test('"Báo lỗi": a mailto with the citation and the permalink', async (t) => {
+    const hadith = await api(`/books/muslim/hadiths/8a${loc()}`);
+    const { page } = await h.open(t, `/hadiths/${hadith.id}`);
+    const { canonical } = await meta(page);
+    const link = page.locator('section[aria-label="Tham chiếu"] a[href^="mailto:"]');
+    await waitForText(link, 'Báo lỗi');
+    const href = await link.getAttribute('href');
+    const url = new URL(href);
+    assert.equal(url.protocol, 'mailto:');
+    assert.equal(url.pathname, 'quran.vn@gmail.com');
+    assert.equal(url.searchParams.get('subject'), 'Báo lỗi: Sahih Muslim 8a');
+    const body = url.searchParams.get('body');
+    assert.ok(body.startsWith(`Hadith: Sahih Muslim 8a\nLiên kết: ${canonical}\n`), `body: ${JSON.stringify(body)}`);
+    // the same address in the ⋯ menu
+    await page.locator('header').getByRole('button', { name: 'Thêm thao tác' }).click();
+    assert.equal(await page.getByRole('menuitem', { name: 'Báo lỗi' }).getAttribute('href'), href);
+  });
+
+  h.test(
+    'canonical and og:url are the citable URL, whichever URL was opened',
+    async (t) => {
+      const hadith = await api(`/books/muslim/hadiths/8a${loc()}`);
+      const { page } = await h.open(t, `/hadiths/${hadith.id}`);
+      const site = await siteOf(page);
+      assert.match(site, /^https?:\/\/[^/]+$/, 'canonical is absolute');
+      for (const path of [`/hadiths/${hadith.id}`, '/books/sahih-muslim/hadiths/8', '/books/muslim/hadiths/8.01', '/books/sahih-muslim/hadiths/8a?lang=en']) {
+        await h.goto(page, path);
+        const info = await meta(page);
+        assert.equal(info.canonical, `${site}/books/sahih-muslim/hadiths/8a`, `canonical of ${path}`);
+        assert.equal(info.ogUrl, `${site}/books/sahih-muslim/hadiths/8a`, `og:url of ${path}`);
+      }
+    },
+    { smoke: true }
+  );
+
+  h.test('legacy URLs (/translations/{lang}, /books?book=) redirect permanently', async (t) => {
+    for (const [path, location] of [
+      [`/books/${BUKHARI}/hadiths/1/translations/en`, `/books/${BUKHARI}/hadiths/1?lang=en`],
+      [`/books/${BUKHARI}/hadiths/1/translations/BN`, `/books/${BUKHARI}/hadiths/1?lang=bn`],
+      ['/books/sahih-muslim/hadiths/8a/translations/vi', '/books/sahih-muslim/hadiths/8a?lang=vi'],
+      [`/books/${BUKHARI}/hadiths/1/translations/not-a-language`, `/books/${BUKHARI}/hadiths/1`],
+    ]) {
+      const res = await fetch(BASE + path, { redirect: 'manual' });
+      assert.ok([301, 308].includes(res.status), `${path}: permanent redirect (got ${res.status})`);
+      assert.equal(new URL(res.headers.get('location'), BASE).pathname + new URL(res.headers.get('location'), BASE).search, location, `${path} -> ${location}`);
+    }
+    // the old collection link /books?book={slug} too
+    const old = await fetch(`${BASE}/books?book=${BUKHARI}`, { redirect: 'manual' });
+    assert.ok([301, 308].includes(old.status), `/books?book= permanent redirect (got ${old.status})`);
+    assert.equal(new URL(old.headers.get('location'), BASE).pathname, `/books/${BUKHARI}`);
+
+    const en = await api(`/books/bukhari/hadiths/1${loc('en')}`);
+    const { page } = await h.open(t, `/books/${BUKHARI}/hadiths/1/translations/en`);
+    await h.waitForPath(page, (url) => url.searchParams.get('lang') === 'en', 'followed the redirect');
+    assert.equal(squash(await translationBlock(page, 'en').innerText()), squash(cleanText(en.translation.text)));
+  });
+
+  h.test(
+    'texts are exactly the API: Arabic, translation, Muslim 8a, the linked HadeethEnc translation',
+    async (t) => {
+      const [one, muslim, three] = await Promise.all([
+        api(`/books/bukhari/hadiths/1${loc()}`),
+        api(`/books/muslim/hadiths/8a${loc()}`),
+        api(`/books/bukhari/hadiths/3${loc()}`),
+      ]);
+      const { page } = await h.open(t, `/books/${BUKHARI}/hadiths/1`);
+      assert.equal(norm(await arabicBlock(page).innerText()), norm(cleanText(one.arabic)), 'Arabic text');
+      assert.equal(squash(await translationBlock(page, one.translation.languageCode).innerText()), squash(cleanText(one.translation.text)), 'translation text');
+      const reference = await page.locator('section[aria-label="Tham chiếu"] dl > div').evaluateAll((rows) =>
+        rows.map((row) => [row.querySelector('dt').textContent.trim(), row.querySelector('dd').textContent.replace(/\s+/g, ' ').trim()])
+      );
+      assert.deepEqual(reference, [
+        ['Tham chiếu', 'Sahih al-Bukhari 1'],
+        ['Vị trí trong sách', `Chương ${one.inBookReference.chapterNo}, Hadith ${one.inBookReference.position}`],
+        ['Bản dịch tiếng Anh', `${one.translation.author} · ấn bản ${one.translation.edition.code} · nguồn (${one.translation.edition.code})`],
+      ]);
+
+      // Muslim's 8.01 is cited 8a everywhere on its page
+      await h.goto(page, `/hadiths/${muslim.id}`);
+      assert.equal(muslim.referenceNumber, '8.01');
+      await waitForH1(page, 'Sahih Muslim 8a');
+      assert.equal(norm(await page.getByText('Số hadith:').textContent()), 'Số hadith: 8a');
+      const crumbs = await page.locator('nav[aria-label="Breadcrumb"] li').allTextContents();
+      assert.equal(norm(crumbs[crumbs.length - 1]), 'Hadith 8a');
+      assert.equal(norm(await arabicBlock(page).innerText()), norm(cleanText(muslim.arabic)));
+
+      // Bukhari 3: HadeethEnc's Vietnamese translation, labelled as HadeethEnc's
+      const linked = three.linkedTranslation;
+      await h.goto(page, `/books/${BUKHARI}/hadiths/3`);
+      const block = page.locator('section[class*="translationBlock"] div[class*="linked"]').first();
+      await waitForText(block.locator('span[class*="linkedBadge"]'), 'Bản dịch tiếng Việt theo HadeethEnc');
+      assert.ok(norm(await block.locator('p[class*="linkedNote"]').textContent()).startsWith('HadeethEnc dịch phần lời văn được trích của hadith này.'));
+      assert.equal(norm(await block.locator('div[lang="vi"]').innerText()), norm(cleanText(linked.text)), 'linked text is the API text');
+      assert.equal(await block.getByRole('link', { name: /Xem giải thích đầy đủ/ }).getAttribute('href'), `/hadiths/${linked.hadithId}`);
+      // the collection's own (English) translation stays available, folded
+      const details = page.locator('section[class*="translationBlock"] details');
+      await waitForText(details.locator('summary'), 'Xem bản dịch tiếng Anh');
+      await details.locator('summary').click();
+      assert.equal(squash(await details.locator('div[lang="en"]').innerText()), squash(cleanText(three.translation.text)));
+      const credit = await page.locator('section[aria-label="Tham chiếu"] dl > div').evaluateAll((rows) =>
+        rows.map((row) => row.querySelector('dt').textContent.trim())
+      );
+      assert.ok(credit.includes('Bản dịch tiếng Việt theo HadeethEnc') && credit.includes('Bản dịch tiếng Anh'), `credits: ${credit}`);
+    },
+    { smoke: true }
+  );
+
+  h.test('a record the source does not number (Muslim, Introduction)', async (t) => {
+    const intro = await api(`/books/muslim/chapters/0${loc()}?perPage=20`);
+    const [first, second, third] = intro.hadiths;
+    assert.equal(second.referenceNumber, null);
+    const hadith = await api(`/hadiths/${second.id}${loc()}`);
+    const { page } = await h.open(t, `/hadiths/${second.id}`);
+    const reference = 'Sahih Muslim (nguồn không đánh số tham chiếu)';
+    await waitForH1(page, reference);
+    const info = await meta(page);
+    assert.equal(norm(info.title), `${reference} | Hadith tiếng Việt | Hadith.vn`, 'the title names the record, not just the collection');
+    assert.ok(info.canonical.endsWith(`/hadiths/${second.id}`), `canonical by id: ${info.canonical}`);
+    assert.equal(await page.getByText('Số hadith:').count(), 0, 'no number to show');
+    const crumbs = await page.locator('nav[aria-label="Breadcrumb"] li').allTextContents();
+    assert.equal(norm(crumbs[crumbs.length - 1]), 'Hadith');
+    const rows = await page.locator('section[aria-label="Tham chiếu"] dl > div').evaluateAll((items) =>
+      items.map((row) => [row.querySelector('dt').textContent.trim(), row.querySelector('dd').textContent.trim()])
+    );
+    assert.deepEqual(rows.slice(0, 2), [
+      ['Tham chiếu', reference],
+      ['Vị trí trong sách', `Chương ${hadith.inBookReference.chapterNo}, Hadith ${hadith.inBookReference.position}`],
+    ]);
+    // previous / next by id; the numbered neighbour by its citation
+    assert.equal(await page.locator('a[rel="prev"]').getAttribute('href'), `/hadiths/${first.id}`);
+    assert.equal(await page.locator('a[rel="next"]').getAttribute('href'), `/hadiths/${third.id}`);
+    await page.locator('a[rel="next"]').click();
+    await h.waitForPath(page, (url) => url.pathname === `/hadiths/${third.id}`, 'next record');
+    // (same h1 as the previous record: wait for the new page's links)
+    await until(
+      async () => (await page.locator('a[rel="next"]').getAttribute('href')) === '/books/sahih-muslim/hadiths/8a',
+      'the last introduction record links on to Sahih Muslim 8a'
+    );
+    assert.equal(await page.locator('a[rel="prev"]').getAttribute('href'), `/hadiths/${second.id}`);
+  });
+
+  h.test('HadeethEnc details: explanation, benefits, word meanings, sources, categories', async (t) => {
+    const bukhari3 = await api(`/books/bukhari/hadiths/3${loc()}`);
+    const henc = await api(`/hadiths/${bukhari3.linkedTranslation.hadithId}${loc()}`);
+    const d = henc.details;
+    const { page } = await h.open(t, `/hadiths/${henc.id}`);
+    if (d.explanation) {
+      assert.equal(norm(await page.locator('section[aria-labelledby="hadith-explanation"] div').innerText()), norm(cleanText(d.explanation)));
+    }
+    if (d.hints && d.hints.length) {
+      assert.deepEqual(
+        (await page.locator('section[aria-labelledby="hadith-benefits"] li').allTextContents()).map(norm),
+        d.hints.map((x) => norm(cleanText(x))).filter(Boolean)
+      );
+    }
+    if (d.wordsMeanings && d.wordsMeanings.length) {
+      assert.equal(await page.locator('section[aria-labelledby="hadith-words"] dt').count(), d.wordsMeanings.length);
+    }
+    if (d.reference) {
+      assert.equal(norm(await page.locator('section[aria-labelledby="hadith-sources"] div').innerText()), norm(cleanText(d.reference)));
+    }
+    const categories = await page.locator('section[aria-labelledby="hadith-categories"] a').evaluateAll((links) => links.map((a) => decodeURIComponent(a.getAttribute('href'))));
+    assert.deepEqual(categories, henc.categories.map((c) => `/categories/${c.slug}`));
+  });
+});

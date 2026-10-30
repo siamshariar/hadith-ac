@@ -1,0 +1,37 @@
+// End-to-end suite of hadith-vn: every feature, in a desktop (1366x768) and a
+// phone (390x844, touch, isMobile) Chromium context; the tests marked smoke
+// also run in WebKit (desktop and phone sizes). Expected values come from the
+// hadith API, not from the page.
+//
+// Run (the dev server on :3000 and the API on :8090 must be up):
+//
+//   PLAYWRIGHT_CORE=/path/to/node_modules/playwright-core node --test scripts/e2e/
+//
+// playwright-core is not a project dependency; its browsers come from
+// ~/.cache/ms-playwright. Environment:
+//   BASE              site under test (default http://127.0.0.1:3000)
+//   API               hadith API (default http://127.0.0.1:8090/api/hadith)
+//   E2E_PROFILES      comma list of chromium-desktop, chromium-phone,
+//                     webkit-desktop, webkit-phone (default: all four)
+//   E2E_CONCURRENCY   profiles run side by side (default 2; 1 = one at a time)
+//   E2E_NAV_TIMEOUT   ms for a navigation (default 90000: first visits compile)
+// One area only: node --test scripts/e2e/search.js
+// Some tests:    node --test --test-name-pattern="go to hadith" scripts/e2e/
+// Each profile runs its tests one at a time in a fresh browser context per
+// test (empty localStorage and cookies); console errors and hydration
+// warnings fail the test they happen in.
+'use strict';
+
+const { run } = require('./harness');
+
+run([
+  require('./smoke'),
+  require('./navigation'),
+  require('./goto'),
+  require('./search'),
+  require('./lists'),
+  require('./hadith'),
+  require('./actions'),
+  require('./settings'),
+  require('./errors'),
+]);
