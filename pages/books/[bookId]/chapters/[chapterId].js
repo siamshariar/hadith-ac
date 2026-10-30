@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { server, config } from "../../../../lib/config";
 import { getBook, getChapterHadiths, loadPage, parsePage } from "../../../../lib/api";
-import { UNASSIGNED_CHAPTER, bookPath, chapterPath } from "../../../../lib/hadith";
+import { UNASSIGNED_CHAPTER, bookPath, chapterPath, shortBookName } from "../../../../lib/hadith";
 import { useLocale } from "../../../../contexts/LocaleContext";
 import useRouteLoading from "../../../../hooks/useRouteLoading";
 import Meta from "../../../../components/core/meta";
@@ -11,12 +11,39 @@ import ErrorState, { EmptyState } from "../../../../components/core/error";
 import Pagination, { pageHref } from "../../../../components/core/pagination";
 import Layout from "../../../../components/layouts/LayoutSecondary";
 import HadithCard, { HadithList } from "../../../../components/hadith/HadithCard";
+import ReaderBar, { barStyles } from "../../../../components/hadith/ReaderBar";
 import styles from "../../../../components/content/Page.module.scss";
 
 const chapterLabel = (chapter, t) =>
   chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapter.chapterNo}`;
 
-export default function Chapter({ data, neighbours, onlyReadable, readableCount, error }) {
+// The book's chapters in a select, like quran.com's surah switcher.
+function ChapterSwitcher({ book, chapter, chapters, query }) {
+  const { t } = useLocale();
+  const router = useRouter();
+  const label = (item) =>
+    item.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${item.chapterNo}. ${item.name}`;
+  if (!chapters || chapters.length < 2) {
+    return <span className={barStyles.shrink}>{label(chapter)}</span>;
+  }
+  return (
+    <span className={barStyles.switcher}>
+      <select
+        value={chapter.chapterNo}
+        onChange={(event) => router.push(pageHref(chapterPath(book.slug, event.target.value), query, 1))}
+        aria-label={t("chooseChapter")}
+      >
+        {chapters.map((item) => (
+          <option key={item.chapterNo} value={item.chapterNo}>
+            {label(item)}
+          </option>
+        ))}
+      </select>
+    </span>
+  );
+}
+
+export default function Chapter({ data, chapters, neighbours, onlyReadable, readableCount, error }) {
   const { t, lang, formatNumber, languageName } = useLocale();
   const router = useRouter();
   const loading = useRouteLoading();
@@ -36,6 +63,12 @@ export default function Chapter({ data, neighbours, onlyReadable, readableCount,
   const pastLastPage = hadiths.length === 0 && pagination.total > 0;
   // Query kept by pagination and links: the ?lang= override and the filter.
   const query = { lang: router.query.lang || undefined, translated: onlyReadable ? 1 : undefined };
+  // The API lists a chapter in the source's order, so without the filter a
+  // card's position on the page gives its in-book reference.
+  const inBookAt = (index) =>
+    onlyReadable || unassigned
+      ? undefined
+      : { chapterNo: chapter.chapterNo, position: (pagination.page - 1) * pagination.perPage + index + 1 };
   const showToggle =
     lang !== "ar" &&
     readableCount != null &&
@@ -61,12 +94,24 @@ export default function Chapter({ data, neighbours, onlyReadable, readableCount,
           ]}
         />
 
+        <ReaderBar>
+          <Link href={bookPath(book)} className={`${barStyles.book} ${barStyles.bookOptional}`}>
+            {shortBookName(book)}
+          </Link>
+          <span className={`${barStyles.separator} ${barStyles.bookOptional}`} aria-hidden="true">
+            ›
+          </span>
+          <ChapterSwitcher book={book} chapter={chapter} chapters={chapters} query={query} />
+        </ReaderBar>
+
         <header className={styles.header}>
-          <p className={styles.eyebrow}>
-            {book.name} · {chapterLabel(chapter, t)}
-          </p>
           <h1 className={styles.title}>
-            {!unassigned && <span className={styles.titleNumber}>{chapter.chapterNo}</span>}
+            {!unassigned && (
+              <>
+                <span className={styles.titleNumber}>{chapter.chapterNo}</span>
+                <span className="visually_hidden">. </span>
+              </>
+            )}
             {title}
           </h1>
           {chapter.nameArabic && (
@@ -119,7 +164,14 @@ export default function Chapter({ data, neighbours, onlyReadable, readableCount,
           <HadithList
             hadiths={hadiths}
             loading={loading}
-            renderCard={(hadith) => <HadithCard key={hadith.id} hadith={hadith} book={book} />}
+            renderCard={(hadith, index) => (
+              <HadithCard
+                key={hadith.id}
+                hadith={hadith}
+                book={book}
+                inBookReference={inBookAt(index)}
+              />
+            )}
           />
         )}
 
@@ -185,15 +237,17 @@ export async function getServerSideProps(context) {
 
     let neighbours = null;
     const chapters = (book && book.chapters) || [];
+    const pick = (chapter) => (chapter ? { chapterNo: chapter.chapterNo, name: chapter.name } : null);
     const index = chapters.findIndex((chapter) => chapter.chapterNo === data.chapter.chapterNo);
     if (index !== -1) {
-      const pick = (chapter) => (chapter ? { chapterNo: chapter.chapterNo, name: chapter.name } : null);
       neighbours = { previous: pick(chapters[index - 1]), next: pick(chapters[index + 1]) };
     }
 
     return {
       props: {
         data,
+        // for the chapter switcher
+        chapters: chapters.map(pick),
         neighbours,
         onlyReadable,
         readableCount: onlyReadable ? data.pagination.total : readableTotal,

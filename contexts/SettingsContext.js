@@ -2,41 +2,51 @@ import { useState, useEffect, createContext } from "react";
 import { useRouter } from "next/router";
 import { settings as defaultSettings, fontStacks } from "../lib/settings";
 
-// Settings saved before version 2 never let the reader choose the Arabic font
-// or size (those controls were hidden), so they get the new defaults.
-// Version 3 changes the default translation face from Roboto to Be Vietnam
-// Pro (full Vietnamese support); saved Roboto (the old default) follows it.
+// Settings are migrated one version at a time:
+// - before 2: the reader could not choose the Arabic font or size (those
+//   controls were hidden), so they get the new defaults;
+// - 2 → 3: the default translation face changes from Roboto to Be Vietnam
+//   Pro (full Vietnamese support); saved Roboto (the old default) follows it;
+// - 3 → 4: adds the reader settings (show the Arabic, text order).
 const migrateSettings = (saved) => {
   if (!saved || typeof saved !== "object") return defaultSettings;
-  if (saved.version === defaultSettings.version) return saved;
-  if (saved.version === 2) {
-    const family = saved.fontFamily || {};
-    return {
-      ...saved,
+  let next = saved;
+  if (![2, 3, 4].includes(next.version)) {
+    next = {
+      ...defaultSettings,
+      ...next,
+      fontSize: {
+        ...defaultSettings.fontSize,
+        ...(next.fontSize || {}),
+        arabic: defaultSettings.fontSize.arabic,
+      },
+      fontFamily: {
+        ...defaultSettings.fontFamily,
+        ...(next.fontFamily || {}),
+        arabic: defaultSettings.fontFamily.arabic,
+      },
+      version: 3,
+    };
+  }
+  if (next.version === 2) {
+    const family = next.fontFamily || {};
+    next = {
+      ...next,
       fontFamily: {
         ...defaultSettings.fontFamily,
         ...family,
         translation: !family.translation || family.translation === "Roboto" ? defaultSettings.fontFamily.translation : family.translation,
       },
-      version: defaultSettings.version,
+      version: 3,
     };
   }
-  return {
-    ...defaultSettings,
-    ...saved,
-    fontSize: {
-      ...defaultSettings.fontSize,
-      ...(saved.fontSize || {}),
-      arabic: defaultSettings.fontSize.arabic,
-    },
-    fontFamily: {
-      ...defaultSettings.fontFamily,
-      ...(saved.fontFamily || {}),
-      arabic: defaultSettings.fontFamily.arabic,
-    },
-    version: defaultSettings.version,
-  };
+  if (next.version === 3) {
+    next = { ...next, reader: { ...defaultSettings.reader, ...(next.reader || {}) }, version: 4 };
+  }
+  return next;
 };
+
+const readerOf = (settings) => ({ ...defaultSettings.reader, ...((settings && settings.reader) || {}) });
 
 // Typography is applied through CSS variables on <html>, so it also reaches
 // content rendered after a client-side navigation.
@@ -49,6 +59,13 @@ const applyTypography = (settings) => {
   root.setProperty("--fs-trans", `${size.translation || defaultSettings.fontSize.translation}px`);
   root.setProperty("--font-arabic", fontStacks[family.arabic] || fontStacks.Amiri);
   root.setProperty("--font-trans", fontStacks[family.translation] || fontStacks.BeVietnamPro);
+  // Read by the hadith card and detail styles.
+  const reader = readerOf(settings);
+  const html = document.documentElement;
+  if (reader.showArabic) html.removeAttribute("data-arabic");
+  else html.setAttribute("data-arabic", "hidden");
+  if (reader.textOrder === "translation") html.setAttribute("data-text-order", "translation");
+  else html.removeAttribute("data-text-order");
 };
 
 export const SettingsContext = createContext();
@@ -197,6 +214,21 @@ const SettingsContextProvider = ({ children }) => {
     setSettings(newSettings);
   };
 
+  const changeReader = (values) => {
+    const newSettings = { ...settings, reader: { ...readerOf(settings), ...values } };
+    applyTypography(newSettings);
+    saveToLocalStorage(newSettings);
+    setSettings(newSettings);
+  };
+
+  // The reader settings only: font sizes, the Arabic shown, text order.
+  const resetReader = () => {
+    const newSettings = { ...settings, fontSize: defaultSettings.fontSize, reader: defaultSettings.reader };
+    applyTypography(newSettings);
+    saveToLocalStorage(newSettings);
+    setSettings(newSettings);
+  };
+
   const resetSettings = () => {
     initSettings(defaultSettings);
     saveToLocalStorage(defaultSettings);
@@ -226,6 +258,11 @@ const SettingsContextProvider = ({ children }) => {
         changeAutoScroll,
         notification: settings.notification,
         changeNotification,
+        showArabic: readerOf(settings).showArabic,
+        changeShowArabic: (value) => changeReader({ showArabic: Boolean(value) }),
+        textOrder: readerOf(settings).textOrder,
+        changeTextOrder: (value) => changeReader({ textOrder: value === "translation" ? "translation" : "arabic" }),
+        resetReader,
         resetSettings,
       }}
     >
