@@ -75,29 +75,38 @@ function CategoryLink({ category, active, level, parent }) {
   );
 }
 
-function CategoryTree({ selectedCategoryId, filter }) {
+// The category ids to open so that `selectedId` is visible.
+function branchTo(categories, selectedId) {
+  const open = new Set();
+  if (selectedId == null || !categories.length) return open;
+  const byId = new Map(categories.map((category) => [category.id, category]));
+  let current = byId.get(selectedId);
+  if (current && current.totalChildren > 0) open.add(current.id);
+  while (current && current.parentId != null) {
+    open.add(current.parentId);
+    current = byId.get(current.parentId);
+  }
+  return open;
+}
+
+function CategoryTree({ selectedCategoryId, filter, initial, enabled }) {
   const { lang, t } = useLocale();
-  const { data, error, loading, retry } = useApi(`categories:${lang}`, () => getCategories(lang));
-  const categories = useMemo(() => (Array.isArray(data) ? data : []), [data]);
+  const { data, error, retry } = useApi(`categories:${lang}`, () => getCategories(lang), {
+    enabled: enabled && !initial,
+  });
+  const categories = useMemo(() => initial || (Array.isArray(data) ? data : []), [initial, data]);
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
-  const [expanded, setExpanded] = useState(() => new Set());
+  // Server-provided data renders the open branch on the first paint.
+  const [expanded, setExpanded] = useState(() => branchTo(categories, selectedCategoryId));
 
   // Open the branch that leads to the current category.
   useEffect(() => {
-    if (!selectedCategoryId || !categories.length) return;
-    const byId = new Map(categories.map((category) => [category.id, category]));
-    const open = new Set();
-    let current = byId.get(selectedCategoryId);
-    if (current && current.totalChildren > 0) open.add(current.id);
-    while (current && current.parentId != null) {
-      open.add(current.parentId);
-      current = byId.get(current.parentId);
-    }
-    setExpanded((previous) => new Set([...previous, ...open]));
+    const open = branchTo(categories, selectedCategoryId);
+    if (open.size) setExpanded((previous) => new Set([...previous, ...open]));
   }, [selectedCategoryId, categories]);
 
-  if (loading && !categories.length) return <SidebarSkeleton />;
-  if (error) return <ErrorState error={error} onRetry={retry} compact />;
+  if (error && !categories.length) return <ErrorState error={error} onRetry={retry} compact />;
+  if (!categories.length) return <SidebarSkeleton />;
 
   if (filter) {
     const query = fold(filter);
@@ -147,14 +156,17 @@ function CategoryTree({ selectedCategoryId, filter }) {
   return renderNodes(tree);
 }
 
-function BookChapters({ book, selectedChapterNo, active }) {
+function BookChapters({ book, selectedChapterNo, active, initial }) {
   const { lang, t } = useLocale();
-  const { data, error, loading, retry } = useApi(`book:${book.slug}:${lang}`, () => getBook(book.slug, lang));
+  const { data, error, retry } = useApi(`book:${book.slug}:${lang}`, () => getBook(book.slug, lang), {
+    enabled: !initial,
+  });
+  const chapters = initial || (data && data.chapters);
 
-  if (loading) return <Skeleton count={4} height={18} style={{ marginBottom: 8 }} />;
-  if (error) return <ErrorState error={error} onRetry={retry} compact />;
+  if (error && !chapters) return <ErrorState error={error} onRetry={retry} compact />;
+  if (!chapters) return <Skeleton count={4} height={18} style={{ marginBottom: 8 }} />;
 
-  return ((data && data.chapters) || []).map((chapter) => {
+  return chapters.map((chapter) => {
     const isActive = active && chapter.chapterNo === selectedChapterNo;
     const label = chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : chapter.name;
     return (
@@ -172,18 +184,31 @@ function BookChapters({ book, selectedChapterNo, active }) {
   });
 }
 
-function BookTree({ selectedBookSlug, selectedChapterNo, filter }) {
+function BookTree({ selectedBookSlug, selectedChapterNo, filter, initial, enabled }) {
   const { lang, t } = useLocale();
-  const { data, error, loading, retry } = useApi(`books:${lang}`, () => getBooks(lang));
-  const books = Array.isArray(data) ? data : [];
+  const initialBooks = initial && initial.books;
+  const initialChapters = (initial && initial.chapters) || {};
+  const { data, error, retry } = useApi(`books:${lang}`, () => getBooks(lang), {
+    enabled: enabled && !initialBooks,
+  });
+  const books = initialBooks || (Array.isArray(data) ? data : []);
   const [expanded, setExpanded] = useState(() => new Set(selectedBookSlug ? [selectedBookSlug] : []));
 
   useEffect(() => {
     if (selectedBookSlug) setExpanded((previous) => new Set([...previous, selectedBookSlug]));
   }, [selectedBookSlug]);
 
-  if (loading && !books.length) return <SidebarSkeleton />;
-  if (error) return <ErrorState error={error} onRetry={retry} compact />;
+  // Load the open book's chapters together with the list, not after it
+  // (getBook is memoised, so BookChapters reuses this request).
+  useEffect(() => {
+    if (enabled && selectedBookSlug && !initialChapters[selectedBookSlug]) {
+      getBook(selectedBookSlug, lang).catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, selectedBookSlug, lang]);
+
+  if (error && !books.length) return <ErrorState error={error} onRetry={retry} compact />;
+  if (!books.length) return <SidebarSkeleton />;
 
   const query = fold(filter);
   const visible = query
@@ -223,7 +248,14 @@ function BookTree({ selectedBookSlug, selectedChapterNo, filter }) {
         </AccordionSummary>
         <AccordionDetails classes={detailClasses}>
           <div className={styles.sub_item}>
-            {isOpen && <BookChapters book={book} selectedChapterNo={selectedChapterNo} active={active} />}
+            {isOpen && (
+              <BookChapters
+                book={book}
+                selectedChapterNo={selectedChapterNo}
+                active={active}
+                initial={initialChapters[book.slug]}
+              />
+            )}
           </div>
         </AccordionDetails>
       </Accordion>
@@ -231,11 +263,40 @@ function BookTree({ selectedBookSlug, selectedChapterNo, filter }) {
   });
 }
 
-export default function Sidebar({ mode = "categories", selectedCategoryId, selectedBookSlug, selectedChapterNo }) {
+// Only shown from 1024px (the layouts' aside); phones get the tree in a
+// dialog (CategoryModal), which loads it when opened.
+const DESKTOP = "(min-width: 1024px)";
+
+function useShown(lazy) {
+  const [shown, setShown] = useState(!lazy);
+  useEffect(() => {
+    if (!lazy) return undefined;
+    const query = window.matchMedia(DESKTOP);
+    const update = () => setShown(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, [lazy]);
+  return shown;
+}
+
+// `data`: what the page's server props already hold (components/sidebar/
+// data.js), rendered on the first paint: { books, chapters: { slug: [...] } }
+// or { categories }. Anything missing is loaded in the browser; with `lazy`,
+// only on screens that show the sidebar.
+export default function Sidebar({
+  mode = "categories",
+  selectedCategoryId,
+  selectedBookSlug,
+  selectedChapterNo,
+  data,
+  lazy = false,
+}) {
   const { theme } = useContext(SettingsContext);
   const { t } = useLocale();
   const isBooksMode = mode === "books";
   const [search, setSearch] = useState("");
+  const enabled = useShown(lazy);
 
   return (
     <div className={`${styles.wrapper} ${theme}`}>
@@ -249,7 +310,7 @@ export default function Sidebar({ mode = "categories", selectedCategoryId, selec
               type="button"
               className={`${styles.icon} ${styles.close_icon}`}
               onClick={() => setSearch("")}
-              aria-label="Clear"
+              aria-label={t("clearFilter")}
             >
               <CloseIcon />
             </button>
@@ -274,9 +335,16 @@ export default function Sidebar({ mode = "categories", selectedCategoryId, selec
                 selectedBookSlug={selectedBookSlug}
                 selectedChapterNo={selectedChapterNo}
                 filter={search.trim()}
+                initial={data && data.books ? data : null}
+                enabled={enabled}
               />
             ) : (
-              <CategoryTree selectedCategoryId={selectedCategoryId} filter={search.trim()} />
+              <CategoryTree
+                selectedCategoryId={selectedCategoryId}
+                filter={search.trim()}
+                initial={data && data.categories ? data.categories : null}
+                enabled={enabled}
+              />
             )}
           </nav>
         </Scrollbar>

@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./Header.module.scss";
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { SettingsContext } from "../../contexts/SettingsContext";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -27,6 +27,40 @@ import SearchIcon from "../icons/Search";
 import MenuBookIcon from "../icons/MenuBook";
 import { useLocale } from "../../contexts/LocaleContext";
 
+// Compact search box (GET /search?q=, so it also works before hydration).
+function HeaderSearch() {
+  const router = useRouter();
+  const { t } = useLocale();
+  const [query, setQuery] = useState("");
+
+  const submit = (event) => {
+    event.preventDefault();
+    const q = query.trim();
+    router.push(q ? { pathname: "/search", query: { q } } : "/search");
+  };
+
+  return (
+    <form action="/search" method="get" role="search" className={styles.search} onSubmit={submit}>
+      <input
+        type="search"
+        name="q"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder={t("searchPlaceholder")}
+        aria-label={t("search")}
+        autoComplete="off"
+        enterKeyHint="search"
+      />
+      <button type="submit" aria-label={t("searchButton")} title={t("searchButton")}>
+        <SearchIcon />
+      </button>
+    </form>
+  );
+}
+
+// Desktop header (1024px and up). On the home page it lies transparent over
+// the brand band until the page scrolls; the home and search pages have
+// their own search box, so the header only links to /search there.
 export default function HeaderWeb({ page }) {
   const router = useRouter();
 
@@ -38,23 +72,14 @@ export default function HeaderWeb({ page }) {
     changeTheme(newTheme);
   };
 
-  const header = useRef(null);
-  const [offset, setOffset] = useState(0);
-  const [didMount, setDidMount] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    setDidMount(true);
-    window.onscroll = () => {
-      setOffset(window.pageYOffset);
-    };
-    if (offset > 5) {
-      header.current.classList.add(styles.scrolled);
-    } else {
-      header.current.classList.remove(styles.scrolled);
-    }
-
-    return () => setDidMount(false);
-  }, [offset]);
+    const onScroll = () => setScrolled(window.scrollY > 5);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -95,6 +120,8 @@ export default function HeaderWeb({ page }) {
     }
   };
 
+  const searchBox = page !== "home" && router.pathname !== "/search";
+
   return (
     <>
       <Modal
@@ -103,71 +130,64 @@ export default function HeaderWeb({ page }) {
         title={modalTitle}
         content={modalContent}
       />
-      <div className={`${styles.header} ${styles[page]}`} ref={header}>
+      <div
+        className={`${styles.header} ${page ? styles[page] : ""} ${scrolled ? styles.scrolled : ""}`}
+      >
         <div className={styles.content}>
           <div className={styles.left}>
-            {theme === "light" && (
-              <Link href="/" className={`${styles.logo} ${styles.logo_normal}`}>
-
-                <Image
-                  src="/img/logo.png"
-                  alt="Hadith VN"
-                  width={153}
-                  height={26}
-                  loading="eager"
-                />
-
-              </Link>
-            )}
-
-            {theme === "light" && (
-              <Link href="/" className={`${styles.logo} ${styles.logo_white}`}>
-
-                <Image
-                  src="/img/logo_full_white.png"
-                  alt="Hadith VN"
-                  width={153}
-                  height={26}
-                  loading="eager"
-                />
-
-              </Link>
-            )}
-
-            {theme !== "light" && (
-              <Link href="/" className={`${styles.logo} ${styles.logo_full_white}`}>
-
-                <Image
-                  src="/img/logo_full_white.png"
-                  alt="Hadith VN"
-                  width={153}
-                  height={26}
-                  loading="eager"
-                />
-
-              </Link>
-            )}
+            {/* Dark logo on light backgrounds, white logo on the band and in
+                the dark theme (switched in CSS: no flash before hydration). */}
+            <Link href="/" className={styles.logo} aria-label="Hadith.vn">
+              <Image
+                className={styles.logoOnLight}
+                src="/img/logo.png"
+                alt=""
+                width={153}
+                height={26}
+                loading="eager"
+              />
+              <Image
+                className={styles.logoOnDark}
+                src="/img/logo_full_white.png"
+                alt=""
+                width={153}
+                height={26}
+                loading="eager"
+              />
+            </Link>
           </div>
 
           <div className={styles.right}>
+            {searchBox && <HeaderSearch />}
+
+            {!searchBox && (
+              <IconButton component={Link} href="/search" className={styles.btn} aria-label={t("search")} title={t("search")}>
+                <SearchIcon />
+              </IconButton>
+            )}
+
             <IconButton component={Link} href="/books" className={styles.btn} aria-label={t("books")} title={t("books")}>
               <MenuBookIcon />
-            </IconButton>
-
-            <IconButton component={Link} href="/search" className={styles.btn} aria-label={t("search")} title={t("search")}>
-              <SearchIcon />
             </IconButton>
 
             <IconButton
               className={styles.btn}
               onClick={() => modeSwitcher()}
-              aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+              aria-label={theme === "light" ? t("darkMode") : t("lightMode")}
+              title={theme === "light" ? t("darkMode") : t("lightMode")}
             >
               {theme === "light" && <Brightness4Icon />}
               {theme !== "light" && <Brightness7Icon />}
             </IconButton>
 
-            <IconButton className={styles.btn} onClick={handleClick} aria-label="More options">
+            <IconButton
+              className={styles.btn}
+              onClick={handleClick}
+              aria-label={t("moreOptions")}
+              title={t("moreOptions")}
+              aria-haspopup="menu"
+              aria-expanded={open ? "true" : undefined}
+            >
               <MoreVertIcon />
             </IconButton>
 
@@ -185,31 +205,31 @@ export default function HeaderWeb({ page }) {
               }}
               disableScrollLock={true}
             >
-              <MenuList className={styles.menu}>
+              <MenuList className={styles.menu} autoFocusItem={open}>
                 <MenuItem
                   onClick={(e) =>
                     handleItem(
                       e,
                       <Bookmarks controller={handleModalClose} />,
-                      "Bookmarks"
+                      t("bookmarks")
                     )
                   }
                 >
                   <span className={styles.icon}>
                     <BookmarkBorderIcon />
                   </span>
-                  <span className={styles.text}>Bookmarks</span>
+                  <span className={styles.text}>{t("bookmarks")}</span>
                 </MenuItem>
 
                 <MenuItem
                   onClick={(e) =>
-                    handleItem(e, <Pin controller={handleModalClose} />, "Pin")
+                    handleItem(e, <Pin controller={handleModalClose} />, t("pins"))
                   }
                 >
                   <span className={styles.icon}>
                     <PinOutlineIcon />
                   </span>
-                  <span className={styles.text}>Pin</span>
+                  <span className={styles.text}>{t("pins")}</span>
                 </MenuItem>
 
                 <MenuItem
@@ -217,14 +237,14 @@ export default function HeaderWeb({ page }) {
                     handleItem(
                       e,
                       <LastRead controller={handleModalClose} />,
-                      "Last Read"
+                      t("lastRead")
                     )
                   }
                 >
                   <span className={styles.icon}>
                     <AutoStoriesIcon />
                   </span>
-                  <span className={styles.text}>Last Read</span>
+                  <span className={styles.text}>{t("lastRead")}</span>
                 </MenuItem>
 
                 <MenuItem
@@ -232,21 +252,21 @@ export default function HeaderWeb({ page }) {
                     handleItem(
                       e,
                       <Settings controller={handleModalClose} />,
-                      "Settings"
+                      t("settings")
                     )
                   }
                 >
                   <span className={styles.icon}>
                     <SettingsIcon />
                   </span>
-                  <span className={styles.text}>Settings</span>
+                  <span className={styles.text}>{t("settings")}</span>
                 </MenuItem>
 
                 <MenuItem onClick={(e) => handleItem(e, "about", null)}>
                   <span className={styles.icon}>
                     <InfoIcon />
                   </span>
-                  <span className={styles.text}>About</span>
+                  <span className={styles.text}>{t("about")}</span>
                 </MenuItem>
               </MenuList>
             </Popover>

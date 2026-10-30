@@ -39,6 +39,13 @@
   --sidebar-icon-color: rgba(0, 0, 0, 0.54);
   --snsic: #138025;
 
+  // brand band (home hero, menu drawer): the main green, white text
+  --band-bg: #3d5a40;
+  --band-bg2: #4b6d4e;
+  --band-txt: #ffffff;
+  --band-muted: rgba(255, 255, 255, 0.85);
+  --band-line: rgba(255, 255, 255, 0.14);
+
   // type scale (interface)
   --text-xs: 0.75rem; // 12
   --text-sm: 0.875rem; // 14
@@ -93,6 +100,10 @@
   --bsc11: #313a55;
   --sidebar-icon-color: #9eabbe;
   --snsic: #ffffff;
+
+  --band-bg: #1f3027;
+  --band-bg2: #29402f;
+  --band-line: rgba(255, 255, 255, 0.1);
 
   --accent-soft: rgba(255, 255, 255, 0.08);
   --notice-bg: #3a3420;

@@ -1,217 +1,130 @@
+// Phones and tablets: links as a wrapped row of 44px-high targets, then the
+// copyright and credit lines; clear of the back-to-top button and the
+// iPhone home indicator.
 .footer {
-  display: none;
+  display: block;
+  background: var(--bg11);
+}
+
+.bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0 calc(72px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 4px;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 10px;
+    border-radius: 6px;
+    color: var(--txt11);
+    font-size: 14px;
+    font-weight: 500;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--main-color);
+      text-decoration: underline;
+    }
+  }
+}
+
+.copyright,
+.credit {
+  color: var(--txt12);
+  font-size: 13px;
+  line-height: 1.5;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--main-color);
+    font-weight: 500;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+}
+
+.copyright {
+  margin-top: 4px;
 }
 
 @media only screen and (min-width: 1024px) {
-  .footer {
-    display: block;
-    background: var(--bg11);
-  }
-
-  .top {
-    padding-top: 70px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--bdr11);
-  }
-
-  .about {
-    margin-bottom: 28px;
-    color: var(--txt12);
-    line-height: 26px;
-    font-size: 14px;
-    max-width: 314px;
-  }
-
-  .social {
-    display: flex;
-  }
-
-  .social a {
-    margin-right: 19px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-  }
-
-  .social a svg {
-    width: 16px;
-    height: 16px;
-    fill: var(--txt12);
-    transition: fill 250ms ease-in-out;
-  }
-
-  .social a:hover svg {
-    fill: var(--main-color);
-  }
-
-  .title {
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: var(--txt12);
-  }
-
-  .app {
-    display: flex;
-  }
-
-  .app a {
-    margin-right: 15px;
-    font-size: 0;
-  }
-
-  .app img {
-  }
-
-  .links {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .links li {
-    display: block;
-    line-height: 1;
-    margin-bottom: 10px;
-    margin-right: 17px;
-  }
-
-  .links a {
-    color: var(--txt12);
-    font-size: 14px;
-    line-height: 1;
-  }
-
-  .links a:hover {
-    text-decoration: underline;
-  }
-
   .bottom {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    padding: 24px 0;
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: space-between;
+    gap: 8px 24px;
+    padding: 16px 0;
+    text-align: start;
+  }
+
+  .nav {
+    order: 1;
   }
 
   .copyright {
-    font-size: 14px;
-    color: var(--txt12);
-    margin-bottom: 12px;
-  }
-
-  .copyright span {
-  }
-
-  .copyright a {
-    color: var(--main-color);
-  }
-
-  .copyright a:hover {
-    text-decoration: underline;
-  }
-
-  .menu {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    order: -1;
-  }
-
-  .menu li {
-    margin-bottom: 12px;
-    margin-right: 17px;
-    margin-right: 12px;
-    margin-left: 11px;
-    margin-bottom: 0;
-    position: relative;
-  }
-
-  .menu li::after {
-    content: "";
-    width: 1px;
-    height: 14px;
-    background-color: var(--txt13);
-    position: absolute;
-    top: 50%;
-    right: -13px;
-    transform: translateY(-50%);
-  }
-
-  .menu li:first-child {
-    margin-left: 0;
-  }
-  .menu li:last-child {
-    margin-right: 0;
-  }
-  .menu li:last-child::after {
-    display: none;
-  }
-
-  .menu li a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 32px;
-    font-size: 14px;
-    color: var(--txt12);
-  }
-
-  .menu li a:hover {
-    text-decoration: underline;
+    order: 0;
+    margin-top: 0;
   }
 
   .credit {
-    font-size: 14px;
-    color: var(--txt12);
-  }
-
-  .credit a {
-    display: inline-block;
-    padding: 6px 0;
-    color: var(--main-color);
-  }
-
-  .credit a:hover {
-    text-decoration: underline;
-  }
-}
-
-@media only screen and (min-width: 1024px) {
-  .title {
-    margin-bottom: 30px;
-  }
-
-  .links {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .links li {
-    margin-bottom: 17px;
-    margin-right: 0;
-  }
-
-  .bottom {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .copyright {
-    margin-bottom: 0;
+    order: 2;
   }
 
   .menu {
-    display: flex;
     justify-content: center;
-    align-items: center;
-    order: unset;
+    column-gap: 0;
+
+    li {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    li + li::before {
+      content: "";
+      width: 1px;
+      height: 14px;
+      background-color: var(--bdr13);
+    }
+
+    a {
+      padding: 0 12px;
+      color: var(--txt12);
+      font-weight: 400;
+    }
   }
 
-  .menu li {
-    margin-right: 12px;
-    margin-left: 11px;
-    margin-bottom: 0;
+  .copyright,
+  .credit {
+    font-size: 14px;
+  }
+}
+
+// keep the end of the row clear of the back-to-top button
+@media only screen and (min-width: 1024px) and (max-width: 1439px) {
+  .bottom {
+    padding-right: 60px;
+  }
+}
+
+@media print {
+  .footer {
+    display: none;
   }
 }

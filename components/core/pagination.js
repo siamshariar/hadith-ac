@@ -33,14 +33,19 @@ export default function Pagination({ pagination, hrefFor }) {
     <nav className={styles.pagination} aria-label={t("page")}>
       <div className={styles.controls}>
         {page > 1 ? (
-          <Link href={hrefFor(page - 1)} className={`${styles.step} ${styles.prev}`} rel="prev">
-            <span aria-hidden="true">‹</span> {t("previous")}
+          <Link href={hrefFor(page - 1)} className={styles.step} rel="prev">
+            <span aria-hidden="true">‹</span> <span className={styles.stepLabel}>{t("previous")}</span>
           </Link>
         ) : (
-          <span className={`${styles.step} ${styles.prev} ${styles.disabled}`} aria-disabled="true">
-            <span aria-hidden="true">‹</span> {t("previous")}
+          <span className={`${styles.step} ${styles.disabled}`} aria-disabled="true">
+            <span aria-hidden="true">‹</span> <span className={styles.stepLabel}>{t("previous")}</span>
           </span>
         )}
+
+        {/* Phones: "Trang 3/13" instead of the numbers. */}
+        <span className={styles.compact}>
+          {t("page")} {formatNumber(page)}/{formatNumber(lastPage)}
+        </span>
 
         <ol className={styles.pages}>
           {pageItems(page, lastPage).map((item) =>
@@ -49,7 +54,7 @@ export default function Pagination({ pagination, hrefFor }) {
                 …
               </li>
             ) : (
-              <li key={item} className={Math.abs(item - page) > 1 && item !== 1 && item !== lastPage ? styles.far : ""}>
+              <li key={item}>
                 {item === page ? (
                   <span className={`${styles.number} ${styles.active}`} aria-current="page">
                     {item}
@@ -65,12 +70,12 @@ export default function Pagination({ pagination, hrefFor }) {
         </ol>
 
         {page < lastPage ? (
-          <Link href={hrefFor(page + 1)} className={`${styles.step} ${styles.next}`} rel="next">
-            {t("next")} <span aria-hidden="true">›</span>
+          <Link href={hrefFor(page + 1)} className={styles.step} rel="next">
+            <span className={styles.stepLabel}>{t("next")}</span> <span aria-hidden="true">›</span>
           </Link>
         ) : (
-          <span className={`${styles.step} ${styles.next} ${styles.disabled}`} aria-disabled="true">
-            {t("next")} <span aria-hidden="true">›</span>
+          <span className={`${styles.step} ${styles.disabled}`} aria-disabled="true">
+            <span className={styles.stepLabel}>{t("next")}</span> <span aria-hidden="true">›</span>
           </span>
         )}
       </div>

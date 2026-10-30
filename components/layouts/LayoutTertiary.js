@@ -5,7 +5,7 @@ import SidenavContextProvider from "../../contexts/SidenavContext";
 import HeaderWeb from "../web/Header";
 import HeaderMobile from "../mobile/HeaderContent";
 import FooterWeb from "../web/Footer";
-// import Sidebar from "../sidebar";
+import ScrollFrame from "./ScrollFrame";
 import styles from "./Layout.module.scss";
 
 const Layout = ({ children }) => {
@@ -19,18 +19,14 @@ const Layout = ({ children }) => {
             <div className={`${styles.wrapper} ${styles.layout3}`}>
               <div className={styles.header}>
                 <HeaderWeb page={null} />
-                <HeaderMobile title={children.props.contentTitle} />
+                <HeaderMobile
+                  title={children.props.contentTitle}
+                  titleKey={children.props.contentTitleKey}
+                />
               </div>
 
               <div className={styles.body}>
-                {/* <div className={styles.sidebar}>
-                  <Sidebar
-                    categoryList={categoryList}
-                    categoryTree={categoryTree}
-                    selectedCategoryId={selectedCategoryId}
-                  />
-                </div> */}
-                <main id="viewport" className={styles.content}>
+                <main id="viewport" className={styles.content} tabIndex={-1}>
                   <div className={styles.container}>{children}</div>
                 </main>
               </div>
@@ -38,6 +34,7 @@ const Layout = ({ children }) => {
               <div className={styles.footer}>
                 <FooterWeb />
               </div>
+              <ScrollFrame />
             </div>
           </SidenavContextProvider>
         </BookmarkContextProvider>

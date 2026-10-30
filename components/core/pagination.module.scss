@@ -73,19 +73,36 @@ a.number:focus-visible {
   color: var(--txt12);
 }
 
-// Small screens: keep first, last and neighbours; previous/next become arrows.
+.compact {
+  display: none;
+}
+
+// Small screens: arrows (44px) around "Trang 3/13"; the labels stay for
+// screen readers.
 @media only screen and (max-width: 599px) {
-  .far {
+  .pages {
     display: none;
   }
+  .compact {
+    display: block;
+    color: var(--txt11);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+  }
   .step {
-    min-width: 40px;
+    width: 44px;
+    height: 44px;
     padding: 0;
-    font-size: 0;
-
-    span {
-      font-size: 20px;
-    }
+    font-size: 22px;
+  }
+  .stepLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
   .controls {
     justify-content: space-between;

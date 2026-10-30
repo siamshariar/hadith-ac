@@ -40,15 +40,9 @@
   padding-right: 16px;
   padding-top: 32px;
   padding-bottom: 32px;
-  background-color: #f4f4f4;
   margin-bottom: 18px;
-  background: linear-gradient(
-    90deg,
-    var(--hbnc1) 0,
-    var(--hbnc2) 50%,
-    var(--hbnc2) 50%,
-    var(--hbnc1) 100%
-  );
+  background: var(--band-bg);
+  background: linear-gradient(135deg, var(--band-bg) 0%, var(--band-bg2) 100%);
 }
 .logo {
   display: flex;

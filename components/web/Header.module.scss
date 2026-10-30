@@ -11,7 +11,6 @@
     left: 0;
     border-bottom: none;
     background: var(--bg11);
-    box-shadow: var(--bs21);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
     z-index: 999;
     transition: background 150ms ease-in, box-shadow 150ms ease-in;
@@ -19,6 +18,7 @@
     padding: 0 17px;
   }
 
+  // home: transparent over the brand band until the page scrolls
   .header.home {
     position: fixed;
     background: none;
@@ -27,12 +27,7 @@
 
   .header.home.scrolled {
     background: var(--bg11);
-    box-shadow: var(--bs21);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
-  }
-
-  .header.content {
-    position: absolute;
   }
 
   .content {
@@ -40,39 +35,46 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
     height: 100%;
   }
 
   .left {
+    flex: 0 0 auto;
   }
 
   .logo {
     display: flex;
     align-items: center;
-    height: 100%;
+    min-height: 44px;
+
+    img {
+      width: 153px;
+      height: 26px;
+    }
   }
 
-  .logo img {
-  }
-
-  .logo.logo_normal,
-  .logo.logo_full_white,
-  .header.home .logo.logo_white,
-  .header.home.scrolled .logo.logo_normal {
-    display: flex;
-  }
-
-  .logo.logo_white,
-  .header.home .logo.logo_normal,
-  .header.home.scrolled .logo.logo_white {
+  // which logo shows (see Header.js)
+  .logoOnDark,
+  .header.home:not(.scrolled) .logoOnLight,
+  :global(body.dark) .logoOnLight {
     display: none;
+  }
+
+  .logoOnLight,
+  .header.home:not(.scrolled) .logoOnDark,
+  :global(body.dark) .logoOnDark {
+    display: block;
   }
 
   .right {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: row;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
+    gap: 2px;
+    min-width: 0;
   }
 
   .btn {
@@ -80,10 +82,6 @@
     min-width: 48px !important;
     height: 48px !important;
     border-radius: 50% !important;
-  }
-
-  .btn:hover {
-    //background-color: var(--bg22) !important;
   }
 
   .btn span {
@@ -110,6 +108,69 @@
     fill: var(--txt11);
   }
 
+  // search box
+  .search {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+    height: 44px;
+    margin-right: 8px;
+    border: 1px solid var(--bdr11);
+    border-radius: 22px;
+    background: var(--bg12);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--theme-color);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    input {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 100%;
+      padding: 0 4px 0 18px;
+      border: 0;
+      background: transparent;
+      color: var(--txt11);
+      font: inherit;
+      font-size: 15px;
+      appearance: none;
+
+      &::placeholder {
+        color: var(--txt13);
+      }
+
+      &:focus-visible {
+        outline: none; // the box shows focus (:focus-within)
+      }
+    }
+
+    button {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 42px;
+      border: 0;
+      border-radius: 0 22px 22px 0;
+      background: transparent;
+      cursor: pointer;
+
+      svg {
+        width: 22px;
+        height: 22px;
+        fill: var(--txt12);
+      }
+
+      &:hover svg {
+        fill: var(--main-color);
+      }
+    }
+  }
+
   //popover
   .menu {
     background-color: var(--bg11);
@@ -132,5 +193,11 @@
     font-size: 15px;
     color: var(--txt11);
     padding-right: 14px;
+  }
+}
+
+@media print {
+  .header {
+    display: none !important;
   }
 }

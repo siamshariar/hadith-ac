@@ -53,6 +53,36 @@ body {
   color: var(--txt11);
 }
 
+// Height of the fixed header, for sticky bars below it (`top:
+// var(--header-offset)`): 54px on phones and tablets, 64px from 1024px. The
+// phone header slides away while reading down (components/layouts/
+// ScrollFrame puts .header-hidden on <html>), so the offset becomes 0.
+:root {
+  --header-offset: 54px;
+}
+
+@media only screen and (max-width: 1023px) {
+  html.header-hidden {
+    --header-offset: 0px;
+  }
+}
+
+@media only screen and (min-width: 1024px) {
+  :root {
+    --header-offset: 64px;
+  }
+}
+
+// In-page links (#hadith-12) land below the header, not under it.
+html {
+  scroll-padding-top: calc(var(--header-offset) + 8px);
+}
+
+// The main region takes focus after "back to top"; it is not a control.
+main[tabindex="-1"]:focus {
+  outline: none;
+}
+
 // viewport: the page itself scrolls (below the fixed 54px mobile header)
 .viewport {
   display: block;

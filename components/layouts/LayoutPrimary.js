@@ -5,6 +5,7 @@ import SettingsContextProvider from "../../contexts/SettingsContext";
 import PinContextProvider from "../../contexts/PinContext";
 import BookmarkContextProvider from "../../contexts/BookmarkContext";
 import SidenavContextProvider from "../../contexts/SidenavContext";
+import ScrollFrame from "./ScrollFrame";
 import styles from "./Layout.module.scss";
 
 const Layout = ({ children }) => {
@@ -19,14 +20,14 @@ const Layout = ({ children }) => {
                 <HeaderMobile />
               </div>
 
-              <main id="viewport" className="viewport">
+              <main id="viewport" className="viewport" tabIndex={-1}>
                 {children}
               </main>
 
               <div className={styles.footer}>
                 <FooterWeb />
-                {/* <FooterMobile /> */}
               </div>
+              <ScrollFrame />
             </div>
           </SidenavContextProvider>
         </BookmarkContextProvider>

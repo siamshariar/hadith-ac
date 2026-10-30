@@ -1,114 +1,108 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/router";
 import Container from "../core/container";
 import CategoryModal from "./CategoryModal";
 import SettingsModal from "./settings-modal";
+import MobileNav from "./MobileNav";
 import BackIcon from "../icons/NavigateBefore";
 import DropDownIcon from "../icons/ArrowDropDown";
+import MenuIcon from "../icons/Menu";
 import TuneIcon from "../icons/Tune";
 import SearchIcon from "../icons/Search";
-import styles from "./Header.module.scss";
-import {useRouter} from "next/router";
+import { SettingsContext } from "../../contexts/SettingsContext";
 import { useLocale } from "../../contexts/LocaleContext";
+import styles from "./Header.module.scss";
 
-export default function HeaderMobile({
-  selectedCategoryId,
-  backLink,
-}) {
-  const router = useRouter()
+// Header of the content pages (phones and tablets): back, menu, then the
+// category tree on category pages or the logo elsewhere; search and the
+// reader settings on the right.
+export default function HeaderMobile({ selectedCategoryId, backLink }) {
+  const router = useRouter();
   const { t } = useLocale();
-  const [categoryOpen, setCategoryOpen] = useState(false);
+  const { theme } = useContext(SettingsContext);
 
+  const ignoreTab = (event) =>
+    event.type === "keydown" && (event.key === "Tab" || event.key === "Shift");
+
+  const [categoryOpen, setCategoryOpen] = useState(false);
   const handleCategoryModal = (open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
+    if (ignoreTab(event)) return;
     setCategoryOpen(open);
   };
 
-  // settings modal
   const [settingsOpen, setSettingsOpen] = useState(false);
-
   const handleSettingsModal = (open) => (event) => {
     event.preventDefault();
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
+    if (ignoreTab(event)) return;
     setSettingsOpen(open);
   };
 
-  // show hide appbar on scroll
-  const header = useRef(null);
-  const [lastScrollTop, setLastScrollTop] = useState(0);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [didMount, setDidMount] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  const controlNav = (open) => (event) => {
+    if (ignoreTab(event)) return;
+    setNavOpen(open);
+  };
 
-  // useEffect(() => {
-  //     setDidMount(true)
-  //
-  //     const viewport = document.getElementById('viewport')
-  //
-  //     viewport.onscroll = () => {
-  //         setScrollTop(viewport.scrollTop)
-  //     }
-  //     if (scrollTop > lastScrollTop) {
-  //         header.current.classList.add(styles.scroll_up)
-  //     }
-  //     else {
-  //         header.current.classList.remove(styles.scroll_up)
-  //     }
-  //     setLastScrollTop(scrollTop)
-  //
-  //     return () => setDidMount(false)
-  // }, [scrollTop])
-
-  const [historyLength, setHistoryLength] = useState(0)
-
+  // Back goes back in history when there is some; else up to `backLink`.
+  const [historyLength, setHistoryLength] = useState(0);
   useEffect(() => {
-    setHistoryLength(window.history.length)
-  }, [])
+    setHistoryLength(window.history.length);
+  }, []);
+
+  const categoryNav = selectedCategoryId != null || router.pathname.startsWith("/categories");
 
   return (
     <>
-      <div className={styles.header} ref={header}>
+      <div className={styles.header}>
         <Container>
           <div className={styles.wrapper}>
             <div className={styles.left}>
-              {/*<Link href={backLink ?? '/'}>*/}
-              {/*  <a className={styles.icon}>*/}
-              {/*    <BackIcon />*/}
-              {/*  </a>*/}
-              {/*</Link>*/}
               {backLink && (
-                  <span
-                      className={styles.icon}
-                      role="button"
-                      tabIndex={0}
-                      aria-label="Back"
-                      onClick={historyLength > 2 ? () => router.back() : () => router.push(`${backLink}`)}
-                  >
-                <BackIcon />
-              </span>
+                <button
+                  type="button"
+                  className={styles.icon}
+                  aria-label={t("goBack")}
+                  onClick={historyLength > 2 ? () => router.back() : () => router.push(`${backLink}`)}
+                >
+                  <BackIcon />
+                </button>
               )}
+              <button
+                type="button"
+                className={styles.icon}
+                aria-label={t("menu")}
+                aria-haspopup="dialog"
+                onClick={controlNav(true)}
+              >
+                <MenuIcon />
+              </button>
             </div>
 
-            <button
-              type="button"
-              className={styles.center}
-              onClick={handleCategoryModal(true)}
-              aria-haspopup="dialog"
-            >
-              <span>{t("categories")}</span>
-              <span className={styles.icon}>
-                <DropDownIcon />
-              </span>
-            </button>
+            <div className={styles.center}>
+              {categoryNav ? (
+                <button
+                  type="button"
+                  className={styles.categoryButton}
+                  onClick={handleCategoryModal(true)}
+                  aria-haspopup="dialog"
+                >
+                  <span>{t("categories")}</span>
+                  <DropDownIcon />
+                </button>
+              ) : (
+                <Link href="/" className={styles.logo}>
+                  <Image
+                    src={theme === "light" ? "/img/logo.png" : "/img/logo_full_white.png"}
+                    alt="Hadith.vn"
+                    width={130}
+                    height={22}
+                    loading="eager"
+                  />
+                </Link>
+              )}
+            </div>
 
             <div className={styles.right}>
               <Link href="/search" className={styles.icon} aria-label={t("search")}>
@@ -117,16 +111,16 @@ export default function HeaderMobile({
               <Link
                 href="/settings"
                 className={styles.icon}
-                aria-label="Settings"
-                onClick={handleSettingsModal(true)}>
-
+                aria-label={t("settings")}
+                onClick={handleSettingsModal(true)}
+              >
                 <TuneIcon />
-
               </Link>
             </div>
           </div>
         </Container>
       </div>
+      <MobileNav navOpen={navOpen} navControl={controlNav} selectedCategoryId={selectedCategoryId} />
       <CategoryModal
         open={categoryOpen}
         controller={handleCategoryModal}

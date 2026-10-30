@@ -8,10 +8,13 @@ import HeaderWeb from "../web/Header";
 import HeaderMobile from "../mobile/HeaderSecondary";
 import FooterWeb from "../web/Footer";
 import Sidebar from "../sidebar";
+import ScrollFrame from "./ScrollFrame";
 import styles from "./Layout.module.scss";
 
 // Pages pass what the sidebar should show: the category tree (default) or
-// the books with their chapters. The sidebar loads its own data.
+// the books with their chapters. A page whose server props include
+// `sidebarData` (components/sidebar/data.js) gets the sidebar on the first
+// paint; otherwise it loads in the browser on desktop screens.
 const Layout = ({
   children,
   sidebar = "categories",
@@ -19,6 +22,7 @@ const Layout = ({
   selectedBookSlug,
   selectedChapterNo,
 }) => {
+  const pageProps = children.props || {};
   return (
     <SettingsContextProvider>
       <PinContextProvider>
@@ -29,7 +33,7 @@ const Layout = ({
                 <HeaderWeb page={null} />
                 <HeaderMobile
                   selectedCategoryId={selectedCategoryId}
-                  backLink={children.props.backLink}
+                  backLink={pageProps.backLink}
                 />
               </div>
 
@@ -40,9 +44,11 @@ const Layout = ({
                     selectedCategoryId={selectedCategoryId}
                     selectedBookSlug={selectedBookSlug}
                     selectedChapterNo={selectedChapterNo}
+                    data={pageProps.sidebarData}
+                    lazy
                   />
                 </aside>
-                <main id="viewport" className={styles.content}>
+                <main id="viewport" className={styles.content} tabIndex={-1}>
                   <div className={styles.container}>{children}</div>
                 </main>
               </div>
@@ -50,6 +56,7 @@ const Layout = ({
               <div className={styles.footer}>
                 <FooterWeb />
               </div>
+              <ScrollFrame />
             </div>
           </SidenavContextProvider>
         </BookmarkContextProvider>

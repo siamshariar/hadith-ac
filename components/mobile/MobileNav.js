@@ -132,16 +132,11 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
 
                 <Image
                   src="/img/logo_full_white.png"
-                  alt=""
-                  width={122}
-                  height={26}
+                  alt="Hadith.vn"
+                  width={130}
+                  height={22}
                   loading="eager"
                 />
-                <span>
-                  Quran.vn
-                  <br />
-                  v1.0.1
-                </span>
 
               </Link>
             </div>
@@ -191,7 +186,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <BookmarkIcon />
                   </span>
-                  <span className={styles.text}>Bookmarks</span>
+                  <span className={styles.text}>{t("bookmarks")}</span>
 
                 </Link>
               </li>
@@ -201,7 +196,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <PinIcon />
                   </span>
-                  <span className={styles.text}>Pin</span>
+                  <span className={styles.text}>{t("pins")}</span>
 
                 </Link>
               </li>
@@ -211,7 +206,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <AutoStoriesIcon />
                   </span>
-                  <span className={styles.text}>Last Read</span>
+                  <span className={styles.text}>{t("lastRead")}</span>
 
                 </Link>
               </li>
@@ -232,7 +227,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <SettingsIcon />
                   </span>
-                  <span className={styles.text}>Settings</span>
+                  <span className={styles.text}>{t("settings")}</span>
 
                 </Link>
               </li>
@@ -248,7 +243,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
 								<Link href="/bookmark">
 									<a onClick={handleBookmarkModal(true)}>
 										<span className={styles.icon}><BookmarkBorderIcon /></span>
-										<span className={styles.text}>Bookmarks</span>
+										<span className={styles.text}>{t("bookmarks")}</span>
 									</a>
 								</Link>
 							</li> */}
@@ -287,7 +282,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <ContactIcon />
                   </span>
-                  <span className={styles.text}>Support</span>
+                  <span className={styles.text}>{t("support")}</span>
 
                 </Link>
               </li>
@@ -297,7 +292,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <FavoriteBorderIcon />
                   </span>
-                  <span className={styles.text}>Grateful</span>
+                  <span className={styles.text}>{t("grateful")}</span>
 
                 </Link>
               </li>
@@ -320,7 +315,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <InfoIcon />
                   </span>
-                  <span className={styles.text}>About</span>
+                  <span className={styles.text}>{t("about")}</span>
 
                 </Link>
               </li>
@@ -330,7 +325,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <ContactIcon />
                   </span>
-                  <span className={styles.text}>Contact</span>
+                  <span className={styles.text}>{t("contact")}</span>
 
                 </Link>
               </li>
@@ -350,7 +345,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <SecurityIcon />
                   </span>
-                  <span className={styles.text}>Privacy Policy</span>
+                  <span className={styles.text}>{t("privacyPolicy")}</span>
 
                 </Link>
               </li>

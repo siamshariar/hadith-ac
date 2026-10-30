@@ -8,48 +8,89 @@
   z-index: 99;
   box-shadow: var(--bs21);
   border-bottom: 1px solid var(--bdr11);
-  transition: transform 400ms ease-in-out;
+  transition: transform 200ms ease-out;
 }
 
-.header.scroll_up {
+// Slides away while reading down (components/layouts/ScrollFrame); stays
+// when something in it has keyboard focus.
+:global(html.header-hidden) .header:not(:focus-within) {
   transform: translateY(-100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    transition: none;
+  }
 }
 
 .wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 4px;
   height: 54px;
 }
 
-.left {
+.left,
+.right {
   display: flex;
-  justify-content: flex-start;
+  flex: 0 0 auto;
   align-items: center;
+  min-width: 0;
 }
 
-.left span.title {
-  margin-left: 10px;
-  font-size: 16px;
-  color: var(--txt00);
-  white-space: normal;
-  display: -moz-box;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+.left {
+  justify-content: flex-start;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+.grow {
+  flex: 1 1 auto;
+}
+
+// The edge icons' glyphs line up with the page gutter; the tap area runs
+// to the screen edge.
+.left > .icon:first-child {
+  margin-left: -10px;
+}
+
+.right > .icon:last-child {
+  margin-right: -10px;
+}
+
+// page title (LayoutTertiary)
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: 4px;
   overflow: hidden;
+  color: var(--txt00);
+  font-size: 16px;
   text-overflow: ellipsis;
-  word-break: break-all;
+  white-space: nowrap;
 }
 
+// header icons: 44 x 44 tap area around a 24px glyph
 .icon {
-  padding: 0 !important;
-  width: 24px;
-  height: 24px;
-  justify-content: flex-start !important;
+  display: inline-flex !important;
+  flex: 0 0 auto;
   align-items: center !important;
-  display: flex !important;
+  justify-content: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 50% !important;
+  background: transparent;
+  color: var(--txt12);
   cursor: pointer;
+
+  &:active {
+    background: var(--accent-soft);
+  }
 }
 
 .icon svg {
@@ -60,46 +101,55 @@
 
 .logo {
   display: flex;
-  justify-content: center;
   align-items: center;
-}
+  justify-content: center;
+  min-width: 0;
+  min-height: 44px;
 
-.logo img {
+  img {
+    display: block;
+    width: 130px;
+    height: 22px;
+  }
 }
 
 .center {
   display: flex;
+  flex: 1 1 auto;
   justify-content: center;
   align-items: center;
+  min-width: 0;
 }
 
-.center span {
-  display: flex;
-  justify-content: center;
+// "Danh mục ▾": opens the category tree
+.categoryButton {
+  display: inline-flex;
   align-items: center;
-}
+  gap: 2px;
+  min-height: 44px;
+  padding: 0 4px 0 10px;
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  color: var(--txt11);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
 
-.center span:nth-child(1) {
-  margin-right: 5px;
-}
-
-.audio_icon {
-  margin-left: 4px;
-}
-
-.audio_icon svg {
-  width: 22px;
-  height: 22px;
-  fill: var(--txt12);
-}
-
-.right {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--txt12);
+  }
 }
 
 @media only screen and (min-width: 1024px) {
+  .header {
+    display: none;
+  }
+}
+
+@media print {
   .header {
     display: none;
   }

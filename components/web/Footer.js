@@ -3,49 +3,46 @@ import Container from "../core/container";
 import { useLocale } from "../../contexts/LocaleContext";
 import styles from "./Footer.module.scss";
 
+// Site footer on every layout and screen size: the site links, copyright
+// and credit. Compact on phones, one row on desktop.
 export default function FooterWeb() {
   const { t } = useLocale();
+  const links = [
+    { href: "/sources", label: t("sourcesAndMethod") },
+    { href: "/about", label: t("about") },
+    { href: "/support", label: t("support") },
+    { href: "/grateful", label: t("grateful") },
+    { href: "/contact", label: t("contact") },
+  ];
+
   return (
-    <div className={styles.footer}>
+    <footer className={styles.footer}>
       <Container>
         <div className={styles.bottom}>
+          <nav className={styles.nav} aria-label={t("footerLinks")}>
+            <ul className={styles.menu}>
+              {links.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href}>{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
           <p className={styles.copyright}>
             <span>&copy; {new Date().getFullYear()} </span>
-            <Link href="/about">
-              Hadith.vn
-            </Link>
-            <span> All Rights Reserved</span>
+            <Link href="/about">Hadith.vn</Link>
+            <span>. {t("allRightsReserved")}</span>
           </p>
 
-          <ul className={styles.menu}>
-            <li>
-              <Link href="/sources">{t("sourcesAndMethod")}</Link>
-            </li>
-            <li>
-              <Link href="/support">
-                Support
-              </Link>
-            </li>
-            <li>
-              <Link href="/grateful">
-                Grateful
-              </Link>
-            </li>
-            <li>
-              <Link href="/contact">
-                Contact
-              </Link>
-            </li>
-          </ul>
-
           <p className={styles.credit}>
-            Powered By -{" "}
-            <a href="http://deeniinfotech.com/" target="_blank">
+            {t("poweredBy")}{" "}
+            <a href="http://deeniinfotech.com/" target="_blank" rel="noopener noreferrer">
               Deeni Info Tech
             </a>
           </p>
         </div>
       </Container>
-    </div>
+    </footer>
   );
 }
