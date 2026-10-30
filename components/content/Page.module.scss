@@ -464,7 +464,7 @@
   vertical-align: 0.1em;
 }
 
-// prose pages (sources & method)
+// prose pages (data & method)
 .prosePage {
   max-width: 880px;
 
@@ -534,7 +534,7 @@
     font-weight: 500;
   }
 
-  // the language of a group of editions: its own name on one line, the
+  // the language of a group of translations: its own name on one line, the
   // English one under it when the column is narrow
   tbody th {
     min-width: 7.5em;
@@ -543,6 +543,13 @@
     bdi {
       white-space: nowrap;
     }
+  }
+
+  // counts, right-aligned so their digits line up
+  .tableNumber {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 }
 

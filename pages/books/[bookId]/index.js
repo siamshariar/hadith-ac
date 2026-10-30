@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { server, shareImage } from "../../../lib/config";
 import { getBook, getBooks, getEditions, loadPage } from "../../../lib/api";
+import { translatorName } from "../../../lib/citation";
 import { bookPath, isCategoryBook } from "../../../lib/hadith";
 import { useLocale } from "../../../contexts/LocaleContext";
 import Meta from "../../../components/core/meta";
@@ -102,15 +103,14 @@ export async function getServerSideProps(context) {
       props: {
         book,
         counts: listed ? { own: listed.totalTranslated || 0, linked: listed.totalLinkedTranslated || 0 } : null,
+        // one per language, with its translator when the source names one
         editions: editions
           .filter((edition) => edition.bookSlug === book.slug)
-          .map(({ code, languageCode, languageName, languageNativeName, author, sourceUrl }) => ({
-            code,
-            languageCode,
-            languageName,
-            languageNativeName,
-            author: author || null,
-            sourceUrl: sourceUrl || null,
+          .map((edition) => ({
+            languageCode: edition.languageCode,
+            languageName: edition.languageName,
+            languageNativeName: edition.languageNativeName,
+            translator: translatorName(edition.author, edition),
           })),
         sidebarData: await sidebarBooksData(lang, { book, books: books.length ? books : null }),
         backLink: "/books",

@@ -9,7 +9,7 @@ import styles from "./Footer.module.scss";
 export default function FooterWeb() {
   const { t } = useLocale();
   const links = [
-    { href: "/sources", label: t("sourcesAndMethod") },
+    { href: "/sources", label: t("dataAndMethod") },
     { href: "/about", label: t("about") },
     { href: "/support", label: t("support") },
     { href: "/grateful", label: t("grateful") },

@@ -8,6 +8,7 @@ import {
   citablePath,
   cleanText,
   isCategoryBook,
+  namedGrades,
   shortBookName,
 } from "../../lib/hadith";
 import { inBookText, referenceText } from "../../lib/citation";
@@ -65,7 +66,7 @@ export default function HadithCard({ hadith, book, showContext = false, inBookRe
             {referenceText(hadith, book, t)}
           </Link>
           {inBook && <span className={styles.inBook}>{inBook}</span>}
-          <GradeBadge grades={hadith.grades} gradeText={hadith.gradeText} />
+          <GradeBadge grades={namedGrades(hadith, book)} gradeText={hadith.gradeText} />
         </div>
       </header>
 
@@ -86,7 +87,7 @@ export default function HadithCard({ hadith, book, showContext = false, inBookRe
           <ArabicText text={hadith.arabic} />
         </div>
         <div className={styles.translationCol}>
-          <HadithTranslations hadith={hadith} compact collapsible />
+          <HadithTranslations hadith={hadith} book={book} compact collapsible />
         </div>
       </div>
 
@@ -132,8 +133,8 @@ export function HadithCardSkeleton({ count = 3 }) {
 }
 
 // A list of cards that switches to skeletons while the next page loads.
-// When cards show HadeethEnc's linked translations, what that label means is
-// said once, above the list (LinkedTranslationNote). `picker`: the
+// When cards show the topic collection's linked translations, what that label
+// means is said once, above the list (LinkedTranslationNote). `picker`: the
 // translations chip above the list ({ translations, book }) for lists
 // without a reader bar; the collection is the cards' own when they share one.
 export function HadithList({ hadiths, loading, renderCard, skeletonCount = 4, picker }) {

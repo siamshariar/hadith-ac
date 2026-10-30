@@ -14,6 +14,7 @@ import {
   hadithPath,
   isCategoryBook,
   lettered,
+  namedGrades,
   shortBookName,
   storedHadithRef,
 } from "../../lib/hadith";
@@ -28,8 +29,7 @@ import TranslationPicker from "./TranslationPicker";
 import styles from "./HadithDetail.module.scss";
 
 // A related hadith (API `related`: same wording in another collection) by its citation.
-const relatedLabel = (item) =>
-  `${item.bookSlug === "hadeethenc" ? "HadeethEnc" : item.bookName} ${lettered(item.referenceNumber)}`.trim();
+const relatedLabel = (item) => `${item.bookName} ${lettered(item.referenceNumber)}`.trim();
 const relatedPath = (item) =>
   item.referenceNumber && item.bookSlug
     ? bookHadithPath(item.bookSlug, lettered(item.referenceNumber))
@@ -260,7 +260,7 @@ export default function HadithDetail({ hadith, translations }) {
               {t("hadithNumber")}: <strong>{lettered(hadith.referenceNumber)}</strong>
             </span>
           )}
-          <GradeBadge grades={hadith.grades} gradeText={hadith.gradeText} />
+          <GradeBadge grades={namedGrades(hadith, book)} gradeText={hadith.gradeText} />
           {hadith.title && <span className={styles.fact}>{reference}</span>}
           <span className={styles.picker}>
             <TranslationPicker translations={extras} book={book.slug} />
@@ -281,7 +281,7 @@ export default function HadithDetail({ hadith, translations }) {
         </section>
 
         <section className={styles.translationBlock}>
-          <HadithTranslations hadith={hadith} showNote />
+          <HadithTranslations hadith={hadith} book={book} showNote />
         </section>
       </div>
 

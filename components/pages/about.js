@@ -36,7 +36,7 @@ export default function AboutContent() {
             {t("aboutApp")} {t("siteTagline")}
           </p>
           <p>
-            {t("aboutData")} <Link href="/sources">{t("sourcesAndMethod")}</Link>.
+            {t("aboutMethod")} <Link href="/sources">{t("dataAndMethod")}</Link>.
           </p>
           <p>
             {t("poweredBy")}{" "}

@@ -90,7 +90,7 @@
   }
 }
 
-// translation editions (/hadith/editions), folded
+// the translations by language (/hadith/editions), folded
 .editions {
   margin-top: 8px;
   border-top: 1px solid var(--bdr11);
@@ -139,12 +139,13 @@
   border-top: 1px solid var(--bdr11);
 }
 
+// the language, then its translator when the source names one
 .edition {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "language source"
-    "translator translator";
+    "language"
+    "translator";
   align-items: center;
   gap: 0 12px;
   padding: 6px 8px;
@@ -170,26 +171,9 @@
 
 .editionTranslator {
   grid-area: translator;
+  min-width: 0;
   color: var(--txt12);
-}
-
-.editionSource {
-  grid-area: source;
-  font-size: 13px;
-
-  a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 32px;
-    color: var(--main-color);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-}
-
-.muted {
-  color: var(--txt13);
-  font-style: italic;
+  overflow-wrap: anywhere;
 }
 
 // chapters
@@ -280,8 +264,8 @@
   }
 
   .edition {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto;
-    grid-template-areas: "language translator source";
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-areas: "language translator";
   }
 
   // one dense line per chapter: number | name | range | count

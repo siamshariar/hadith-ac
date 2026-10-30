@@ -20,7 +20,7 @@ export default function Books({ books, error }) {
     <>
       <Meta
         title={t("books")}
-        description="Hadith collections: Sahih al-Bukhari, Sahih Muslim, the Sunan, Muwatta Malik, the forty-hadith books and HadeethEnc."
+        description="Hadith collections: Sahih al-Bukhari, Sahih Muslim, the Sunan, Muwatta Malik, the forty-hadith books and hadiths by topic."
         url={`${server}/books`}
         image={shareImage}
         type="website"
@@ -54,7 +54,7 @@ export default function Books({ books, error }) {
                   language: languageName(lang),
                 })}
                 {linked > 0 &&
-                  `; ${t("bookLinkedTranslations", { count: formatNumber(linked), language: languageName(lang) })}`}
+                  `; ${t("bookTopicTranslations", { count: formatNumber(linked), language: languageName(lang) })}`}
                 {". "}
                 {t("contentLanguageNote")}
               </p>

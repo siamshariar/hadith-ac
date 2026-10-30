@@ -12,8 +12,8 @@ export default function BookCard({ book, showTranslation = false }) {
   const counts = [`${formatNumber(book.totalHadith)} ${t("hadiths")}`];
   if (book.totalChapter > 1) counts.push(`${formatNumber(book.totalChapter)} ${t("chapters")}`);
 
-  // Own translations and linked HadeethEnc translations are counted apart:
-  // a book with only linked ones is not "translated".
+  // Own translations and the topic collection's linked ones are counted
+  // apart: a book with only linked ones is not "translated".
   const notes = [];
   if (showTranslation && lang !== "ar" && book.totalTranslated != null) {
     const language = languageName(lang);
@@ -27,7 +27,7 @@ export default function BookCard({ book, showTranslation = false }) {
     if (book.totalLinkedTranslated > 0) {
       notes.push({
         key: "linked",
-        text: t("bookLinkedTranslations", { count: formatNumber(book.totalLinkedTranslated), language }),
+        text: t("bookTopicTranslations", { count: formatNumber(book.totalLinkedTranslated), language }),
       });
     }
     if (!notes.length) notes.push({ key: "none", text: t("noTranslationInBook", { language }) });

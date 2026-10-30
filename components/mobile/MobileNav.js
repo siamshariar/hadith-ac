@@ -319,7 +319,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
                   <span className={styles.icon}>
                     <InfoIcon />
                   </span>
-                  <span className={styles.text}>{t("sourcesAndMethod")}</span>
+                  <span className={styles.text}>{t("dataAndMethod")}</span>
                 </Link>
               </li>
               <li>

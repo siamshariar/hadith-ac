@@ -3,7 +3,7 @@ import Container from "../core/container";
 import Grades from "../hadith/Grades";
 import { ArabicText, HadithTranslations } from "../hadith/HadithText";
 import { useLocale } from "../../contexts/LocaleContext";
-import { cleanText, hadithPath } from "../../lib/hadith";
+import { cleanText, hadithPath, namedGrades } from "../../lib/hadith";
 import { referenceText } from "../../lib/citation";
 import styles from "./banner.module.scss";
 
@@ -58,7 +58,7 @@ export default function DailyHadith({ hadith }) {
       </div>
 
       <div className={styles.footer}>
-        <Grades grades={hadith.grades} gradeText={hadith.gradeText} />
+        <Grades grades={namedGrades(hadith)} gradeText={hadith.gradeText} />
         <Link href={href} className={styles.more}>
           {t("readMore")} <span aria-hidden="true">→</span>
         </Link>

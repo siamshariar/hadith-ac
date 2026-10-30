@@ -64,30 +64,6 @@
   overflow-wrap: anywhere;
 }
 
-.credit {
-  display: contents;
-}
-
-// The edition code, linked to the source file (24px tall: a tap target).
-.creditCode {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  color: var(--main-color);
-  overflow-wrap: anywhere;
-
-  &:is(a) {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
-  }
-
-  &:is(a):hover,
-  &:is(a):focus-visible {
-    text-decoration-thickness: 2px;
-  }
-}
-
 .fallbackBadge {
   display: inline-flex;
   align-items: center;
@@ -248,7 +224,7 @@
   font-weight: 500;
 }
 
-// ---------------------------------------------------------------- linked translation (HadeethEnc)
+// ---------------------------------------------------------------- linked translation (topic collection)
 
 .translations {
   display: flex;
@@ -355,10 +331,11 @@
   }
 }
 
-.sourceLink {
-  color: var(--main-color);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+// "Nguồn: HadeethEnc.com" (SourceLine): small and muted, last under the text it credits.
+.sourceLine {
+  color: var(--txt13);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 // ---------------------------------------------------------------- extra translations
@@ -378,7 +355,7 @@
   padding-top: 12px;
   border-top: 1px solid var(--bdr11);
 
-  // HadeethEnc's translation of the same wording: the tinted box of .linked
+  // the topic collection's translation of the same wording: the tinted box of .linked
   &.linked {
     padding-top: 10px;
   }

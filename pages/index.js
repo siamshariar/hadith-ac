@@ -91,7 +91,7 @@ export default function Home({ home, languages, error }) {
 
               <p className={styles.sources}>
                 <Link href="/sources">
-                  {t("sourcesAndMethod")} <span aria-hidden="true">→</span>
+                  {t("dataAndMethod")} <span aria-hidden="true">→</span>
                 </Link>
               </p>
             </div>
