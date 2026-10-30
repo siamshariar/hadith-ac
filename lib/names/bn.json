@@ -1,0 +1,23 @@
+{
+  "_note": "Book names in this language that a source attests: Wikidata (CC0) labels, or the API's own Arabic names. Books not listed keep the API's name; chapter names are the source's.",
+  "books": {
+    "sahih-al-bukhari": "সহীহ বুখারী",
+    "sahih-muslim": "সহীহ মুসলিম",
+    "sunan-abu-dawud": "সুনানে আবু দাউদ",
+    "jami-at-tirmidhi": "সুনান আত-তিরমিজী",
+    "sunan-an-nasai": "সুনানে নাসাই",
+    "sunan-ibn-majah": "সুনানে ইবনে মাজাহ",
+    "muwatta-malik": "মুয়াত্তা ইমাম মালিক",
+    "40-hadith-nawawi": "ইমাম নববির চল্লিশ হাদিস"
+  },
+  "bookSources": {
+    "sahih-al-bukhari": "wikidata:Q1023470 সহীহ বুখারী",
+    "sahih-muslim": "wikidata:Q886659 সহীহ মুসলিম",
+    "sunan-abu-dawud": "wikidata:Q947278 সুনানে আবু দাউদ",
+    "jami-at-tirmidhi": "wikidata:Q2998769 সুনান আত-তিরমিজী",
+    "sunan-an-nasai": "wikidata:Q2175237 সুনানে নাসাই",
+    "sunan-ibn-majah": "wikidata:Q1187931 সুনানে ইবনে মাজাহ",
+    "muwatta-malik": "wikidata:Q1050556 মুয়াত্তা ইমাম মালিক",
+    "40-hadith-nawawi": "wikidata:Q10957293 ইমাম নববির চল্লিশ হাদিস"
+  }
+}
