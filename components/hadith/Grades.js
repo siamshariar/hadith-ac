@@ -41,3 +41,28 @@ export default function Grades({ grades, gradeText, variant = "compact" }) {
     </ul>
   );
 }
+
+// The first grade the source gives, with its grader ("Sahih · Al-Albani"),
+// or HadeethEnc's gradeText; "+2" when more graders follow (detail page).
+export function GradeBadge({ grades, gradeText }) {
+  const { t } = useLocale();
+  const list = Array.isArray(grades) ? grades.filter((grade) => grade && grade.grade) : [];
+  const first = list[0];
+  if (!gradeText && !first) return null;
+  const more = gradeText ? 0 : list.length - 1;
+  const all = list.map((grade) => `${grade.graderName}: ${grade.grade}`).join("; ");
+
+  return (
+    <span className={styles.gradeBadge} title={all ? `${t("grades")}: ${all}` : t("grades")}>
+      <span className="visually_hidden">{t("grades")}: </span>
+      <bdi className={styles.gradeBadgeGrade}>{gradeText || first.grade}</bdi>
+      {first && first.graderName && <span className={styles.gradeBadgeGrader}>· {first.graderName}</span>}
+      {more > 0 && (
+        <span className={styles.gradeBadgeMore}>
+          <span aria-hidden="true">+{more}</span>
+          <span className="visually_hidden"> ({t("moreGrades", { count: more })})</span>
+        </span>
+      )}
+    </span>
+  );
+}

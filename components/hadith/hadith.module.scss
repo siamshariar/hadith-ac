@@ -1,20 +1,17 @@
 // ---------------------------------------------------------------- Arabic
 
+// 24px on phones, 28px on desktops at the default size (--fs-arabic: 28px,
+// changed in the reader settings).
 .arabic {
   font-family: var(--font-arabic);
-  font-size: calc(var(--fs-arabic) * 0.78);
+  font-size: calc(var(--fs-arabic) * 0.86);
   font-weight: 400;
-  line-height: 2.05;
+  line-height: 1.9;
   color: var(--txt00);
   text-align: right;
   white-space: pre-line;
   overflow-wrap: anywhere;
   word-spacing: 0.04em;
-}
-
-.arabicLarge {
-  font-size: calc(var(--fs-arabic) * 0.86);
-  line-height: 2.15;
 }
 
 .clampArabic {
@@ -25,11 +22,8 @@
   overflow: hidden;
 }
 
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 1024px) {
   .arabic {
-    font-size: calc(var(--fs-arabic) * 0.86);
-  }
-  .arabicLarge {
     font-size: var(--fs-arabic);
   }
 }
@@ -92,6 +86,13 @@
   overflow-wrap: anywhere;
 }
 
+// "Narrated 'Umar bin Al-Khattab:" on its own line (HadithText).
+.narrator {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
 .clampTranslation {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -117,6 +118,30 @@
 }
 
 // ---------------------------------------------------------------- grades
+
+// First grade and its grader, next to the citation (GradeBadge).
+.gradeBadge {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 4px;
+  max-width: 100%;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--grade-bg);
+  color: var(--grade-txt);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.gradeBadgeGrade {
+  font-weight: 600;
+}
+
+.gradeBadgeGrader,
+.gradeBadgeMore {
+  opacity: 0.85;
+}
 
 .gradeChips {
   display: flex;
@@ -231,6 +256,32 @@
       text-decoration: underline;
     }
   }
+}
+
+.linkedLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--main-color);
+  font-size: 13px;
+  font-weight: 500;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}
+
+// Above a list (LinkedTranslationNote).
+.linkedListNote {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-inline-start: 3px solid var(--theme-color);
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--txt11);
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .fallbackDetails {

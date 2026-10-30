@@ -1,39 +1,70 @@
-import { useState } from "react";
 import Link from "next/link";
 import Skeleton from "react-loading-skeleton";
 import { useLocale } from "../../contexts/LocaleContext";
-import { cleanText, hadithPath } from "../../lib/hadith";
-import { referenceText } from "../../lib/citation";
+import {
+  UNASSIGNED_CHAPTER,
+  bookPath,
+  chapterPath,
+  citablePath,
+  cleanText,
+  isCategoryBook,
+  shortBookName,
+} from "../../lib/hadith";
+import { inBookText, referenceText } from "../../lib/citation";
 import HadithOptions from "../content/HadithOptions";
-import HadithReference from "./HadithReference";
-import { ArabicText, HadithTranslations, needsClamp } from "./HadithText";
+import { GradeBadge } from "./Grades";
+import { ArabicText, HadithTranslations, LinkedTranslationNote, shownTranslation } from "./HadithText";
 import styles from "./HadithCard.module.scss";
 
-// One hadith in a list (chapter, category, search, bookmarks). The citation
-// is the book plus `referenceNumber`, the number people cite.
-export default function HadithCard({ hadith, book, context, isBookmarkPage, updateBookmarksData }) {
+// Book › chapter, for lists that mix chapters (search results).
+function CardContext({ hadith, book }) {
   const { t } = useLocale();
-  const [expanded, setExpanded] = useState(false);
-  const clampable = needsClamp(hadith);
-  const clamped = clampable && !expanded;
-  const href = hadithPath(hadith);
+  if (!book) return null;
+  const chapterNo = hadith.chapterNo;
+  const showChapter = chapterNo != null && !isCategoryBook(book);
+  return (
+    <p className={styles.context}>
+      <Link href={bookPath(book)}>{shortBookName(book)}</Link>
+      {showChapter && (
+        <>
+          <span className={styles.contextSep} aria-hidden="true">
+            ›
+          </span>
+          <Link href={chapterPath(book.slug, chapterNo)}>
+            {chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapterNo}`}
+          </Link>
+        </>
+      )}
+    </p>
+  );
+}
+
+// One hadith in a list (chapter, category, search, bookmarks), in full, as
+// sunnah.com and HadeethEnc list them. The header is the compact reference:
+// the citation (book plus `referenceNumber`, the number people cite), the
+// in-book reference when the list knows it, and the first grade; the full
+// grade table is on the detail page.
+// - showContext: book › chapter above the citation (search results);
+// - inBookReference: { chapterNo, position } when the API item has none
+//   (the chapter page knows each hadith's position).
+export default function HadithCard({ hadith, book, showContext = false, inBookReference, isBookmarkPage, updateBookmarksData }) {
+  const { t } = useLocale();
+  const href = citablePath(hadith, book);
+  const inBook = isCategoryBook(book) ? null : inBookText(hadith.inBookReference || inBookReference, t);
+  const { linked, own } = shownTranslation(hadith);
+  // Without any translation the Arabic stays, even when the reader hides it.
+  const arabicOnly = !linked && !own;
 
   return (
     <article className={styles.card} id={`hadith-${hadith.id}`}>
       <header className={styles.head}>
-        <div className={styles.reference}>
+        {showContext && <CardContext hadith={hadith} book={book} />}
+        <div className={styles.refLine}>
           <Link href={href} className={styles.citation}>
             {referenceText(hadith, book, t)}
           </Link>
-          {context && <span className={styles.context}>{context}</span>}
-        </div>
-        <div className={styles.options}>
-          <HadithOptions
-            hadith={hadith}
-            book={book}
-            isBookmarkPage={isBookmarkPage}
-            updateBookmarksData={updateBookmarksData}
-          />
+          {inBook && <span className={styles.inBook}>{inBook}</span>}
+          <GradeBadge grades={hadith.grades} gradeText={hadith.gradeText} />
         </div>
       </header>
 
@@ -44,35 +75,32 @@ export default function HadithCard({ hadith, book, context, isBookmarkPage, upda
       )}
 
       {/* Arabic and translation side by side when the card is wide enough
-          (container query), stacked otherwise; the Arabic comes first in the
-          reading order. */}
+          (container query), stacked otherwise; the reader settings choose
+          which comes first and can hide the Arabic. */}
       <div className={styles.texts}>
-        <div className={styles.arabicCol}>
-          <ArabicText text={hadith.arabic} clamped={clamped} />
+        <div className={`${styles.arabicCol} ${arabicOnly ? styles.arabicOnly : ""}`}>
+          <ArabicText text={hadith.arabic} />
         </div>
         <div className={styles.translationCol}>
-          <HadithTranslations hadith={hadith} clamped={clamped} />
+          <HadithTranslations hadith={hadith} compact />
         </div>
       </div>
 
-      <HadithReference hadith={hadith} book={book} />
-
       <footer className={styles.foot}>
-        <div className={styles.actions}>
-          {clampable && (
-            <button
-              type="button"
-              className={styles.toggle}
-              onClick={() => setExpanded((value) => !value)}
-              aria-expanded={expanded}
-            >
-              {expanded ? t("showLess") : t("showMore")}
-            </button>
-          )}
-          <Link href={href} className={styles.details}>
-            {t("viewDetails")} <span aria-hidden="true">→</span>
-          </Link>
-        </div>
+        <HadithOptions
+          hadith={hadith}
+          book={book}
+          isBookmarkPage={isBookmarkPage}
+          updateBookmarksData={updateBookmarksData}
+          showDetails
+        />
+        <Link href={href} className={styles.details}>
+          {t("viewDetails")}
+          <span className={styles.detailsArrow} aria-hidden="true">
+            {" "}
+            →
+          </span>
+        </Link>
       </footer>
     </article>
   );
@@ -100,6 +128,8 @@ export function HadithCardSkeleton({ count = 3 }) {
 }
 
 // A list of cards that switches to skeletons while the next page loads.
+// When cards show HadeethEnc's linked translations, what that label means is
+// said once, above the list (LinkedTranslationNote).
 export function HadithList({ hadiths, loading, renderCard, skeletonCount = 4 }) {
   if (loading) {
     return (
@@ -108,5 +138,10 @@ export function HadithList({ hadiths, loading, renderCard, skeletonCount = 4 }) 
       </div>
     );
   }
-  return <div className={styles.list}>{hadiths.map((hadith) => renderCard(hadith))}</div>;
+  return (
+    <>
+      <LinkedTranslationNote hadiths={hadiths} />
+      <div className={styles.list}>{hadiths.map((hadith, index) => renderCard(hadith, index))}</div>
+    </>
+  );
 }

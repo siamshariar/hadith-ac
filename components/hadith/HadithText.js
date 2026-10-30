@@ -5,16 +5,31 @@ import { Highlighted } from "./Highlight";
 import styles from "./hadith.module.scss";
 
 // Arabic is always present and always rendered right-to-left.
-export function ArabicText({ text, clamped = false, large = false }) {
+export function ArabicText({ text, clamped = false }) {
   if (!text) return null;
   return (
-    <div
-      className={`${styles.arabic} ${large ? styles.arabicLarge : ""} ${clamped ? styles.clampArabic : ""}`}
-      dir="rtl"
-      lang="ar"
-    >
+    <div className={`${styles.arabic} ${clamped ? styles.clampArabic : ""}`} dir="rtl" lang="ar">
       <Highlighted text={cleanText(text)} field="arabic" />
     </div>
+  );
+}
+
+// English translations open with the narrator ("Narrated 'Umar bin
+// Al-Khattab:"); like sunnah.com, that line is set apart in bold. Only the
+// layout changes: the words are the source's.
+const NARRATOR = /^(Narrated\s[^:\n]{1,160}):\s*/;
+
+function TranslationText({ text, code }) {
+  const clean = cleanText(text);
+  const match = code === "en" ? clean.match(NARRATOR) : null;
+  if (!match) return <Highlighted text={clean} field={code} />;
+  return (
+    <>
+      <strong className={styles.narrator}>
+        <Highlighted text={`${match[1]}:`} field={code} />
+      </strong>
+      <Highlighted text={clean.slice(match[0].length)} field={code} />
+    </>
   );
 }
 
@@ -59,7 +74,7 @@ export function Translation({ translation, clamped = false, showNote = false }) 
         lang={code}
         dir={directionOf(code)}
       >
-        <Highlighted text={cleanText(translation.text)} field={code} />
+        <TranslationText text={translation.text} code={code} />
       </div>
     </div>
   );
@@ -80,41 +95,54 @@ export function shownTranslation(hadith) {
 // (API `linkedTranslation`). It is a different text from the hadith's own
 // translation, usually shorter and without the chain of narrators, so it has
 // its own block, label and note, and is never merged with anything else.
-export function LinkedTranslation({ linked, clamped = false }) {
+// `compact` (lists): the label and a link only; the list says once what the
+// label means (LinkedTranslationNote).
+export function LinkedTranslation({ linked, clamped = false, compact = false }) {
   const { t, languageName, directionOf } = useLocale();
   const code = linked.languageCode;
   const label = t("linkedTranslation", { language: languageName(code) });
+  const source = hadithPath({ id: linked.hadithId });
 
   return (
     <div className={styles.linked}>
       <div className={styles.labelRow}>
         <span className={styles.linkedBadge}>{label}</span>
-        {linked.author && (
-          <span className={styles.author}>
-            {t("translator")}: {linked.author}
-          </span>
-        )}
-        {linked.edition && linked.edition.code && (
-          <span className={styles.author}>
-            {t("edition")} {linked.edition.code}
-            {linked.edition.sourceUrl && (
-              <>
-                {" · "}
-                <a href={linked.edition.sourceUrl} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
-                  {t("sourceLink")}
-                </a>
-              </>
+        {compact ? (
+          <Link href={source} className={styles.linkedLink}>
+            {t("linkedTranslationLink")} <span aria-hidden="true">→</span>
+          </Link>
+        ) : (
+          <>
+            {linked.author && (
+              <span className={styles.author}>
+                {t("translator")}: {linked.author}
+              </span>
             )}
-          </span>
+            {linked.edition && linked.edition.code && (
+              <span className={styles.author}>
+                {t("edition")} {linked.edition.code}
+                {linked.edition.sourceUrl && (
+                  <>
+                    {" · "}
+                    <a href={linked.edition.sourceUrl} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
+                      {t("sourceLink")}
+                    </a>
+                  </>
+                )}
+              </span>
+            )}
+          </>
         )}
       </div>
       {/* Said before the text, so it is read as what it is. */}
-      <p className={styles.linkedNote}>
-        {t("linkedTranslationNote")}{" "}
-        <Link href={hadithPath({ id: linked.hadithId })}>
-          {t("linkedTranslationLink")} <span aria-hidden="true">→</span>
-        </Link>
-      </p>
+      {!compact && (
+        <p className={styles.linkedNote}>
+          {t("linkedTranslationNote")}{" "}
+          <Link href={source}>
+            {t("linkedTranslationLink")} <span aria-hidden="true">→</span>
+          </Link>
+        </p>
+      )}
       <div
         className={`${styles.translationText} ${clamped ? styles.clampTranslation : ""}`}
         lang={code}
@@ -126,8 +154,22 @@ export function LinkedTranslation({ linked, clamped = false }) {
   );
 }
 
+// Said once above a list whose cards show linked translations.
+export function LinkedTranslationNote({ hadiths }) {
+  const { t, languageName } = useLocale();
+  const linked = (hadiths || []).map((hadith) => shownTranslation(hadith).linked).find(Boolean);
+  if (!linked) return null;
+  const language = languageName(linked.languageCode);
+  return (
+    <p className={styles.linkedListNote} role="note">
+      {t("linkedListNote", { label: t("linkedTranslation", { language }), language })}
+    </p>
+  );
+}
+
 // Cards, the detail page and the daily hadith all render translations here.
-export function HadithTranslations({ hadith, clamped = false, showNote = false }) {
+// `compact`: the short linked-translation label of the cards.
+export function HadithTranslations({ hadith, clamped = false, showNote = false, compact = false }) {
   const { t, languageName } = useLocale();
   const { linked, own } = shownTranslation(hadith);
 
@@ -135,7 +177,7 @@ export function HadithTranslations({ hadith, clamped = false, showNote = false }
 
   return (
     <div className={styles.translations}>
-      <LinkedTranslation linked={linked} clamped={clamped} />
+      <LinkedTranslation linked={linked} clamped={clamped} compact={compact} />
       {own && (
         <details className={styles.fallbackDetails}>
           <summary>{t("showFallbackTranslation", { language: languageName(own.languageCode) })}</summary>
@@ -144,15 +186,4 @@ export function HadithTranslations({ hadith, clamped = false, showNote = false }
       )}
     </div>
   );
-}
-
-// Long texts are clamped in lists (full text stays in the HTML).
-export const ARABIC_CLAMP_LENGTH = 420;
-export const TRANSLATION_CLAMP_LENGTH = 520;
-
-export function needsClamp(hadith) {
-  const arabic = (hadith && hadith.arabic) || "";
-  const { linked, own } = shownTranslation(hadith);
-  const shown = (linked || own || {}).text || "";
-  return arabic.length > ARABIC_CLAMP_LENGTH || shown.length > TRANSLATION_CLAMP_LENGTH;
 }

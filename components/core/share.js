@@ -4,6 +4,7 @@ import Modal from "@mui/material/Modal";
 import Backdrop from "@mui/material/Backdrop";
 import Fade from "@mui/material/Fade";
 import CloseIcon from "../icons/Close";
+import { useLocale } from "../../contexts/LocaleContext";
 
 import {
   EmailShareButton,
@@ -33,11 +34,13 @@ import {
 import styles from "./share.module.scss";
 
 export default function Share({ open, closer, url, title }) {
+  const { t } = useLocale();
   return (
     <Modal
       open={open}
       onClose={closer(false)}
       className={styles.root}
+      aria-labelledby="share-title"
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{
@@ -49,15 +52,18 @@ export default function Share({ open, closer, url, title }) {
     >
       <Fade in={open} timeout={100} style={{ transitionDelay: "0ms" }}>
         <div className={styles.modal}>
-          <span className={styles.close} onClick={closer(false)}>
+          <button type="button" className={styles.close} onClick={closer(false)} aria-label={t("close")} title={t("close")}>
             <CloseIcon />
-          </span>
+          </button>
 
-          <div className={styles.title}>Share verse</div>
+          <h2 id="share-title" className={styles.title}>
+            {t("shareHadith")}
+          </h2>
 
           <div className={styles.lists}>
             <div className={styles.item}>
               <EmailShareButton
+                aria-label="Email"
                 url={url}
                 onShareWindowClose={closer(false)}
                 subject={title}
@@ -67,13 +73,14 @@ export default function Share({ open, closer, url, title }) {
             </div>
 
             <div className={styles.item}>
-              <FacebookShareButton url={url} onShareWindowClose={closer(false)}>
+              <FacebookShareButton aria-label="Facebook" url={url} onShareWindowClose={closer(false)}>
                 <FacebookIcon size={32} round={true} />
               </FacebookShareButton>
             </div>
 
             <div className={styles.item}>
               <TwitterShareButton
+                aria-label="X (Twitter)"
                 url={url}
                 onShareWindowClose={closer(false)}
                 title={title}
@@ -84,6 +91,7 @@ export default function Share({ open, closer, url, title }) {
 
             <div className={styles.item}>
               <LinkedinShareButton
+                aria-label="LinkedIn"
                 url={url}
                 onShareWindowClose={closer(false)}
                 title={title}
@@ -94,6 +102,7 @@ export default function Share({ open, closer, url, title }) {
 
             <div className={styles.item}>
               <WhatsappShareButton
+                aria-label="WhatsApp"
                 url={url}
                 onShareWindowClose={closer(false)}
                 title={title}
@@ -104,6 +113,7 @@ export default function Share({ open, closer, url, title }) {
 
             <div className={styles.item}>
               <LineShareButton
+                aria-label="LINE"
                 url={url}
                 onShareWindowClose={closer(false)}
                 title={title}
@@ -114,6 +124,7 @@ export default function Share({ open, closer, url, title }) {
 
             <div className={styles.item}>
               <TelegramShareButton
+                aria-label="Telegram"
                 url={url}
                 onShareWindowClose={closer(false)}
                 title={title}
@@ -124,6 +135,7 @@ export default function Share({ open, closer, url, title }) {
 
             <div className={styles.item}>
               <ViberShareButton
+                aria-label="Viber"
                 url={url}
                 onShareWindowClose={closer(false)}
                 title={title}
@@ -134,6 +146,7 @@ export default function Share({ open, closer, url, title }) {
 
             <div className={styles.item}>
               <RedditShareButton
+                aria-label="Reddit"
                 url={url}
                 onShareWindowClose={closer(false)}
                 title={title}
@@ -144,6 +157,7 @@ export default function Share({ open, closer, url, title }) {
 
             <div className={styles.item}>
               <TumblrShareButton
+                aria-label="Tumblr"
                 url={url}
                 onShareWindowClose={closer(false)}
                 title={title}

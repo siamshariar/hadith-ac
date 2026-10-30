@@ -1,218 +1,208 @@
 "use client";
 
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
+import Link from "next/link";
 import { PinContext } from "../../contexts/PinContext";
 import { BookmarkContext } from "../../contexts/BookmarkContext";
 import { useLocale } from "../../contexts/LocaleContext";
-import { isCurrentStoredRef, storedHadithRef } from "../../lib/hadith";
-import { buildText } from "../../lib/citation";
-import Popover from "@mui/material/Popover";
-import MenuList from "@mui/material/MenuList";
+import { citablePath, isCurrentStoredRef, storedHadithRef } from "../../lib/hadith";
+import { buildCitation, buildText, permalink, referenceText, reportErrorHref } from "../../lib/citation";
+import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import IconButton from "@mui/material/IconButton";
 import Snackbar from "@mui/material/Snackbar";
 import AddBookmark from "../bookmark/add";
 import RemoveBookmark from "../bookmark/remove";
+import Share from "../core/share";
 import BookmarkIcon from "../icons/Bookmark";
 import BookmarkBorder from "../icons/BookmarkBorder";
-import MoreIcon from "../icons/MoreVert";
+import FileCopyIcon from "../icons/FileCopy";
+import LinkIcon from "../icons/Link";
+import ShareIcon from "../icons/ShareOutlined";
+import MoreIcon from "../icons/MoreHoriz";
 import UnpinIcon from "../icons/Pin";
 import PinIcon from "../icons/PinOutline";
-import FileCopyIcon from "../icons/FileCopy";
+import FeedbackIcon from "../icons/Feedback";
+import EastIcon from "../icons/East";
 
 import styles from "./HadithOptions.module.scss";
 
-// The ⋮ menu: bookmark, pin, copy text. Citation, permalink and share are
-// visible buttons in the reference block (components/hadith/HadithReference).
-// `hadith` is an API hadith object, `book` its collection ({ name, slug ... }).
-const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage }) => {
+// One row of 44px icon buttons for a hadith (cards and the detail page):
+// bookmark, copy (text / citation / link), share, and ⋯ for pin, details and
+// "report an error". `hadith` is an API hadith object, `book` its collection.
+// `showDetails`: add "view details" to the ⋯ menu (lists).
+const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage, showDetails = false }) => {
   const locale = useLocale();
   const { t } = locale;
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  const [copyAnchor, setCopyAnchor] = useState(null);
+  const [moreAnchor, setMoreAnchor] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const citation = referenceText(hadith, book, t);
+  const url = permalink(hadith, book);
+  const menuId = `hadith-${hadith.id}`;
 
-  const handlePopoverOpen = (event) => setAnchorEl(event.currentTarget);
-  const handlePopoverClose = () => setAnchorEl(null);
-
-  //snackbar
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setSnackbarOpen(false);
+  const copy = (text) => {
+    setCopyAnchor(null);
+    if (typeof navigator === "undefined" || !navigator.clipboard) return;
+    navigator.clipboard
+      .writeText(text)
+      .then(() => setMessage(t("copied")))
+      .catch(() => {});
   };
 
-  // Arabic and the translation(s) shown, each labelled with language and author.
-  const handleCopyText = () => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard
-        .writeText(buildText(hadith, book, locale))
-        .then(() => setSnackbarOpen(true))
-        .catch(() => {});
+  const share = () => {
+    const title = `${citation} | Hadith.vn`;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({ title, url }).catch(() => {});
+    } else {
+      setShareOpen(true);
     }
-    handlePopoverClose();
+  };
+
+  const closeShare = (open) => (event) => {
+    if (event && event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) return;
+    setShareOpen(open);
   };
 
   // bookmarks (only entries saved against the current API ids count)
   const { bookmarks } = useContext(BookmarkContext);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [bookmarkKey, setBookmarkKey] = useState("");
-
-  useEffect(() => {
-    let found = false;
-    for (let [key, value] of Object.entries(bookmarks || {})) {
-      const entries = (value && value.entry) || [];
-      if (entries.some((el) => isCurrentStoredRef(el) && el.id == hadith.id)) {
-        setBookmarkKey(key);
-        found = true;
-        break;
-      }
-    }
-    setIsBookmarked(found);
-  }, [bookmarks, anchorEl, hadith.id]);
-
+  const bookmarkKey =
+    Object.keys(bookmarks || {}).find((key) => {
+      const entries = (bookmarks[key] && bookmarks[key].entry) || [];
+      return entries.some((el) => isCurrentStoredRef(el) && el.id == hadith.id);
+    }) || "";
+  const isBookmarked = Boolean(bookmarkKey);
   const [addBookmarkOpen, setAddBookmarkOpen] = useState(false);
   const [removeBookmarkOpen, setRemoveBookmarkOpen] = useState(false);
 
-  const handleAddBookmark = () => {
-    handlePopoverClose();
-    setAddBookmarkOpen(true);
-  };
-
-  const handleRemoveBookmark = () => {
-    handlePopoverClose();
-    setRemoveBookmarkOpen(true);
-  };
-
   const handleBookmarkClose = (open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
+    if (event && event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) return;
     setAddBookmarkOpen(open);
     setRemoveBookmarkOpen(open);
   };
 
-  // pin options
+  // pins
   const { pin, addPin, removePin } = useContext(PinContext);
-  const [isPinned, setIsPinned] = useState(false);
-
-  useEffect(() => {
-    setIsPinned((pin || []).some((el) => isCurrentStoredRef(el) && el.id == hadith.id));
-  }, [pin, hadith.id]);
-
-  const handleAddPin = () => {
-    addPin(storedHadithRef(hadith, book));
-    handlePopoverClose();
+  const isPinned = (pin || []).some((el) => isCurrentStoredRef(el) && el.id == hadith.id);
+  const togglePin = () => {
+    if (isPinned) removePin(hadith);
+    else addPin(storedHadithRef(hadith, book));
+    setMoreAnchor(null);
   };
 
-  const handleRemovePin = () => {
-    removePin(hadith);
-    handlePopoverClose();
+  const bookmarkLabel = isBookmarked ? t("removeBookmark") : t("bookmark");
+  const menuProps = {
+    anchorOrigin: { vertical: "bottom", horizontal: "left" },
+    transformOrigin: { vertical: "top", horizontal: "left" },
+    disableScrollLock: true,
+    classes: { paper: styles.paper },
   };
 
   return (
     <>
-      <Snackbar
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        message={t("copied")}
-      />
-
-      <AddBookmark
-        open={addBookmarkOpen}
-        closer={handleBookmarkClose}
-        entry={storedHadithRef(hadith, book)}
-      />
-
-      <RemoveBookmark
-        open={removeBookmarkOpen}
-        closer={handleBookmarkClose}
-        hadith={hadith}
-        updateBookmarksData={updateBookmarksData}
-        bookmarkKey={bookmarkKey}
-        isBookmarkPage={isBookmarkPage}
-      />
-
-      <div className={styles.wrapper}>
-        <div className={styles.action}>
-          <IconButton
-            className={styles.more_icon}
-            onClick={handlePopoverOpen}
-            focusRipple={false}
-            aria-label={t("hadithOptions")}
-            aria-haspopup="menu"
-          >
-            <MoreIcon />
-          </IconButton>
-
-          <Popover
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handlePopoverClose}
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-            disableScrollLock={true}
-            classes={{ paper: styles.custom_paper }}
-          >
-            <MenuList>
-              {isBookmarked ? (
-                <MenuItem onClick={handleRemoveBookmark}>
-                  <span className={styles.icon}>
-                    <BookmarkIcon />
-                  </span>
-                  <span className={styles.text}>{t("removeBookmark")}</span>
-                </MenuItem>
-              ) : (
-                <MenuItem onClick={handleAddBookmark}>
-                  <span className={styles.icon}>
-                    <BookmarkBorder />
-                  </span>
-                  <span className={styles.text}>{t("bookmark")}</span>
-                </MenuItem>
-              )}
-
-              {isPinned ? (
-                <MenuItem onClick={handleRemovePin}>
-                  <span className={styles.icon}>
-                    <UnpinIcon />
-                  </span>
-                  <span className={styles.text}>{t("unpin")}</span>
-                </MenuItem>
-              ) : (
-                <MenuItem onClick={handleAddPin}>
-                  <span className={styles.icon}>
-                    <PinIcon />
-                  </span>
-                  <span className={styles.text}>{t("pin")}</span>
-                </MenuItem>
-              )}
-
-              <MenuItem onClick={handleCopyText}>
-                <span className={styles.icon}>
-                  <FileCopyIcon />
-                </span>
-                <span className={styles.text}>{t("copyText")}</span>
-              </MenuItem>
-            </MenuList>
-          </Popover>
-        </div>
+      <div className={styles.row} role="group" aria-label={t("hadithActions")}>
+        <button
+          type="button"
+          className={`${styles.button} ${isBookmarked ? styles.active : ""}`}
+          onClick={() => (isBookmarked ? setRemoveBookmarkOpen(true) : setAddBookmarkOpen(true))}
+          aria-label={bookmarkLabel}
+          title={bookmarkLabel}
+        >
+          {isBookmarked ? <BookmarkIcon /> : <BookmarkBorder />}
+        </button>
+        <button
+          type="button"
+          className={styles.button}
+          onClick={(event) => setCopyAnchor(event.currentTarget)}
+          aria-label={t("copyMenu")}
+          title={t("copyMenu")}
+          aria-haspopup="menu"
+          aria-expanded={copyAnchor ? "true" : "false"}
+          aria-controls={copyAnchor ? `${menuId}-copy` : undefined}
+        >
+          <FileCopyIcon />
+        </button>
+        <button type="button" className={styles.button} onClick={share} aria-label={t("share")} title={t("share")}>
+          <ShareIcon />
+        </button>
+        <button
+          type="button"
+          className={styles.button}
+          onClick={(event) => setMoreAnchor(event.currentTarget)}
+          aria-label={t("moreHadithActions")}
+          title={t("moreHadithActions")}
+          aria-haspopup="menu"
+          aria-expanded={moreAnchor ? "true" : "false"}
+          aria-controls={moreAnchor ? `${menuId}-more` : undefined}
+        >
+          <MoreIcon />
+        </button>
       </div>
+
+      <Menu id={`${menuId}-copy`} anchorEl={copyAnchor} open={Boolean(copyAnchor)} onClose={() => setCopyAnchor(null)} {...menuProps}>
+        <MenuItem onClick={() => copy(buildText(hadith, book, locale))}>
+          <span className={styles.icon}>
+            <FileCopyIcon />
+          </span>
+          <span className={styles.text}>{t("copyText")}</span>
+        </MenuItem>
+        <MenuItem onClick={() => copy(buildCitation(hadith, book, locale))}>
+          <span className={styles.icon}>
+            <FileCopyIcon />
+          </span>
+          <span className={styles.text}>{t("copyCitation")}</span>
+        </MenuItem>
+        <MenuItem onClick={() => copy(url)}>
+          <span className={styles.icon}>
+            <LinkIcon />
+          </span>
+          <span className={styles.text}>{t("copyLink")}</span>
+        </MenuItem>
+      </Menu>
+
+      <Menu id={`${menuId}-more`} anchorEl={moreAnchor} open={Boolean(moreAnchor)} onClose={() => setMoreAnchor(null)} {...menuProps}>
+        <MenuItem onClick={togglePin}>
+          <span className={styles.icon}>{isPinned ? <UnpinIcon /> : <PinIcon />}</span>
+          <span className={styles.text}>{isPinned ? t("unpin") : t("pin")}</span>
+        </MenuItem>
+        {showDetails && (
+          <MenuItem component={Link} href={citablePath(hadith, book)} onClick={() => setMoreAnchor(null)}>
+            <span className={styles.icon}>
+              <EastIcon />
+            </span>
+            <span className={styles.text}>{t("viewDetails")}</span>
+          </MenuItem>
+        )}
+        <MenuItem component="a" href={reportErrorHref(hadith, book, t)} onClick={() => setMoreAnchor(null)}>
+          <span className={styles.icon}>
+            <FeedbackIcon />
+          </span>
+          <span className={styles.text}>{t("reportError")}</span>
+        </MenuItem>
+      </Menu>
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        open={Boolean(message)}
+        autoHideDuration={2500}
+        onClose={() => setMessage(null)}
+        message={message || ""}
+      />
+
+      {addBookmarkOpen && (
+        <AddBookmark open={addBookmarkOpen} closer={handleBookmarkClose} entry={storedHadithRef(hadith, book)} />
+      )}
+      {removeBookmarkOpen && (
+        <RemoveBookmark
+          open={removeBookmarkOpen}
+          closer={handleBookmarkClose}
+          hadith={hadith}
+          updateBookmarksData={updateBookmarksData}
+          bookmarkKey={bookmarkKey}
+          isBookmarkPage={isBookmarkPage}
+        />
+      )}
+      {shareOpen && <Share open={shareOpen} closer={closeShare} url={url} title={`${citation} | Hadith.vn`} />}
     </>
   );
 };
