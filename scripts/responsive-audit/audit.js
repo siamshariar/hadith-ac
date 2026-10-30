@@ -129,7 +129,8 @@ function inspect() {
   }
   const noName = [];
   for (const el of document.querySelectorAll('a[href], button, [role=button]')) {
-    if (!visible(el)) continue;
+    // hidden from assistive technology on purpose (decorative icons)
+    if (!visible(el) || el.closest('[aria-hidden="true"]')) continue;
     const name = (el.getAttribute('aria-label') || el.textContent || el.getAttribute('title') || '').trim()
       || [...el.querySelectorAll('img[alt], svg title')].map(x => x.getAttribute('alt') || x.textContent).join('').trim();
     if (!name) noName.push(sel(el));
