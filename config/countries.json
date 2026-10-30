@@ -7,7 +7,7 @@
     "lib/locales has that catalog, otherwise the interface falls back to English.",
     "Check against a running API: npm run check:sites"
   ],
-  "vn": { "name": "Vietnam", "localization": "vn", "language": "vi", "ui": "vi", "ogLocale": "vi_VN", "siteName": "Hadith.vn", "logo": "/img/logo.png", "contactEmail": "quran.vn@gmail.com" },
+  "vn": { "name": "Vietnam", "localization": "vn", "language": "vi", "ui": "vi", "ogLocale": "vi_VN", "siteName": "Hadith.vn", "logo": "/img/logo.png", "logoDark": "/img/logo_dark.png", "contactEmail": "quran.vn@gmail.com" },
   "bd": { "name": "Bangladesh", "localization": "bn", "language": "bn", "ui": "bn", "ogLocale": "bn_BD" },
   "usa": { "name": "United States", "localization": "en", "language": "en", "ui": "en", "ogLocale": "en_US" },
   "kh": { "name": "Cambodia", "localization": "kh", "language": "km", "ui": "km", "ogLocale": "km_KH" },
