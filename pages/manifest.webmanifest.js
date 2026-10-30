@@ -14,7 +14,7 @@ export async function getServerSideProps({ res }) {
     scope: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#466548",
+    theme_color: "#173A1D",
     icons: [{ src: "/img/favicon/android-chrome-192x192.png", sizes: "192x192", type: "image/png" }],
   };
   res.setHeader("Content-Type", "application/manifest+json; charset=utf-8");

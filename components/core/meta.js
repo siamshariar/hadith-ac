@@ -16,7 +16,7 @@ export default function Meta(props) {
       <meta httpEquiv="X-UA-Compatible" content="ie=edge" />
 
       {/* Android phone */}
-      <meta name="theme-color" content="#466548" />
+      <meta name="theme-color" content="#173A1D" />
       <meta name="mobile-web-app-capable" content="yes" />
 
       {/* iOS phone */}
@@ -25,7 +25,7 @@ export default function Meta(props) {
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
       {/* Windows phone */}
-      <meta name="msapplication-navbutton-color" content="#466548" />
+      <meta name="msapplication-navbutton-color" content="#173A1D" />
       <meta name="msapplication-TileColor" content="#2B5797" />
       {/* <meta name="msapplication-TileImage" content="ms-icon-144x144.png`} /> */}
       {/* <meta name="msapplication-config" content="browserconfig.xml" /> */}
@@ -182,7 +182,6 @@ export default function Meta(props) {
       </title>
 
       {/* Manifest.json */}
-      {/*<link rel='manifest' href='/manifest.json' />*/}
     </Head>
   );
 }

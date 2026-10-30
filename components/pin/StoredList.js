@@ -7,14 +7,15 @@ import PinIcon from "../icons/Pin";
 import AutoStoriesIcon from "../icons/AutoStories";
 import styles from "./list.module.scss";
 
-const formatDate = (date, ui) => {
+// `locale` is the interface locale from useLocale() (BCP 47, e.g. vi-VN, bn-BD).
+const formatDate = (date, locale) => {
   const value = new Date(date);
   if (Number.isNaN(value.getTime())) return "";
   const today = new Date().toDateString() === value.toDateString();
   const options = today
     ? { hour: "numeric", minute: "numeric" }
     : { year: "numeric", month: "long", day: "numeric" };
-  return value.toLocaleString(ui === "vi" ? "vi-VN" : "en-US", options);
+  return value.toLocaleString(locale, options);
 };
 
 // Pinned hadiths (kind="pin") or the last-read history (kind="lastRead").
@@ -22,7 +23,7 @@ const formatDate = (date, ui) => {
 export default function StoredList({ kind, controller }) {
   const { pin, lastRead, archived } = useContext(PinContext);
   const router = useRouter();
-  const { t, ui } = useLocale();
+  const { t, locale } = useLocale();
   const isPin = kind === "pin";
   const items = (isPin ? pin : lastRead) || [];
   const archivedCount = (archived && archived[kind]) || 0;
@@ -55,7 +56,7 @@ export default function StoredList({ kind, controller }) {
                       {label}
                     </span>
                     {source && source !== label && <span className={styles.source_info}>{source}</span>}
-                    {!isPin && item.date && <span className={styles.time}>{formatDate(item.date, ui)}</span>}
+                    {!isPin && item.date && <span className={styles.time}>{formatDate(item.date, locale)}</span>}
                   </span>
                 </span>
               </a>

@@ -1,11 +1,13 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { useLocale } from "../../contexts/LocaleContext";
+import { site } from "../../lib/sites";
 import css from "./style.module.scss";
 import styles from "./about.module.scss";
 
 export const DEENI_URL = "http://deeniinfotech.com";
-const EMAILS = ["deeniinfotech@gmail.com", "quran.vn@gmail.com"];
+// The deployment's contact address, then Deeni Info Tech's
+const EMAILS = [...new Set([site.contactEmail, "deeniinfotech@gmail.com"])];
 
 // "Email: a@b | c@d" as mailto links (about, contact, support pages).
 export function EmailLinks({ emails = EMAILS }) {
