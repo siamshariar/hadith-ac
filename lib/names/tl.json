@@ -1,0 +1,19 @@
+{
+  "_note": "Book names in this language that a source attests: Wikidata (CC0) labels, or the API's own Arabic names. Books not listed keep the API's name; chapter names are the source's.",
+  "books": {
+    "sahih-al-bukhari": "Sahih al-Bukhari",
+    "sahih-muslim": "Sahih Muslim",
+    "sunan-abu-dawud": "Sunan Abi Dawood",
+    "jami-at-tirmidhi": "Jami` at-Tirmidhi",
+    "sunan-ibn-majah": "Sunan Ibn Maja",
+    "muwatta-malik": "Muwatta Imam Malik"
+  },
+  "bookSources": {
+    "sahih-al-bukhari": "wikidata:Q1023470 Sahih al-Bukhari",
+    "sahih-muslim": "wikidata:Q886659 Sahih Muslim",
+    "sunan-abu-dawud": "wikidata:Q947278 Sunan Abi Dawood",
+    "jami-at-tirmidhi": "wikidata:Q2998769 Jami` at-Tirmidhi",
+    "sunan-ibn-majah": "wikidata:Q1187931 Sunan Ibn Maja",
+    "muwatta-malik": "wikidata:Q1050556 Muwatta Imam Malik"
+  }
+}

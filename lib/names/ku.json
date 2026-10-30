@@ -1,0 +1,21 @@
+{
+  "_note": "Book names in this language that a source attests: Wikidata (CC0) labels, or the API's own Arabic names. Books not listed keep the API's name; chapter names are the source's.",
+  "books": {
+    "sahih-al-bukhari": "سەحیحی بوخاری",
+    "sahih-muslim": "سەحیحی موسلیم",
+    "sunan-abu-dawud": "سونەنی ئەبوو داوود",
+    "jami-at-tirmidhi": "سونەنی ترمزی",
+    "sunan-an-nasai": "سونەنی نەسائی",
+    "sunan-ibn-majah": "سونەنی ئیبن ماجە",
+    "muwatta-malik": "موەتتەئی مالیک"
+  },
+  "bookSources": {
+    "sahih-al-bukhari": "wikidata:Q1023470 سەحیحی بوخاری",
+    "sahih-muslim": "wikidata:Q886659 سەحیحی موسلیم",
+    "sunan-abu-dawud": "wikidata:Q947278 سونەنی ئەبوو داوود",
+    "jami-at-tirmidhi": "wikidata:Q2998769 سونەنی ترمزی",
+    "sunan-an-nasai": "wikidata:Q2175237 سونەنی نەسائی",
+    "sunan-ibn-majah": "wikidata:Q1187931 سونەنی ئیبن ماجە",
+    "muwatta-malik": "wikidata:Q1050556 موەتتەئی مالیک"
+  }
+}

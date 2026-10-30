@@ -1,0 +1,23 @@
+{
+  "_note": "Book names in this language that a source attests: Wikidata (CC0) labels, or the API's own Arabic names. Books not listed keep the API's name; chapter names are the source's.",
+  "books": {
+    "sahih-al-bukhari": "Sahīh al-Buchārī",
+    "sahih-muslim": "Sahīh Muslim",
+    "sunan-abu-dawud": "Sunan Abu Dawood",
+    "jami-at-tirmidhi": "Jami` at-Tirmidhi",
+    "sunan-an-nasai": "Al-Sunan al-Sughra",
+    "sunan-ibn-majah": "Sunan Ibn Māǧa",
+    "muwatta-malik": "Al-Muwatta'",
+    "40-hadith-nawawi": "Vierzig Hadithe"
+  },
+  "bookSources": {
+    "sahih-al-bukhari": "wikidata:Q1023470 Sahīh al-Buchārī",
+    "sahih-muslim": "wikidata:Q886659 Sahīh Muslim",
+    "sunan-abu-dawud": "wikidata:Q947278 Sunan Abu Dawood",
+    "jami-at-tirmidhi": "wikidata:Q2998769 Jami` at-Tirmidhi",
+    "sunan-an-nasai": "wikidata:Q2175237 Al-Sunan al-Sughra",
+    "sunan-ibn-majah": "wikidata:Q1187931 Sunan Ibn Māǧa (a de alias: the de label is as- Sunan)",
+    "muwatta-malik": "wikidata:Q1050556 Al-Muwatta'",
+    "40-hadith-nawawi": "wikidata:Q10957293 Vierzig Hadithe"
+  }
+}

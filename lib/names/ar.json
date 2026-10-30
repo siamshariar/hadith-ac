@@ -1,0 +1,27 @@
+{
+  "_note": "Book names in this language that a source attests: Wikidata (CC0) labels, or the API's own Arabic names. Books not listed keep the API's name; chapter names are the source's.",
+  "books": {
+    "sahih-al-bukhari": "صحيح البخاري",
+    "sahih-muslim": "صحيح مسلم",
+    "sunan-abu-dawud": "سنن أبي داود",
+    "jami-at-tirmidhi": "جامع الترمذي",
+    "sunan-an-nasai": "سنن النسائي",
+    "sunan-ibn-majah": "سنن ابن ماجه",
+    "muwatta-malik": "موطأ مالك",
+    "40-hadith-nawawi": "الأربعون النووية",
+    "40-hadith-qudsi": "الأحاديث القدسية",
+    "40-hadith-dehlawi": "أربعون الدهلوي"
+  },
+  "bookSources": {
+    "sahih-al-bukhari": "api:nameArabic",
+    "sahih-muslim": "api:nameArabic",
+    "sunan-abu-dawud": "api:nameArabic",
+    "jami-at-tirmidhi": "api:nameArabic",
+    "sunan-an-nasai": "api:nameArabic",
+    "sunan-ibn-majah": "api:nameArabic",
+    "muwatta-malik": "api:nameArabic",
+    "40-hadith-nawawi": "api:nameArabic",
+    "40-hadith-qudsi": "api:nameArabic",
+    "40-hadith-dehlawi": "api:nameArabic"
+  }
+}

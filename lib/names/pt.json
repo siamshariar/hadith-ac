@@ -1,0 +1,13 @@
+{
+  "_note": "Book names in this language that a source attests: Wikidata (CC0) labels, or the API's own Arabic names. Books not listed keep the API's name; chapter names are the source's.",
+  "books": {
+    "sahih-al-bukhari": "Sahih al-Bukhari",
+    "jami-at-tirmidhi": "Jami` at-Tirmidhi",
+    "muwatta-malik": "Al-Muwatta"
+  },
+  "bookSources": {
+    "sahih-al-bukhari": "wikidata:Q1023470 Sahih al-Bukhari",
+    "jami-at-tirmidhi": "wikidata:Q2998769 Jami` at-Tirmidhi",
+    "muwatta-malik": "wikidata:Q1050556 Al-Muwatta"
+  }
+}
