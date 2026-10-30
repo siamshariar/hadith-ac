@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "check:sites": "node scripts/check-sites.mjs",
+    "check:countries": "node scripts/country-matrix.mjs",
     "i18n:missing": "node scripts/i18n-missing.mjs",
     "test:e2e": "node --test scripts/e2e/"
   },
