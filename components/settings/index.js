@@ -93,6 +93,7 @@ const Language = () => {
 };
 
 const FontSize = () => {
+  const { t } = useLocale();
   const {
     fontSizeArabic,
     changeFontSizeArabic,
@@ -110,15 +111,16 @@ const FontSize = () => {
 
   return (
     <div className={`${styles.block} ${styles.font_size}`}>
-      <div className={styles.title}>Font Size</div>
+      <div className={styles.title}>{t("fontSize")}</div>
       <div className={styles.list}>
         <div className={styles.item}>
-          <div className={styles.label}>Arabic</div>
+          <div className={styles.label}>{t("arabicLabel")}</div>
           <div className={styles.sizer}>
             <IconButton
               className={styles.sizer_btn}
               onClick={() => handleFontSizeArabic(fontSizeArabic - 1)}
-              aria-label="Decrease Arabic font size"
+              aria-label={t("decreaseArabicSize")}
+              title={t("decreaseArabicSize")}
             >
               <MinusIcon />
             </IconButton>
@@ -128,19 +130,21 @@ const FontSize = () => {
             <IconButton
               className={styles.sizer_btn}
               onClick={() => handleFontSizeArabic(fontSizeArabic + 1)}
-              aria-label="Increase Arabic font size"
+              aria-label={t("increaseArabicSize")}
+              title={t("increaseArabicSize")}
             >
               <PlusIcon />
             </IconButton>
           </div>
         </div>
         <div className={styles.item}>
-          <div className={styles.label}>Translation</div>
+          <div className={styles.label}>{t("translationLabel")}</div>
           <div className={styles.sizer}>
             <IconButton
               className={styles.sizer_btn}
               onClick={() => handleFontSizeTranslation(fontSizeTranslation - 1)}
-              aria-label="Decrease font size"
+              aria-label={t("decreaseTranslationSize")}
+              title={t("decreaseTranslationSize")}
             >
               <MinusIcon />
             </IconButton>
@@ -150,7 +154,8 @@ const FontSize = () => {
             <IconButton
               className={styles.sizer_btn}
               onClick={() => handleFontSizeTranslation(fontSizeTranslation + 1)}
-              aria-label="Increase font size"
+              aria-label={t("increaseTranslationSize")}
+              title={t("increaseTranslationSize")}
             >
               <PlusIcon />
             </IconButton>
@@ -162,6 +167,7 @@ const FontSize = () => {
 };
 
 const FontFamily = () => {
+  const { t } = useLocale();
   const fontsArabic = fonts.arabic;
   const fontsTranslation = fonts.translation;
 
@@ -187,7 +193,7 @@ const FontFamily = () => {
 
   return (
     <div className={`${styles.block} ${styles.font_family}`}>
-      <div className={styles.title}>Font Family</div>
+      <div className={styles.title}>{t("fontFamily")}</div>
       <div className={styles.list}>
         <div className={styles.item}>
           <Accordion
@@ -217,7 +223,7 @@ const FontFamily = () => {
                   <DownIcon />
                 </span>
               </IconButton>
-              <div className={styles.label}>Choose Arabic Font</div>
+              <div className={styles.label}>{t("chooseArabicFont")}</div>
             </AccordionSummary>
 
             <AccordionDetails className={styles.accordion_details}>
@@ -268,7 +274,7 @@ const FontFamily = () => {
                   <DownIcon />
                 </span>
               </IconButton>
-              <div className={styles.label}>Choose Translation Font</div>
+              <div className={styles.label}>{t("chooseTranslationFont")}</div>
             </AccordionSummary>
 
             <AccordionDetails className={styles.accordion_details}>
@@ -297,6 +303,7 @@ const FontFamily = () => {
 };
 
 const Theme = () => {
+  const { t } = useLocale();
   const [expanded, setExpanded] = useState(false);
   const controlAccordion = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -309,7 +316,7 @@ const Theme = () => {
 
   return (
     <div className={`${styles.block} ${styles.theme}`}>
-      <div className={styles.title}>Theme</div>
+      <div className={styles.title}>{t("theme")}</div>
       <div className={styles.list}>
         <div className={styles.item}>
           <Accordion
@@ -335,28 +342,35 @@ const Theme = () => {
                   <DownIcon />
                 </span>
               </IconButton>
-              <div className={styles.label}>Choose theme</div>
+              <div className={styles.label}>{t("chooseTheme")}</div>
             </AccordionSummary>
 
             <AccordionDetails className={styles.accordion_details}>
               <div className={styles.themes}>
                 {themes &&
-                  themes.map((item) => (
-                    <span
-                      key={item.name}
-                      onClick={() => handleThemeChange(item.name)}
-                      className={
-                        theme === item.name
-                          ? `${styles.theme_item} ${styles.active}`
-                          : styles.theme_item
-                      }
-                      style={{
-                        background: item.color,
-                      }}
-                    >
-                      Aa
-                    </span>
-                  ))}
+                  themes.map((item) => {
+                    const name = item.name === "dark" ? t("themeDark") : t("themeLight");
+                    return (
+                      <button
+                        type="button"
+                        key={item.name}
+                        onClick={() => handleThemeChange(item.name)}
+                        className={
+                          theme === item.name
+                            ? `${styles.theme_item} ${styles.active}`
+                            : styles.theme_item
+                        }
+                        style={{
+                          background: item.color,
+                        }}
+                        aria-label={name}
+                        aria-pressed={theme === item.name ? "true" : "false"}
+                        title={name}
+                      >
+                        Aa
+                      </button>
+                    );
+                  })}
               </div>
             </AccordionDetails>
           </Accordion>
@@ -367,21 +381,23 @@ const Theme = () => {
 };
 
 const Note = () => {
+  const { t } = useLocale();
   return (
     <div className={`${styles.block} ${styles.note}`}>
       <p className={styles.note_text}>
-        <span>Note: </span>If you remove storage or cache then your settings
-        will be reset to default.
+        <span>{t("settingsNoteLabel")}: </span>
+        {t("settingsNote")}
       </p>
     </div>
   );
 };
 
 const Reset = () => {
+  const { t } = useLocale();
   const { resetSettings } = useContext(SettingsContext);
   return (
     <Button className={styles.btn_reset} onClick={resetSettings} disableRipple>
-      Reset
+      {t("resetSettings")}
     </Button>
   );
 };

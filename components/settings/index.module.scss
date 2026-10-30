@@ -84,7 +84,7 @@
 .btn_reset {
   margin-top: 5px !important;
   font-weight: 600 !important;
-  text-transform: capitalize !important;
+  text-transform: none !important;
   background-color: rgba(28, 157, 234, 0.25) !important;
   color: #1c9dea !important;
   border: none !important;
@@ -106,17 +106,20 @@
   justify-content: flex-start;
 }
 
+// 44px tap area around a 28px circle
 .sizer_btn {
-  width: 24px;
-  height: 24px;
-  border: 1px solid var(--bdr13) !important;
+  width: 44px;
+  height: 44px;
   user-select: none !important;
   padding: 0 !important;
-}
 
-.sizer_btn span {
-  width: 22px;
-  height: 22px;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--bdr13);
+    border-radius: 50%;
+  }
 }
 
 .sizer_btn svg {
@@ -200,10 +203,13 @@
   text-align: center;
   display: block;
   margin: 4px;
+  padding: 0;
+  border: 0;
   position: relative;
   cursor: pointer;
   border-radius: 50%;
   color: #fff;
+  font: inherit;
 }
 
 .theme_item.active {
