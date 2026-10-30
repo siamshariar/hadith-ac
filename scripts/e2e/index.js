@@ -15,6 +15,11 @@
 //                     webkit-desktop, webkit-phone (default: all four)
 //   E2E_CONCURRENCY   profiles run side by side (default 2; 1 = one at a time)
 //   E2E_NAV_TIMEOUT   ms for a navigation (default 90000: first visits compile)
+//   BASE_BD           a second instance built for Bangladesh
+//                     (NEXT_PUBLIC_COUNTRY_CODE=bd), e.g. http://127.0.0.1:3001:
+//                     country.js tests it, platform.js checks it too; without it
+//                     the country tests are skipped
+//   SITE_NAME_BD      that instance's NEXT_PUBLIC_SITE_NAME, if it has one
 // One area only: node --test scripts/e2e/search.js
 // Some tests:    node --test --test-name-pattern="go to hadith" scripts/e2e/
 // Each profile runs its tests one at a time in a fresh browser context per
@@ -34,4 +39,6 @@ run([
   require('./actions'),
   require('./settings'),
   require('./errors'),
+  require('./platform'),
+  require('./country'),
 ]);
