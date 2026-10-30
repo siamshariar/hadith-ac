@@ -38,7 +38,7 @@ module.exports = spec(module, 'lists', (h) => {
         [
           'Đọc được bằng tiếng Việt',
           viNumber(totals.translated + totals.linkedTranslated),
-          `${viNumber(totals.translated)} bản dịch + ${viNumber(totals.linkedTranslated)} theo HadeethEnc`,
+          `${viNumber(totals.translated)} bản dịch + ${viNumber(totals.linkedTranslated)} từ bộ hadith theo chủ đề`,
         ],
         ['Hadith', viNumber(totals.hadith)],
         ['Bộ sưu tập', viNumber(totals.book)],
@@ -77,11 +77,13 @@ module.exports = spec(module, 'lists', (h) => {
     assert.deepEqual(facts, [
       ['Hadith', viNumber(book.totalHadith)],
       ['Chương', viNumber(book.chapters.length)],
-      ['Đọc được bằng tiếng Việt', viNumber(own + linked), ...(linked > 0 ? [own > 0 ? `${viNumber(own)} bản dịch + ${viNumber(linked)} theo HadeethEnc` : 'tất cả theo bản dịch của HadeethEnc'] : [])],
+      ['Đọc được bằng tiếng Việt', viNumber(own + linked), ...(linked > 0 ? [own > 0 ? `${viNumber(own)} bản dịch + ${viNumber(linked)} từ bộ hadith theo chủ đề` : 'tất cả qua bản dịch từ bộ hadith theo chủ đề'] : [])],
     ]);
     const bookEditions = editions.filter((e) => e.bookSlug === book.slug);
-    assert.equal(norm(await page.locator('header details summary').textContent()), `Bản dịch (${bookEditions.length} ấn bản)`);
+    // one row per language, with the translator when the source names one
+    assert.equal(norm(await page.locator('header details summary').textContent()), `Bản dịch (${bookEditions.length} ngôn ngữ)`);
     assert.equal(await page.locator('header details li').count(), bookEditions.length);
+    assert.equal(await page.locator('header details li').filter({ hasText: 'Muhsin Khan' }).count(), 1);
 
     const rows = await page.locator('#book-chapters + ol > li a').evaluateAll((links) =>
       links.map((a) => [a.getAttribute('href'), [...a.children].map((el) => el.textContent.trim())])
@@ -117,8 +119,11 @@ module.exports = spec(module, 'lists', (h) => {
       await h.waitForPath(page, (url) => url.searchParams.get('translated') === '1', 'filter on');
       await until(async () => (await page.getByRole('switch').getAttribute('aria-checked')) === 'true', 'switch checked');
       await until(async () => JSON.stringify(await cardIds(page)) === JSON.stringify(ids(readable)), 'only the readable hadiths');
-      // each shows HadeethEnc's translation, labelled as such, and the list says what that means once
-      assert.equal(await page.getByText('Bản dịch tiếng Việt theo HadeethEnc', { exact: true }).count(), readable.hadiths.filter((x) => x.linkedTranslation).length);
+      // each shows the topic collection's translation, labelled as such and with its
+      // source line, and the list says what that means once
+      const linkedCount = readable.hadiths.filter((x) => x.linkedTranslation).length;
+      assert.equal(await page.getByText('Bản dịch tiếng Việt từ bộ hadith theo chủ đề', { exact: true }).count(), linkedCount);
+      assert.equal(await page.locator('article div[class*="linked"] p[data-source-line]').count(), linkedCount);
       assert.equal(await page.getByRole('note').filter({ hasText: 'Những hadith có nhãn' }).count(), 1);
 
       await page.getByRole('switch').click();

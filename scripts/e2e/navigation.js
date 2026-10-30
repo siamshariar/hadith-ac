@@ -162,7 +162,7 @@ module.exports = spec(module, 'navigation', (h) => {
         ['/settings', 'Cài đặt'],
         ['/support', 'Ủng hộ'],
         ['/grateful', 'Lời cảm ơn'],
-        ['/sources', 'Nguồn & phương pháp'],
+        ['/sources', 'Dữ liệu & phương pháp'],
         ['/about', 'Giới thiệu'],
         ['/contact', 'Liên hệ'],
         ['/deeniinfotech', 'Deeni Info Tech'],
@@ -185,7 +185,7 @@ module.exports = spec(module, 'navigation', (h) => {
 
       // a link to a page with the same layout: the drawer must not stay open
       for (const [name, path, h1] of [
-        ['Nguồn & phương pháp', '/sources', 'Nguồn & phương pháp'],
+        ['Dữ liệu & phương pháp', '/sources', 'Dữ liệu & phương pháp'],
         ['Bộ sưu tập hadith', '/books', 'Bộ sưu tập hadith'],
         ['Đã ghim', '/bookmarks', 'Đã lưu'],
       ]) {
@@ -293,14 +293,14 @@ module.exports = spec(module, 'navigation', (h) => {
       // with pages behind it, back goes back in history: here /books -> /sources -> /about
       // (a text page with its own header)
       await h.goto(page, '/books');
-      await page.getByRole('contentinfo').getByRole('link', { name: 'Nguồn & phương pháp' }).click();
+      await page.getByRole('contentinfo').getByRole('link', { name: 'Dữ liệu & phương pháp' }).click();
       await h.waitForPath(page, (url) => url.pathname === '/sources', 'to /sources');
       await page.getByRole('contentinfo').getByRole('link', { name: 'Giới thiệu' }).click();
       await h.waitForPath(page, (url) => url.pathname === '/about', 'to /about');
       await waitForH1(page, 'Giới thiệu');
       await back();
       await h.waitForPath(page, (url) => url.pathname === '/sources', 'back in history to /sources');
-      await waitForH1(page, 'Nguồn & phương pháp');
+      await waitForH1(page, 'Dữ liệu & phương pháp');
       // opened directly, a text page goes up to the home page
       const { page: fresh } = await h.open(t, '/about');
       await fresh.getByRole('button', { name: 'Quay lại' }).click();

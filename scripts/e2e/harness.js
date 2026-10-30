@@ -77,6 +77,15 @@ const norm = (value) => String(value == null ? '' : value).replace(/\s+/g, ' ').
 const cleanText = (value) => String(value || '').replace(/\r\n?/g, '\n').trim();
 // Vietnamese thousands separators (lib/i18n formatNumber).
 const viNumber = (value) => String(Math.trunc(Number(value))).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+// The translator a translation is credited to (lib/citation translatorName): the
+// name the source gives, unless it is HadeethEnc's own site or the collection's
+// compiler (the forty-hadith editions give Imam Nawawi, Shah Waliullah Dehlawi).
+function translatorOf(author, edition) {
+  const { code = '', source } = edition || {};
+  if (!author || source === 'hadeethenc') return null;
+  const collection = String(code).split('-').pop();
+  return collection && String(author).toLowerCase().replace(/[^a-z]/g, '').includes(collection) ? null : author;
+}
 // Muslim's 8.01 is cited 8a (lib/hadith lettered).
 function lettered(number) {
   const match = String(number ?? '').match(/^(\d+)\.(\d{2})$/);
@@ -349,6 +358,7 @@ module.exports = {
   sleep,
   spec,
   stored,
+  translatorOf,
   until,
   viNumber,
   waitForH1,

@@ -147,7 +147,7 @@ module.exports = spec(module, 'search', (h) => {
     const options = await bookSelect.locator('option').evaluateAll((items) => items.map((o) => [o.value, o.textContent.trim()]));
     assert.deepEqual(
       options,
-      [['', 'Tất cả bộ sưu tập'], ...books.map((b) => [b.slug, b.code === 'hadeethenc' ? 'HadeethEnc' : b.name])],
+      [['', 'Tất cả bộ sưu tập'], ...books.map((b) => [b.slug, b.name])],
       'every collection in the book filter'
     );
 

@@ -25,7 +25,7 @@ async function pages() {
     [`/books/${bukhari.slug}/hadiths/1`, 'Sahih al-Bukhari 1', 'Sahih al-Bukhari 1'],
     ['/books/sahih-muslim/hadiths/8a', 'Sahih Muslim 8a', 'Sahih Muslim 8a'],
     // the title is cut at 70 characters (components/hadith/HadithPage)
-    [`/hadiths/${henc.id}`, norm(hencTitle), norm(`${hencTitle.slice(0, 70)} - HadeethEnc ${henc.referenceNumber}`)],
+    [`/hadiths/${henc.id}`, norm(hencTitle), norm(`${hencTitle.slice(0, 70)} - ${henc.book.name} ${henc.referenceNumber}`)],
     ['/categories', 'Danh mục', 'Danh mục'],
     [`/categories/${creed.slug}`, creed.title, creed.title],
     [`/categories/${creed.slug}/hadiths`, creed.title, `Hadith trong danh mục: ${creed.title}`],
@@ -34,7 +34,7 @@ async function pages() {
     ['/search?q=%D8%A7%D9%86%D9%85%D8%A7%20%D8%A7%D9%84%D8%A7%D8%B9%D9%85%D8%A7%D9%84', 'Tìm kiếm', 'Tìm kiếm: انما الاعمال'],
     ['/bookmarks', 'Đã lưu', 'Đã lưu'],
     ['/bookmarks?key=favorites', 'Yêu thích', 'Đã lưu'],
-    ['/sources', 'Nguồn & phương pháp', 'Nguồn & phương pháp'],
+    ['/sources', 'Dữ liệu & phương pháp', 'Dữ liệu & phương pháp'],
     ['/settings', 'Cài đặt', 'Cài đặt'],
     ['/about', 'Giới thiệu', 'Giới thiệu'],
     ['/contact', 'Liên hệ', 'Liên hệ'],

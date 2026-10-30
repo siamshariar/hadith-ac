@@ -47,7 +47,7 @@ export default function BookIntro({ book, chapterCount, counts, editions = [] })
         </div>
         {chapterCount > 1 && (
           <div className={styles.fact}>
-            <dt>{t("chapter")}</dt>
+            <dt>{t("totalChapters")}</dt>
             <dd className={styles.factValue}>{formatNumber(chapterCount)}</dd>
           </div>
         )}
