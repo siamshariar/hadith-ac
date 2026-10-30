@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { server, shareImage } from "../lib/config";
-import { getHome, loadPage } from "../lib/api";
+import { getHome, getLanguages, loadPage } from "../lib/api";
+import { INTERNATIONAL } from "../lib/language";
 import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
 import Container from "../components/core/container";
@@ -12,16 +13,21 @@ import Stats from "../components/home/Stats";
 import ContinueReading from "../components/home/ContinueReading";
 import { BookGroups } from "../components/home/book-list";
 import CategoryList from "../components/home/category-list";
+import LanguageDirectory, { directoryLanguages } from "../components/home/LanguageDirectory";
 import styles from "../components/home/Home.module.scss";
 
-export default function Home({ home, error }) {
-  const { t } = useLocale();
+export default function Home({ home, languages, error }) {
+  const { t, formatNumber } = useLocale();
+  // An international site is "Hadith.ac – Hadith collections in all languages" (lib/i18n
+  // homeTitleAll), described with the number of languages it has.
+  const languageCount = (languages && languages.length) || (home && home.totals && home.totals.language) || 0;
 
   return (
     <>
       <Meta
         title={t("home")}
-        description={t("siteTagline")}
+        fullTitle={INTERNATIONAL ? t("homeTitleAll") : undefined}
+        description={INTERNATIONAL && languageCount ? t("homeDescriptionAll", { count: formatNumber(languageCount) }) : t("siteTagline")}
         url={server}
         image={shareImage}
         type="website"
@@ -38,8 +44,8 @@ export default function Home({ home, error }) {
         <>
           {/* The site heading and search (with "go to hadith"), then the
               hadith of the day and the figures; where the reader left off,
-              the collections in groups, the category tree and how the data
-              is made. */}
+              the collections in groups, the category tree, every language on
+              an international site, and how the data is made. */}
           <Hero>
             <HomeSearch />
           </Hero>
@@ -81,6 +87,8 @@ export default function Home({ home, error }) {
                 <CategoryList categories={home.categories} columns={2} />
               </section>
 
+              {languages && languages.length > 0 && <LanguageDirectory languages={languages} />}
+
               <p className={styles.sources}>
                 <Link href="/sources">
                   {t("sourcesAndMethod")} <span aria-hidden="true">→</span>
@@ -98,8 +106,11 @@ Home.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
+// An international site also lists every content language (/hadith/languages).
 export async function getServerSideProps(context) {
-  return loadPage(context, async (lang) => ({
-    props: { home: await getHome(lang) },
-  }));
+  return loadPage(context, async (lang) => {
+    if (!INTERNATIONAL) return { props: { home: await getHome(lang) } };
+    const [home, languages] = await Promise.all([getHome(lang), getLanguages()]);
+    return { props: { home, languages: directoryLanguages(languages) } };
+  });
 }

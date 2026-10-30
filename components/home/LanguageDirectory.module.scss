@@ -1,0 +1,147 @@
+// The language directory of an international site's home page (LanguageDirectory.js).
+
+.intro {
+  margin-bottom: 12px;
+  color: var(--txt12);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+// Phones and tablets: a filter over the list (on desktop it all fits).
+.filter {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  margin-bottom: 12px;
+  border: 1px solid var(--hero-card-bdr);
+  border-radius: 23px;
+  background: var(--bg11);
+
+  &:focus-within {
+    border-color: var(--theme-color);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    padding: 0 16px 0 4px;
+    border: 0;
+    background: transparent;
+    color: var(--txt11);
+    font: inherit;
+    font-size: 16px; // no zoom on focus in iOS Safari
+    appearance: none;
+
+    &::placeholder {
+      color: var(--txt13);
+    }
+
+    &:focus-visible {
+      outline: none; // the box shows focus (:focus-within)
+    }
+  }
+}
+
+.filterIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 0 6px 0 14px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--txt12);
+  }
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.item {
+  min-width: 0;
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--bdr11);
+  border-radius: 8px;
+  background: var(--bg11);
+  color: var(--txt11);
+  overflow-wrap: anywhere;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--theme-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+// the content language in use
+.current {
+  border-color: var(--theme-color);
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--theme-color);
+}
+
+.native {
+  display: block;
+  color: var(--txt11);
+  font-family: var(--font-trans);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+// Amiri's Arabic is small for its size: as the hadith text does (--font-arabic)
+.arabic {
+  font-family: var(--font-arabic);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.english {
+  color: var(--txt13);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.count {
+  margin-top: 2px;
+  color: var(--txt12);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.empty {
+  padding: 12px 0;
+  color: var(--txt12);
+  font-size: 14px;
+}
+
+@media screen and (min-width: 768px) {
+  .list {
+    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+    gap: 10px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .filter {
+    display: none;
+  }
+}
