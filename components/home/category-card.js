@@ -5,7 +5,8 @@ import styles from "./category-card.module.scss";
 
 // A top-level category with its children (from /hadith/home or the flat
 // list). Counts show how many hadiths are translated into the reader's
-// language next to the total; children with none are muted, not hidden.
+// language next to the total. The lists leave out the categories with none
+// (lib/api readableCategories); a child with none that is still given is muted.
 export default function CategoryCard({ category, index }) {
   const { t, lang, formatNumber, languageName } = useLocale();
   const children = category.children || [];

@@ -352,7 +352,14 @@ export async function getServerSideProps(context) {
         book,
         results,
         notFound,
-        books: books.map(({ slug, code, name, source, totalHadith }) => ({ slug, code, name, source, totalHadith })),
+        books: books.map(({ slug, code, name, nameEnglish, source, totalHadith }) => ({
+          slug,
+          code,
+          name,
+          nameEnglish: nameEnglish || null,
+          source,
+          totalHadith,
+        })),
         // the deployment's language first, then English, then by name
         languages: languages
           .filter((language) => language.code !== "ar")

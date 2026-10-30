@@ -78,6 +78,7 @@ const App = ({ Component, pageProps }) => {
       pageLang={pageProps.lang}
       pageUi={pageProps.uiLang}
       pagePreferred={pageProps.preferredLang}
+      uiCatalog={pageProps.uiCatalog}
       languageInfo={pageProps.languageInfo}
     >
       {/* On :root so MUI portals (menus, modals) get the fonts too. */}

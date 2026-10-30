@@ -14,7 +14,7 @@ import SearchIcon from "../icons/Search";
 import { SettingsContext } from "../../contexts/SettingsContext";
 import { useLocale } from "../../contexts/LocaleContext";
 import useApi from "../../hooks/useApi";
-import { buildCategoryTree, getBook, getBooks, getCategories } from "../../lib/api";
+import { buildCategoryTree, getBook, getBooks, getCategories, readableCategories } from "../../lib/api";
 import {
   UNASSIGNED_CHAPTER,
   bookPath,
@@ -91,7 +91,9 @@ function branchTo(categories, selectedId) {
 
 // `initial`: { categories, partial } from the server. A partial list (the
 // top level and the open branch) paints at once; the full list, needed for
-// the other branches and the filter, follows in the background.
+// the other branches and the filter, follows in the background. Only the
+// categories with something to read in the language (lib/api
+// readableCategories), like the server's.
 function CategoryTree({ selectedCategoryId, filter, initial, enabled }) {
   const { lang, t } = useLocale();
   const partial = Boolean(initial && initial.partial);
@@ -99,8 +101,8 @@ function CategoryTree({ selectedCategoryId, filter, initial, enabled }) {
     enabled: enabled && (!initial || partial),
   });
   const categories = useMemo(
-    () => (Array.isArray(data) && data.length ? data : (initial && initial.categories) || []),
-    [initial, data]
+    () => (Array.isArray(data) && data.length ? readableCategories(data, lang) : (initial && initial.categories) || []),
+    [initial, data, lang]
   );
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
   // Server-provided data renders the open branch on the first paint.
@@ -226,7 +228,7 @@ function BookTree({ selectedBookSlug, selectedChapterNo, filter, initial, enable
 
   const query = fold(filter);
   const visible = query
-    ? books.filter((book) => fold(book.name).includes(query) || fold(book.nameArabic).includes(query))
+    ? books.filter((book) => [book.name, book.nameEnglish, book.nameArabic].some((name) => fold(name).includes(query)))
     : books;
   if (!visible.length) return <div className={styles.empty}>{t("noHadiths")}</div>;
 

@@ -1,15 +1,15 @@
-import { INTERFACE_DIRECTION, INTERFACE_LANGUAGE } from "../lib/language";
+import { SITE_INTERFACE, interfaceDirection } from "../lib/language";
 import { site } from "../lib/sites";
 
 // /manifest.webmanifest (linked from components/core/meta.js): the web app manifest with
-// the deployment's name and interface language, so each country's site installs under
-// its own name. Server-rendered: there is no static copy in public/.
+// the deployment's name and its own interface language (that of its content language), so
+// each country's site installs under its own name. Server-rendered: there is no static copy in public/.
 export async function getServerSideProps({ res }) {
   const manifest = {
     name: site.siteName,
     short_name: site.siteName,
-    lang: INTERFACE_LANGUAGE,
-    dir: INTERFACE_DIRECTION,
+    lang: SITE_INTERFACE,
+    dir: interfaceDirection(SITE_INTERFACE),
     start_url: "/",
     scope: "/",
     display: "standalone",

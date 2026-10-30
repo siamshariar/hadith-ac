@@ -1,0 +1,18 @@
+{
+  "books": {
+    "sahih-al-bukhari": "সহিহ বুখারি",
+    "sahih-muslim": "সহিহ মুসলিম",
+    "hadeethenc": "হাদিস বিশ্বকোষ"
+  },
+  "bookSources": {},
+  "chapters": {
+    "sahih-al-bukhari": {
+      "1": "ওহীর সূচনা",
+      "2": "ঈমান",
+      "3": "ইলম"
+    },
+    "sahih-muslim": {
+      "1": "ঈমান অধ্যায়"
+    }
+  }
+}
