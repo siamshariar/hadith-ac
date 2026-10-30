@@ -4,6 +4,11 @@ const apiHostname = new URL(apiBaseUrl).hostname;
 
 const nextConfig = {
   reactStrictMode: true,
+  // The analytics ID is read in the browser too (route-change page views),
+  // so it is inlined at build time; empty means no analytics.
+  env: {
+    GOOGLE_ANALYTICS_ID: process.env.GOOGLE_ANALYTICS_ID || "",
+  },
   images: {
     // Allows next/image to load hadith images served from the API host.
     // Add any additional CDN/media hostnames here as they come into use.
