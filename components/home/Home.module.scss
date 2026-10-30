@@ -76,3 +76,12 @@
     }
   }
 }
+
+// Desktop: room for the back-to-top button beside the content (see
+// layouts/Layout.module.scss) until the page has a wide enough margin.
+@media screen and (min-width: 1024px) and (max-width: 1411px) {
+  .sections {
+    padding-left: 66px;
+    padding-right: 66px;
+  }
+}

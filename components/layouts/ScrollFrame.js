@@ -13,7 +13,9 @@ const MIN_DELTA = 8; // px; smaller moves (and iOS bounce) don't toggle the head
 // - phones: the fixed header slides away while reading down and comes back
 //   on any scroll up, as on quran.com. The state is the `header-hidden`
 //   class on <html>, which also sets --header-offset to 0 (styles/_core).
-// - long pages: a back-to-top button after one and a half screens.
+// - long pages: a back-to-top button after one and a half screens. On
+//   phones it comes and goes with the header, so it never sits on the text
+//   while reading down; on desktop the layouts keep a lane free for it.
 export default function ScrollFrame() {
   const router = useRouter();
   const { t } = useLocale();
@@ -36,7 +38,8 @@ export default function ScrollFrame() {
         root.classList.toggle(HIDDEN, delta > 0);
         last = y;
       }
-      setShowTop(y > window.innerHeight * 1.5);
+      const readingDown = phone.matches && root.classList.contains(HIDDEN);
+      setShowTop(y > window.innerHeight * 1.5 && !readingDown);
     };
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(update);

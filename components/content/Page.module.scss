@@ -97,6 +97,10 @@
 }
 
 .sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
   color: var(--main-color);
   font-size: 14px;
   font-weight: 500;

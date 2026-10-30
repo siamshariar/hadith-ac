@@ -136,3 +136,19 @@
     }
   }
 }
+
+// Desktop: a lane right of the content for the back-to-top button
+// (ScrollFrame: 44px, 24px from the edge) where the page has no wider
+// gutter of its own, so it never covers a card's links.
+@media screen and (min-width: 1024px) and (max-width: 1565px) {
+  .wrapper:not(.layout3) .content {
+    padding-right: 76px;
+  }
+}
+
+@media screen and (min-width: 1024px) and (max-width: 1131px) {
+  .layout3 .body {
+    padding-left: 76px;
+    padding-right: 76px;
+  }
+}
