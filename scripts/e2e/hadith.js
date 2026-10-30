@@ -1,10 +1,10 @@
 // The hadith page: the content language for one view (?lang=, the saved
-// preference stays), grades, "Cũng có trong", the reference block and "Báo
+// preference stays; the interface follows it), grades, "Cũng có trong", the reference block and "Báo
 // lỗi", canonical and og:url, the legacy per-language URL, and the texts
 // shown against the API.
 'use strict';
 
-const { BASE, api, assert, cleanText, lettered, loc, meta, norm, spec, until, waitForH1, waitForText } = require('./harness');
+const { BASE, api, assert, cleanText, interfaceStrings, lettered, loc, meta, norm, spec, until, waitForH1, waitForText } = require('./harness');
 
 // Translations are compared without whitespace: the English narrator line
 // ("Narrated 'Umar:") is set on its own line, which adds or removes a space
@@ -17,6 +17,8 @@ const arabicBlock = (page) => page.locator('section[class*="arabicBlock"] div[la
 const languageCookie = async (context) => (await context.cookies()).find((c) => c.name === 'hadith_lang');
 // The translations chip of the page header ("Bản dịch: Tiếng Việt").
 const chip = (page) => page.locator('article > header').getByRole('button', { name: /^Bản dịch:/ });
+// The same in any interface.
+const anyChip = (page) => page.locator('article > header button[data-translations]');
 
 // The site URL the app builds permalinks from: the canonical of a page we
 // know, checked against the citable path below.
@@ -27,10 +29,9 @@ async function siteOf(page) {
 
 module.exports = spec(module, 'hadith page', (h) => {
   h.test(
-    '?lang= changes the language for that view, not the saved preference',
+    '?lang= changes the language for that view, interface included, not the saved preference',
     async (t) => {
       const [vi, en, bn] = await Promise.all(['vi', 'en', 'bn'].map((lang) => api(`/books/bukhari/hadiths/1${loc(lang)}`)));
-      const languages = await api('/languages');
       const { page, context } = await h.open(t, `/books/${BUKHARI}/hadiths/1`);
       await waitForText(chip(page), /^Bản dịch: Tiếng Việt\b/);
       assert.equal(await chip(page).getAttribute('data-translations'), 'vi', 'Vietnamese, no extra language');
@@ -42,12 +43,12 @@ module.exports = spec(module, 'hadith page', (h) => {
         await until(async () => (await translationBlock(page, code).count()) === 1, `${code} translation shown`);
         assert.equal(squash(await translationBlock(page, code).innerText()), squash(cleanText(data.translation.text)), `${code} text is the API's`);
         assert.equal(data.translation.isFallback, false);
-        // the label names the language; the interface stays Vietnamese and nothing is saved
-        const name = code === 'en' ? 'tiếng Anh' : languages.find((l) => l.code === code).nativeName;
-        await waitForText(page.locator('section[class*="translationBlock"] span[class*="label"]').first(), name);
-        assert.equal(await chip(page).getAttribute('data-translations'), code);
+        // the label names the language; the interface is that language's and nothing is saved
+        const tr = await interfaceStrings(code);
+        await waitForText(page.locator('section[class*="translationBlock"] span[class*="label"]').first(), tr.name(code));
+        assert.equal(await anyChip(page).getAttribute('data-translations'), code);
         assert.equal(await languageCookie(context), undefined, 'no language cookie written');
-        assert.equal((await meta(page)).lang, 'vi');
+        assert.equal((await meta(page)).lang, code);
       }
 
       // Arabic: the original, with the English translation labelled as such

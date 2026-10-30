@@ -4,7 +4,10 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const { after, describe, test } = require('node:test');
+const { pathToFileURL } = require('node:url');
 const pw = require(process.env.PLAYWRIGHT_CORE || 'playwright-core');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:3000').replace(/\/+$/, '');
@@ -84,6 +87,55 @@ function lettered(number) {
   const index = parseInt(match[2], 10);
   return index >= 1 && index <= 26 ? `${match[1]}${String.fromCharCode(96 + index)}` : String(number);
 }
+
+// ------------------------------------------------------------------ interface and names
+
+// lib/i18n.js is an ES module in a package without "type": "module"; Node says so once,
+// which is not a test problem.
+process.removeAllListeners('warning');
+process.on('warning', (warning) => {
+  if (warning.code !== 'MODULE_TYPELESS_PACKAGE_JSON') console.warn(warning.stack || String(warning));
+});
+
+// lib/i18n.js with every catalog loaded (lib/locales).
+let i18nModule;
+function i18n() {
+  i18nModule =
+    i18nModule ||
+    import(pathToFileURL(path.join(__dirname, '..', '..', 'lib', 'i18n.js')).href).then(async (m) => {
+      await m.loadCatalogs();
+      return m;
+    });
+  return i18nModule;
+}
+
+// The strings of an interface as LocaleContext's t() gives them on a site: tr(key, vars), with
+// the site's name and content language filled in, plus tr.name(code) (a language inside a
+// sentence) and tr.number(n). Default: the vn site.
+async function interfaceStrings(ui, { site = 'Hadith.vn', language = 'vi' } = {}) {
+  const m = await i18n();
+  const vars = { site, siteLanguage: m.languageName(ui, language) };
+  const tr = (key, values) => m.translate(ui, key, { ...vars, ...values });
+  tr.name = (code) => m.languageName(ui, code);
+  tr.number = (value) => m.formatNumber(value, ui);
+  return tr;
+}
+
+// The book and chapter names the site under test shows (lib/names.js): those of the fixture
+// when the builds and this run have NAMES_FIXTURE=1 (scripts/e2e/fixtures/names), else of
+// lib/names; the API's where they have none.
+const NAMES_FIXTURE = process.env.NAMES_FIXTURE === '1';
+const NAMES_DIR = NAMES_FIXTURE ? path.join(__dirname, 'fixtures', 'names') : path.join(__dirname, '..', '..', 'lib', 'names');
+const namesCache = new Map();
+function namesOf(lang) {
+  if (!namesCache.has(lang)) {
+    const file = path.join(NAMES_DIR, `${lang}.json`);
+    namesCache.set(lang, fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {});
+  }
+  return namesCache.get(lang);
+}
+const bookName = (lang, book) => (namesOf(lang).books || {})[book.slug] || book.name;
+const chapterName = (lang, slug, chapter) => ((namesOf(lang).chapters || {})[slug] || {})[chapter.chapterNo] || chapter.name;
 
 // ------------------------------------------------------------------ browsers
 
@@ -333,14 +385,19 @@ async function scrollTo(page, y) {
 module.exports = {
   API,
   BASE,
+  NAMES_FIXTURE,
   PROFILES,
   api,
   assert,
+  bookName,
   breadcrumbs,
+  chapterName,
   cleanText,
   lettered,
+  interfaceStrings,
   loc,
   meta,
+  namesOf,
   norm,
   pathOf,
   readClipboard,
