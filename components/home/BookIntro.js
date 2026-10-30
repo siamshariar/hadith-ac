@@ -56,7 +56,9 @@ export default function BookIntro({ book, chapterCount, counts, editions = [] })
             <dd className={styles.factValue}>{formatNumber(own + linked)}</dd>
             {linked > 0 && (
               <dd className={styles.factNote}>
-                {t("readableBreakdown", { own: formatNumber(own), linked: formatNumber(linked) })}
+                {own > 0
+                  ? t("readableBreakdown", { own: formatNumber(own), linked: formatNumber(linked) })
+                  : t("readableLinkedOnly", { linked: formatNumber(linked) })}
               </dd>
             )}
           </div>

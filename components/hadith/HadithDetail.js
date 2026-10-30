@@ -81,10 +81,15 @@ function LanguageSwitch({ available, languages, linked }) {
 
   const label = (code) => {
     const info = names.get(code);
-    const name = info ? (info.nativeName && info.nativeName !== info.name ? `${info.nativeName} (${info.name})` : info.name) : code;
+    // The reader's own language needs no English gloss (and the select stays short).
+    const name = !info
+      ? code
+      : code === lang || !info.nativeName || info.nativeName === info.name
+        ? info.nativeName || info.name
+        : `${info.nativeName} (${info.name})`;
     if (!missingCurrent || code !== lang) return name;
     // No translation of its own: say whether a linked HadeethEnc one is shown.
-    return linked && linked.languageCode === lang ? `${name} - HadeethEnc` : `${name} - ${t("notAvailableShort")}`;
+    return linked && linked.languageCode === lang ? `${name} – HadeethEnc` : `${name} – ${t("notAvailableShort")}`;
   };
 
   const change = (event) => {
