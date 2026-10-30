@@ -11,10 +11,12 @@ import {
   shortBookName,
 } from "../../lib/hadith";
 import { inBookText, referenceText } from "../../lib/citation";
+import { extraTranslations } from "../../lib/translations";
 import HadithOptions from "../content/HadithOptions";
 import { GradeBadge } from "./Grades";
 import { Highlighted } from "./Highlight";
 import { ArabicText, HadithTranslations, LinkedTranslationNote, shownTranslation } from "./HadithText";
+import TranslationPicker from "./TranslationPicker";
 import styles from "./HadithCard.module.scss";
 
 // Book › chapter, for lists that mix chapters (search results). Nothing for
@@ -52,7 +54,7 @@ export default function HadithCard({ hadith, book, showContext = false, inBookRe
   const withInBook = !hadith.inBookReference && inBookReference ? { ...hadith, inBookReference } : hadith;
   const { linked, own } = shownTranslation(hadith);
   // Without any translation the Arabic stays, even when the reader hides it.
-  const arabicOnly = !linked && !own;
+  const arabicOnly = !linked && !own && !extraTranslations(hadith).some((slot) => slot.entry);
 
   return (
     <article className={styles.card} id={`hadith-${hadith.id}`}>
@@ -84,7 +86,7 @@ export default function HadithCard({ hadith, book, showContext = false, inBookRe
           <ArabicText text={hadith.arabic} />
         </div>
         <div className={styles.translationCol}>
-          <HadithTranslations hadith={hadith} compact />
+          <HadithTranslations hadith={hadith} compact collapsible />
         </div>
       </div>
 
@@ -131,17 +133,33 @@ export function HadithCardSkeleton({ count = 3 }) {
 
 // A list of cards that switches to skeletons while the next page loads.
 // When cards show HadeethEnc's linked translations, what that label means is
-// said once, above the list (LinkedTranslationNote).
-export function HadithList({ hadiths, loading, renderCard, skeletonCount = 4 }) {
+// said once, above the list (LinkedTranslationNote). `picker`: the
+// translations chip above the list ({ translations, book }) for lists
+// without a reader bar; the collection is the cards' own when they share one.
+export function HadithList({ hadiths, loading, renderCard, skeletonCount = 4, picker }) {
+  const books = new Set((hadiths || []).map((hadith) => hadith.bookSlug));
+  const chip = picker ? (
+    <div className={styles.listTools}>
+      <TranslationPicker
+        translations={picker.translations}
+        book={picker.book || (books.size === 1 ? [...books][0] : null)}
+      />
+    </div>
+  ) : null;
+
   if (loading) {
     return (
-      <div className={styles.list} aria-busy="true">
-        <HadithCardSkeleton count={skeletonCount} />
-      </div>
+      <>
+        {chip}
+        <div className={styles.list} aria-busy="true">
+          <HadithCardSkeleton count={skeletonCount} />
+        </div>
+      </>
     );
   }
   return (
     <>
+      {chip}
       <LinkedTranslationNote hadiths={hadiths} />
       <div className={styles.list}>{hadiths.map((hadith, index) => renderCard(hadith, index))}</div>
     </>

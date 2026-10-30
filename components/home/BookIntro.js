@@ -83,9 +83,11 @@ export default function BookIntro({ book, chapterCount, counts, editions = [] })
                     <span className={styles.editionTag}> · {t("selectedLanguage")}</span>
                   )}
                 </span>
-                <span className={styles.editionTranslator}>
-                  <span className="visually_hidden">{t("translator")}: </span>
-                  {edition.author || <span className={styles.muted}>{t("translatorUnnamed")}</span>}
+                {/* The name as the source gives it: most editions give none,
+                    and some give the compiler's, so it is not called the translator. */}
+                <span className={styles.editionTranslator} title={t("nameInSource")}>
+                  <span className="visually_hidden">{t("nameInSource")}: </span>
+                  {edition.author || <span className={styles.muted}>{t("nameNotGiven")}</span>}
                 </span>
                 <span className={styles.editionSource}>
                   <span className="visually_hidden">{t("editionSource")}: </span>

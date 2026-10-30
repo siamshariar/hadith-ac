@@ -6,7 +6,18 @@ import { PinContext } from "../../contexts/PinContext";
 import { BookmarkContext } from "../../contexts/BookmarkContext";
 import { useLocale } from "../../contexts/LocaleContext";
 import { citablePath, isCurrentStoredRef, storedHadithRef } from "../../lib/hadith";
-import { buildCitation, buildText, permalink, referenceText, reportErrorHref } from "../../lib/citation";
+import {
+  buildArabic,
+  buildCitation,
+  buildText,
+  buildTranslations,
+  hasTranslations,
+  permalink,
+  referenceText,
+  reportErrorHref,
+} from "../../lib/citation";
+import { site } from "../../lib/sites";
+import { TRANSLATIONS_PARAM, translationsParam } from "../../lib/translations";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Snackbar from "@mui/material/Snackbar";
@@ -27,9 +38,11 @@ import EastIcon from "../icons/East";
 import styles from "./HadithOptions.module.scss";
 
 // One row of 44px icon buttons for a hadith (cards and the detail page):
-// bookmark, copy (text / citation / link), share, and ⋯ for pin, details and
-// "report an error". `hadith` is an API hadith object, `book` its collection.
-// `showDetails`: add "view details" to the ⋯ menu (lists).
+// bookmark, copy (the Arabic, the translations, everything, the citation or
+// the link), share, and ⋯ for pin, details and "report an error". `hadith`
+// is an API hadith object, `book` its collection. `showDetails`: add "view
+// details" to the ⋯ menu (lists). The shared link keeps the reader's extra
+// translations (?tr=), so the person it is sent to sees the same texts.
 const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage, showDetails = false }) => {
   const locale = useLocale();
   const { t } = locale;
@@ -38,7 +51,9 @@ const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage, show
   const [message, setMessage] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
   const citation = referenceText(hadith, book, t);
-  const url = permalink(hadith, book);
+  const extras = translationsParam((hadith.extraLanguages || []).map((language) => language.code));
+  const url = `${permalink(hadith, book)}${extras ? `?${TRANSLATIONS_PARAM}=${extras}` : ""}`;
+  const shareTitle = `${citation} | ${site.siteName}`;
   const menuId = `hadith-${hadith.id}`;
 
   const copy = (text) => {
@@ -51,7 +66,7 @@ const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage, show
   };
 
   const share = () => {
-    const title = `${citation} | Hadith.vn`;
+    const title = shareTitle;
     if (typeof navigator !== "undefined" && navigator.share) {
       navigator.share({ title, url }).catch(() => {});
     } else {
@@ -140,11 +155,27 @@ const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage, show
       </div>
 
       <Menu id={`${menuId}-copy`} anchorEl={copyAnchor} open={Boolean(copyAnchor)} onClose={() => setCopyAnchor(null)} {...menuProps}>
+        {hadith.arabic && (
+          <MenuItem onClick={() => copy(buildArabic(hadith, book, locale))}>
+            <span className={styles.icon}>
+              <FileCopyIcon />
+            </span>
+            <span className={styles.text}>{t("copyArabic")}</span>
+          </MenuItem>
+        )}
+        {hasTranslations(hadith) && (
+          <MenuItem onClick={() => copy(buildTranslations(hadith, book, locale))}>
+            <span className={styles.icon}>
+              <FileCopyIcon />
+            </span>
+            <span className={styles.text}>{t("copyTranslations")}</span>
+          </MenuItem>
+        )}
         <MenuItem onClick={() => copy(buildText(hadith, book, locale))}>
           <span className={styles.icon}>
             <FileCopyIcon />
           </span>
-          <span className={styles.text}>{t("copyText")}</span>
+          <span className={styles.text}>{t("copyAll")}</span>
         </MenuItem>
         <MenuItem onClick={() => copy(buildCitation(hadith, book, locale))}>
           <span className={styles.icon}>
@@ -202,7 +233,7 @@ const HadithOptions = ({ hadith, book, updateBookmarksData, isBookmarkPage, show
           isBookmarkPage={isBookmarkPage}
         />
       )}
-      {shareOpen && <Share open={shareOpen} closer={closeShare} url={url} title={`${citation} | Hadith.vn`} />}
+      {shareOpen && <Share open={shareOpen} closer={closeShare} url={url} title={shareTitle} />}
     </>
   );
 };

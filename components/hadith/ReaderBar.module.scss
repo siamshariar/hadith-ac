@@ -118,10 +118,13 @@
 // The citation, shown once the page title has scrolled away.
 .trailing {
   display: none;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
   color: var(--txt11);
   font-size: 14px;
   font-weight: 600;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -133,6 +136,27 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
+  }
+}
+
+// The translations chip (on the hadith page once the header, which has its
+// own, has scrolled away).
+.picker {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-left: auto;
+  animation: fadeIn 0.2s ease;
+}
+
+.pickerHidden {
+  display: none;
+}
+
+// Narrow phones: with the citation and the chip in the bar, the citation
+// says where the reader is.
+@media only screen and (max-width: 479px) {
+  .bar:has(.trailingShown):has(.picker:not(.pickerHidden)) .where {
+    display: none;
   }
 }
 

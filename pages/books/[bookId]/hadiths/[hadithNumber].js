@@ -11,5 +11,7 @@ BookHadith.getLayout = hadithLayout;
 
 export async function getServerSideProps(context) {
   const { bookId, hadithNumber } = context.params;
-  return loadHadithPage(context, (lang) => getBookHadith(bookId, hadithNumber, lang));
+  return loadHadithPage(context, (lang, { translations }) =>
+    getBookHadith(bookId, hadithNumber, lang, { translations })
+  );
 }

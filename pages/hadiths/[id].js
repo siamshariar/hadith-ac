@@ -10,5 +10,5 @@ Hadith.getLayout = hadithLayout;
 export async function getServerSideProps(context) {
   const { id } = context.params;
   if (!/^\d+$/.test(String(id))) return { notFound: true };
-  return loadHadithPage(context, (lang) => getHadith(id, lang));
+  return loadHadithPage(context, (lang, { translations }) => getHadith(id, lang, { translations }));
 }

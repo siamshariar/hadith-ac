@@ -116,3 +116,11 @@
     text-decoration: underline;
   }
 }
+
+// "Muhsin Khan · eng-bukhari ↗ · HadeethEnc"
+.credit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 6px;
+}

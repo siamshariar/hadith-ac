@@ -2,6 +2,7 @@ import Link from "next/link";
 import { server } from "../lib/config";
 import { getBooks, getEditions, getLanguages, loadPage } from "../lib/api";
 import { bookPath, shortBookName } from "../lib/hadith";
+import { site } from "../lib/sites";
 import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
 import Breadcrumbs from "../components/core/breadcrumbs";
@@ -17,7 +18,7 @@ const COPY = {
   vi: {
     title: "Nguồn & phương pháp",
     intro:
-      "Hadith.vn hiển thị văn bản hadith từ hai nguồn, qua API hadith của Quran API. Mỗi hadith ghi rõ số tham chiếu, người dịch và ấn bản của bản dịch đang hiển thị.",
+      "{site} hiển thị văn bản hadith từ hai nguồn, qua API hadith của Quran API. Mỗi hadith ghi rõ số tham chiếu và ấn bản của từng bản dịch đang hiển thị, cùng tên mà ấn bản đó ghi.",
     sourcesTitle: "Nguồn dữ liệu",
     fawaz:
       "Các bộ sưu tập kinh điển: văn bản tiếng Ả Rập, bản dịch và đánh giá độ xác thực theo từng học giả. Theo dự án này, văn bản tiếng Ả Rập và tiếng Anh được lấy từ sunnah.com.",
@@ -26,7 +27,7 @@ const COPY = {
     collections: "Bộ sưu tập",
     rulesTitle: "Nguyên tắc",
     rules: [
-      "Không dùng máy dịch. Mọi bản dịch đều là bản dịch đã xuất bản, có tên người dịch và ấn bản.",
+      "Không dùng máy dịch. Mọi bản dịch đều lấy nguyên văn từ một ấn bản đã công bố và ghi mã ấn bản đó. Tên đi kèm là tên mà ấn bản ghi, giữ nguyên: phần lớn ấn bản không nêu tên người dịch, và vài ấn bản ghi tên người biên soạn bộ sách, nên tên đó không được gọi là người dịch.",
       "Khi một hadith chưa có bản dịch bằng ngôn ngữ bạn chọn, bản dịch tiếng Anh được hiển thị kèm nhãn rõ ràng; nếu không có cả bản tiếng Anh, chỉ hiển thị nguyên văn tiếng Ả Rập.",
       "Liên kết giữa các bộ sưu tập chỉ được tạo khi lời văn tiếng Ả Rập trùng khớp chính xác. Bản dịch HadeethEnc của phần lời văn trùng khớp được ghi nhãn riêng, không bao giờ trình bày như bản dịch của chính bộ sách.",
       "Đánh giá độ xác thực chỉ hiển thị kèm tên người đánh giá, đúng như nguồn ghi. Nguồn không có đánh giá theo từng hadith cho Sahih al-Bukhari, Sahih Muslim và ba bộ 40 hadith, nên ở đó không có đánh giá nào.",
@@ -35,19 +36,20 @@ const COPY = {
     coverageTitle: "Mức độ có tiếng Việt",
     coverage: ({ own, hencTotal, linked, readable, total, linkedBooks }) =>
       `${own} trong ${hencTotal} hadith của HadeethEnc có bản dịch tiếng Việt của HadeethEnc. Thêm ${linked} hadith trong các bộ sưu tập khác đọc được qua bản dịch HadeethEnc của phần lời văn trùng khớp${linkedBooks ? ` (${linkedBooks})` : ""}. Các bộ sưu tập kinh điển chưa có bản dịch tiếng Việt riêng: với các hadith đó, nguyên văn tiếng Ả Rập và bản dịch tiếng Anh được hiển thị, có ghi nhãn. Tổng cộng ${readable} trong ${total} hadith đọc được bằng tiếng Việt.`,
-    translatorsTitle: "Người dịch theo ngôn ngữ",
+    translatorsTitle: "Ấn bản bản dịch theo ngôn ngữ",
     translatorsIntro:
-      "Mọi ấn bản bản dịch theo dữ liệu API: bộ sưu tập, người dịch theo cách nguồn ghi, và mã ấn bản (liên kết tới tệp nguồn).",
+      "Mọi ấn bản bản dịch theo dữ liệu API: bộ sưu tập, tên mà ấn bản ghi (giữ nguyên, không phải lúc nào cũng là người dịch), mã ấn bản (liên kết tới tệp nguồn) và số hadith.",
     language: "Ngôn ngữ",
-    translator: "Người dịch",
-    unknownTranslator: "Không rõ (theo nguồn)",
+    translator: "Tên trong nguồn",
+    edition: "Ấn bản",
+    unknownTranslator: "không nêu tên",
     hencLanguages: (count) => `HadeethEnc.com: bản dịch bằng ${count} ngôn ngữ.`,
-    unavailable: "Không tải được danh sách người dịch lúc này.",
+    unavailable: "Không tải được danh sách ấn bản lúc này.",
   },
   en: {
     title: "Sources & method",
     intro:
-      "Hadith.vn shows hadith texts from two sources, through the Quran API's hadith endpoints. Every hadith shows its reference number and who translated the text on screen, from which edition.",
+      "{site} shows hadith texts from two sources, through the Quran API's hadith endpoints. Every hadith shows its reference number and the edition of each translation on screen, with the name that edition gives.",
     sourcesTitle: "Sources",
     fawaz:
       "The canonical collections: Arabic text, translations and per-scholar grades. The project states that its Arabic and English texts come from sunnah.com.",
@@ -56,7 +58,7 @@ const COPY = {
     collections: "Collections",
     rulesTitle: "Rules",
     rules: [
-      "No machine translation. Every translation is a published one, with its translator and edition.",
+      "No machine translation. Every translation is taken word for word from a published edition, whose code is given. The name shown with it is the one the edition gives, as given: most editions name no translator and a few name the collection's compiler, so that name is never called the translator.",
       "When a hadith has no translation in the chosen language, the English translation is shown and clearly labelled; without English either, only the Arabic is shown.",
       "Collections are linked only when the Arabic wording matches exactly. HadeethEnc's translation of a matching wording is labelled as such and never presented as the collection's own translation.",
       "Grades are shown only with the grader's name, exactly as the source gives them. The source has no per-hadith grades for Sahih al-Bukhari, Sahih Muslim and the three forty-hadith books, so none are shown there.",
@@ -65,20 +67,22 @@ const COPY = {
     coverageTitle: "Vietnamese coverage",
     coverage: ({ own, hencTotal, linked, readable, total, linkedBooks }) =>
       `${own} of HadeethEnc's ${hencTotal} hadiths have HadeethEnc's Vietnamese translation. Another ${linked} hadiths in other collections can be read through HadeethEnc's translation of a matching wording${linkedBooks ? ` (${linkedBooks})` : ""}. The canonical collections have no Vietnamese translation of their own: for those hadiths the Arabic and the labelled English translation are shown. In all, ${readable} of ${total} hadiths can be read in Vietnamese.`,
-    translatorsTitle: "Translators by language",
+    translatorsTitle: "Translation editions by language",
     translatorsIntro:
-      "Every translation edition the API lists: the collection, the translator as the source names them, and the edition code (linked to the source file).",
+      "Every translation edition the API lists: the collection, the name the edition gives (as given, not always the translator), the edition code (linked to the source file) and the number of hadiths.",
     language: "Language",
-    translator: "Translator",
-    unknownTranslator: "Not named (per the source)",
+    translator: "Name in the source",
+    edition: "Edition",
+    unknownTranslator: "not named",
     hencLanguages: (count) => `HadeethEnc.com: translations in ${count} languages.`,
-    unavailable: "The list of translators could not be loaded right now.",
+    unavailable: "The list of editions could not be loaded right now.",
   },
 };
 
 export default function Sources({ books, vietnamese, translators, hencLanguages }) {
   const { t, ui, formatNumber } = useLocale();
-  const copy = COPY[ui] || COPY.vi;
+  const base = COPY[ui] || COPY.en;
+  const copy = { ...base, intro: base.intro.replace("{site}", site.siteName) };
   const fawazBooks = (books || []).filter((book) => book.source === "fawaz");
   const henc = (books || []).find((book) => book.source === "hadeethenc");
 
@@ -184,39 +188,43 @@ export default function Sources({ books, vietnamese, translators, hencLanguages 
                   <tr>
                     <th scope="col">{copy.language}</th>
                     <th scope="col">{copy.collections}</th>
+                    <th scope="col">{copy.translator}</th>
+                    <th scope="col">{copy.edition}</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {translators.map((row) => (
-                    <tr key={row.code}>
-                      <th scope="row">
-                        {row.nativeName}
-                        {row.nativeName !== row.name ? <span className={styles.tableNote}> ({row.name})</span> : null}
-                      </th>
-                      <td>
-                        <ul className={styles.translatorList}>
-                          {row.editions.map((item) => (
-                            <li key={item.code}>
-                              <span>{item.name}</span>:{" "}
-                              {item.author || <span className={styles.tableNote}>{copy.unknownTranslator}</span>}{" "}
-                              <span className={styles.tableNote}>
-                                ·{" "}
-                                {item.sourceUrl ? (
-                                  <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer">
-                                    {item.code}
-                                  </a>
-                                ) : (
-                                  item.code
-                                )}{" "}
-                                ({formatNumber(item.count)})
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+                {/* One group of rows per language, one row per edition. */}
+                {translators.map((row) => (
+                  <tbody key={row.code}>
+                    {row.editions.map((item, index) => (
+                        <tr key={item.code}>
+                          {index === 0 && (
+                            <th scope="rowgroup" rowSpan={row.editions.length}>
+                              <bdi>{row.nativeName}</bdi>
+                              {row.nativeName !== row.name ? <span className={styles.tableNote}> ({row.name})</span> : null}
+                            </th>
+                          )}
+                          <td>{item.name}</td>
+                          <td>
+                            {item.author ? (
+                              <bdi>{item.author}</bdi>
+                            ) : (
+                              <span className={styles.tableNote}>{copy.unknownTranslator}</span>
+                            )}
+                          </td>
+                          <td>
+                            {item.sourceUrl ? (
+                              <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer">
+                                {item.code}
+                              </a>
+                            ) : (
+                              item.code
+                            )}{" "}
+                            <span className={styles.tableNote}>({formatNumber(item.count)})</span>
+                          </td>
+                        </tr>
+                    ))}
+                  </tbody>
+                ))}
               </table>
             </div>
           ) : (

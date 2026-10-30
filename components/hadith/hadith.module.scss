@@ -36,20 +36,56 @@
   gap: 8px;
 }
 
+// "TIẾNG ANH · Muhsin Khan · eng-bukhari ↗" above each translation.
 .labelRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 12px;
-  font-size: 12px;
+  gap: 4px 6px;
+  min-width: 0;
+  color: var(--txt12);
+  font-size: 13px;
   line-height: 1.4;
 }
 
 .label {
   color: var(--txt12);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+}
+
+.creditSep {
+  color: var(--txt13);
+}
+
+.creditName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.credit {
+  display: contents;
+}
+
+// The edition code, linked to the source file (24px tall: a tap target).
+.creditCode {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--main-color);
+  overflow-wrap: anywhere;
+
+  &:is(a) {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  &:is(a):hover,
+  &:is(a):focus-visible {
+    text-decoration-thickness: 2px;
+  }
 }
 
 .fallbackBadge {
@@ -323,4 +359,132 @@
   color: var(--main-color);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+// ---------------------------------------------------------------- extra translations
+
+// The primary translation, then the reader's extra languages, in order.
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.extra {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--bdr11);
+
+  // HadeethEnc's translation of the same wording: the tinted box of .linked
+  &.linked {
+    padding-top: 10px;
+  }
+}
+
+.extraBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+// "Chưa có bản dịch বাংলা cho hadith này"
+.extraMissing {
+  padding-top: 10px;
+  border-top: 1px dashed var(--bdr11);
+  color: var(--txt13);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.extraToggle {
+  display: none;
+}
+
+// Lists on phones: each extra language is a 44px row that opens on a tap
+// (the whole row is the button; the links in it stay links).
+@media only screen and (max-width: 599px) {
+  .collapsible {
+    gap: 0;
+
+    .labelRow {
+      position: relative;
+      min-height: 44px;
+    }
+
+    .labelRow a {
+      position: relative;
+      z-index: 1;
+    }
+
+    .extraToggle {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin: -6px -10px -6px auto;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--txt12);
+      cursor: pointer;
+
+      svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+        transition: transform 0.2s ease;
+      }
+
+      // the tap area: the whole row
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+      }
+
+      &:focus-visible {
+        outline: none;
+      }
+
+      &:focus-visible::after {
+        border-radius: 6px;
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+    }
+
+    &[data-open="false"] .extraBody {
+      display: none;
+    }
+
+    &[data-open="true"] {
+      gap: 8px;
+
+      .extraToggle svg {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .extra.collapsible {
+    padding-top: 4px;
+  }
+
+  .extra.linked.collapsible {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .extraToggle svg {
+    transition: none;
+  }
 }

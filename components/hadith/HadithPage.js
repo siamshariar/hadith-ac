@@ -1,5 +1,5 @@
 import { server } from "../../lib/config";
-import { getLanguages, loadPage } from "../../lib/api";
+import { loadPage } from "../../lib/api";
 import {
   UNASSIGNED_CHAPTER,
   bookPath,
@@ -20,8 +20,9 @@ import Layout from "../layouts/LayoutSecondary";
 import HadithDetail from "./HadithDetail";
 import styles from "../content/Page.module.scss";
 
-// Shared by /hadiths/{id} and /books/{book}/hadiths/{number}.
-export default function HadithPage({ hadith, languages, error }) {
+// Shared by /hadiths/{id} and /books/{book}/hadiths/{number}. `translations`:
+// the extra languages shown under the primary translation (lib/api loadPage).
+export default function HadithPage({ hadith, translations, error }) {
   const { t } = useLocale();
 
   if (error || !hadith) {
@@ -71,7 +72,7 @@ export default function HadithPage({ hadith, languages, error }) {
 
       <div className={styles.page}>
         <Breadcrumbs items={crumbs} />
-        <HadithDetail hadith={hadith} languages={languages} />
+        <HadithDetail hadith={hadith} translations={translations} />
       </div>
     </>
   );
@@ -95,21 +96,14 @@ export function hadithLayout(page) {
   );
 }
 
+// `fetchHadith(lang, { translations })` loads the hadith in the content
+// language with the reader's extra translations.
 export function loadHadithPage(context, fetchHadith) {
-  return loadPage(context, async (lang) => {
-    const [hadith, languages] = await Promise.all([
-      fetchHadith(lang),
-      // Names for the language switch; the page still works without them.
-      getLanguages().catch(() => []),
-    ]);
-    const available = new Set(hadith.availableLanguages || []);
-    available.add(lang);
+  return loadPage(context, async (lang, { translations }) => {
+    const hadith = await fetchHadith(lang, { translations });
     return {
       props: {
         hadith,
-        languages: languages
-          .filter((language) => available.has(language.code))
-          .map(({ code, name, nativeName }) => ({ code, name, nativeName })),
         backLink:
           hadith.chapter && !isCategoryBook(hadith.book)
             ? chapterPath(hadith.book.slug, hadith.chapter.chapterNo)

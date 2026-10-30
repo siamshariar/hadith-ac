@@ -14,7 +14,7 @@ import { sidebarCategoriesData } from "../../../components/sidebar/data";
 import HadithCard, { HadithList } from "../../../components/hadith/HadithCard";
 import styles from "../../../components/content/Page.module.scss";
 
-export default function CategoryHadiths({ data, books, direct, filtered, counts, error }) {
+export default function CategoryHadiths({ data, books, direct, filtered, counts, translations, error }) {
   const { t, lang, formatNumber, languageName } = useLocale();
   const router = useRouter();
   const loading = useRouteLoading();
@@ -33,6 +33,7 @@ export default function CategoryHadiths({ data, books, direct, filtered, counts,
   // (all hadiths; the default is those translated into the reader's language).
   const query = {
     lang: router.query.lang || undefined,
+    tr: router.query.tr,
     direct: direct ? 1 : undefined,
     all: router.query.all === "1" ? 1 : undefined,
   };
@@ -143,6 +144,7 @@ export default function CategoryHadiths({ data, books, direct, filtered, counts,
           <HadithList
             hadiths={hadiths}
             loading={loading}
+            picker={{ translations }}
             renderCard={(hadith) => <HadithCard key={hadith.id} hadith={hadith} book={books[hadith.bookSlug]} />}
           />
         )}
@@ -163,7 +165,7 @@ export async function getServerSideProps(context) {
   const direct = context.query.direct === "1";
   const all = context.query.all === "1";
 
-  return loadPage(context, async (lang) => {
+  return loadPage(context, async (lang, { translations }) => {
     const page = parsePage(context.query.page);
     const perPage = config.perPage;
     const count = (translated) =>
@@ -174,13 +176,13 @@ export async function getServerSideProps(context) {
     // Default: only hadiths translated into the reader's language (Arabic is
     // the original, so it is never filtered). ?all=1 shows every hadith.
     let filtered = !all && lang !== "ar";
-    let data = await getCategoryHadiths(id, lang, { page, perPage, direct, translated: filtered });
+    let data = await getCategoryHadiths(id, lang, { page, perPage, direct, translated: filtered, translations });
     let translatedCount = filtered ? data.pagination.total : null;
     let allCount = filtered ? null : data.pagination.total;
 
     if (filtered && translatedCount === 0) {
       // Nothing translated here: show all of them rather than an empty list.
-      data = await getCategoryHadiths(id, lang, { page, perPage, direct });
+      data = await getCategoryHadiths(id, lang, { page, perPage, direct, translations });
       filtered = false;
       allCount = data.pagination.total;
     }

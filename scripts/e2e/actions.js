@@ -9,7 +9,11 @@ const { api, assert, cleanText, lettered, loc, meta, readClipboard, sleep, store
 const BUKHARI = 'sahih-al-bukhari';
 
 // The copied texts, from the API data, in the format the site promises
-// (lib/citation): labels as on the page, grades with their grader names.
+// (lib/citation): labels as on the page, the name an edition gives quoted as
+// given ("không nêu tên" when none, never "translator"), grades with their
+// grader names.
+const credit = (entry) => [entry.author || 'không nêu tên', entry.edition.code].join(' · ');
+
 function expectedCitation(hadith, permalink, site) {
   const book = hadith.book;
   const henc = book.source === 'hadeethenc';
@@ -21,13 +25,12 @@ function expectedCitation(hadith, permalink, site) {
   const linked = own && !own.isFallback ? null : hadith.linkedTranslation;
   if (linked) {
     lines.push(
-      `Bản dịch tiếng Việt theo HadeethEnc: ${linked.author || 'HadeethEnc.com'}, ấn bản ${linked.edition.code} - ${linked.edition.sourceUrl} - ${site}/hadiths/${linked.hadithId}`
+      `Bản dịch tiếng Việt theo HadeethEnc · ${credit(linked)} - ${linked.edition.sourceUrl} - ${site}/hadiths/${linked.hadithId}`
     );
   }
   if (own) {
     const label = own.isFallback ? 'Bản dịch tiếng Anh' : `Bản dịch ${own.languageCode === 'vi' ? 'tiếng Việt' : own.languageCode}`;
-    const parts = [own.author, `ấn bản ${own.edition.code}`].filter(Boolean);
-    lines.push(`${label}: ${parts.join(', ')} - ${own.edition.sourceUrl}`);
+    lines.push(`${label} · ${credit(own)} - ${own.edition.sourceUrl}`);
   }
   lines.push(permalink);
   return lines.join('\n');
@@ -40,10 +43,10 @@ function expectedText(hadith, permalink) {
   parts.push(`[Nguyên văn tiếng Ả Rập]\n${cleanText(hadith.arabic)}`);
   const own = hadith.translation;
   const linked = own && !own.isFallback ? null : hadith.linkedTranslation;
-  if (linked) parts.push(`[Bản dịch tiếng Việt theo HadeethEnc - ${linked.author || 'HadeethEnc.com'}]\n${cleanText(linked.text)}`);
+  if (linked) parts.push(`[Bản dịch tiếng Việt theo HadeethEnc · ${credit(linked)}]\n${cleanText(linked.text)}`);
   if (own) {
     const label = own.isFallback ? 'Bản dịch tiếng Anh' : 'Bản dịch tiếng Việt';
-    parts.push(`[${[label, own.author].filter(Boolean).join(' - ')}]\n${cleanText(own.text)}`);
+    parts.push(`[${label} · ${credit(own)}]\n${cleanText(own.text)}`);
   }
   const grades = [];
   if (hadith.gradeText) grades.push(hadith.gradeText);
@@ -85,7 +88,7 @@ module.exports = spec(module, 'hadith actions', (h) => {
         const site = canonical.slice(0, canonical.length - citable.length);
         assert.equal(canonical, `${site}${citable}`, 'canonical is the citable URL');
         const header = page.locator('article > header');
-        assert.equal(await copyFrom(page, header, 'Copy văn bản'), expectedText(hadith, canonical), `${citable}: copied text`);
+        assert.equal(await copyFrom(page, header, 'Copy tất cả'), expectedText(hadith, canonical), `${citable}: copied text`);
         await sleep(300);
         assert.equal(await copyFrom(page, header, 'Copy trích dẫn'), expectedCitation(hadith, canonical, site), `${citable}: copied citation`);
         await sleep(300);

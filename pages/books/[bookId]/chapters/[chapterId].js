@@ -43,7 +43,7 @@ function ChapterSwitcher({ book, chapter, chapters, query }) {
   );
 }
 
-export default function Chapter({ data, chapters, neighbours, onlyReadable, readableCount, error }) {
+export default function Chapter({ data, chapters, neighbours, onlyReadable, readableCount, translations, error }) {
   const { t, lang, formatNumber, languageName } = useLocale();
   const router = useRouter();
   const loading = useRouteLoading();
@@ -61,8 +61,12 @@ export default function Chapter({ data, chapters, neighbours, onlyReadable, read
   const title = unassigned ? t("unassignedChapter") : chapter.name;
   const basePath = chapterPath(book.slug, chapter.chapterNo);
   const pastLastPage = hadiths.length === 0 && pagination.total > 0;
-  // Query kept by pagination and links: the ?lang= override and the filter.
-  const query = { lang: router.query.lang || undefined, translated: onlyReadable ? 1 : undefined };
+  // Query kept by pagination and links: the ?lang= and ?tr= overrides and the filter.
+  const query = {
+    lang: router.query.lang || undefined,
+    tr: router.query.tr,
+    translated: onlyReadable ? 1 : undefined,
+  };
   // The API lists a chapter in the source's order, so without the filter a
   // card's position on the page gives its in-book reference.
   const inBookAt = (index) =>
@@ -94,7 +98,7 @@ export default function Chapter({ data, chapters, neighbours, onlyReadable, read
           ]}
         />
 
-        <ReaderBar>
+        <ReaderBar picker={{ translations, book: book.slug }}>
           <Link href={bookPath(book)} className={`${barStyles.book} ${barStyles.bookOptional}`}>
             {shortBookName(book)}
           </Link>
@@ -215,7 +219,7 @@ export async function getServerSideProps(context) {
   const { bookId, chapterId } = context.params;
   if (!/^-?\d+$/.test(String(chapterId))) return { notFound: true };
 
-  return loadPage(context, async (lang) => {
+  return loadPage(context, async (lang, { translations }) => {
     // ?translated=1: only hadiths readable in the language (own or linked
     // translation). Off by default; Arabic is the original text.
     const onlyReadable = lang !== "ar" && context.query.translated === "1";
@@ -224,6 +228,7 @@ export async function getServerSideProps(context) {
         page: parsePage(context.query.page),
         perPage: config.perPage,
         translated: onlyReadable,
+        translations,
       }),
       // Cached; only used for previous/next chapter links.
       getBook(bookId, lang).catch(() => null),

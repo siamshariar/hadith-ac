@@ -145,7 +145,7 @@ function SearchForm({ query, book, books, languages, goTo }) {
   );
 }
 
-export default function Search({ query, book, results, books, languages, notFound, error }) {
+export default function Search({ query, book, results, books, languages, notFound, translations, error }) {
   const { t, lang, languageInfo, formatNumber, languageName } = useLocale();
   const router = useRouter();
   const loading = useRouteLoading();
@@ -173,7 +173,7 @@ export default function Search({ query, book, results, books, languages, notFoun
       : null;
 
   // Keep the query, book filter and any ?lang= override across pages.
-  const baseQuery = { q: query, book: book || undefined, lang: router.query.lang || undefined };
+  const baseQuery = { q: query, book: book || undefined, lang: router.query.lang || undefined, tr: router.query.tr };
 
   return (
     <>
@@ -276,6 +276,7 @@ export default function Search({ query, book, results, books, languages, notFoun
                 <HadithList
                   hadiths={results.hadiths}
                   loading={loading}
+                  picker={{ translations, book: book || null }}
                   renderCard={(hadith) => (
                     <HadithCard key={hadith.id} hadith={hadith} book={bookMap[hadith.bookSlug]} showContext />
                   )}
@@ -303,8 +304,9 @@ export async function getServerSideProps(context) {
   const rawBook = first(context.query.book);
   const book = /^[\w-]+$/.test(String(rawBook || "")) ? String(rawBook) : "";
   const langOverride = first(context.query.lang);
+  const trOverride = context.query.tr === undefined ? undefined : String(first(context.query.tr));
 
-  return loadPage(context, async (lang) => {
+  return loadPage(context, async (lang, { translations }) => {
     const [books, languages] = await Promise.all([getBooks(lang).catch(() => []), getLanguages().catch(() => [])]);
 
     // "Go to hadith": ?go=Bukhari 1, ?go=8a&book=sahih-muslim, or a search
@@ -320,8 +322,11 @@ export async function getServerSideProps(context) {
     if (reference) {
       try {
         const hadith = await getBookHadith(reference.slug, reference.number, lang);
-        const keep = langOverride ? `?lang=${encodeURIComponent(langOverride)}` : "";
-        return { redirect: { destination: `${hadithPath(hadith)}${keep}`, permanent: false } };
+        const keep = new URLSearchParams();
+        if (langOverride) keep.set("lang", langOverride);
+        if (trOverride !== undefined) keep.set("tr", trOverride);
+        const search = keep.toString().replace(/%2C/gi, ",");
+        return { redirect: { destination: `${hadithPath(hadith)}${search ? `?${search}` : ""}`, permanent: false } };
       } catch (error) {
         if (!(error instanceof ApiError && error.status === 404)) throw error;
         notFound = goTo || query;
@@ -336,6 +341,7 @@ export async function getServerSideProps(context) {
             page: parsePage(context.query.page),
             perPage: config.perPage,
             book: book || undefined,
+            translations,
           })
         : null;
 

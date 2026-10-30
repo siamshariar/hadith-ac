@@ -156,17 +156,17 @@ Category.getLayout = function getLayout(page) {
 
 export async function getServerSideProps(context) {
   const { id } = context.params;
-  return loadPage(context, async (lang) => {
+  return loadPage(context, async (lang, { translations }) => {
     // Preview the hadiths translated into the reader's language first,
     // like the full list; fall back to all when none are.
     let previewFiltered = lang !== "ar";
     const [category, firstPreview] = await Promise.all([
       getCategory(id, lang),
-      getCategoryHadiths(id, lang, { perPage: PREVIEW_SIZE, translated: previewFiltered }),
+      getCategoryHadiths(id, lang, { perPage: PREVIEW_SIZE, translated: previewFiltered, translations }),
     ]);
     let preview = firstPreview;
     if (previewFiltered && preview.pagination.total === 0) {
-      preview = await getCategoryHadiths(id, lang, { perPage: PREVIEW_SIZE });
+      preview = await getCategoryHadiths(id, lang, { perPage: PREVIEW_SIZE, translations });
       previewFiltered = false;
     }
     return {

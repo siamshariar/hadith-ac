@@ -1,6 +1,10 @@
+import { Fragment, useId, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "../../contexts/LocaleContext";
+import { languageName as catalogName } from "../../lib/i18n";
 import { cleanText, hadithPath } from "../../lib/hadith";
+import { extraTranslations, fallbackShownAsExtra, primaryTranslation } from "../../lib/translations";
+import ChevronDownIcon from "../icons/ChevronDown";
 import { Highlighted } from "./Highlight";
 import styles from "./hadith.module.scss";
 
@@ -33,16 +37,70 @@ function TranslationText({ text, code }) {
   );
 }
 
-// A translation as returned by the API: { languageCode, text, author, isFallback }.
+// The name of an extra language ({ code, name, nativeName } from lib/api):
+// the interface's own name for it when the catalog has one, else the API's,
+// in English for an English interface and in the language itself otherwise.
+export function useExtraLanguageName() {
+  const { ui } = useLocale();
+  return (language) => catalogName(ui, language.code, ui === "en" ? language.name : language.nativeName || language.name);
+}
+
+// A sentence of the catalog with a language name in it, the name isolated
+// (<bdi>) so a right-to-left name keeps its place in a left-to-right line.
+function WithLanguage({ text, name }) {
+  const parts = text.split("{language}");
+  return parts.map((part, index) => (
+    <Fragment key={index}>
+      {index > 0 && <bdi>{name}</bdi>}
+      {part}
+    </Fragment>
+  ));
+}
+
+const SEPARATOR = (
+  <span className={styles.creditSep} aria-hidden="true">
+    {" · "}
+  </span>
+);
+
+// "Muhsin Khan · eng-bukhari ↗": the name the source gives with the edition
+// (most editions give none, and some give the compiler's, so it is never
+// called the translator), then the edition code, linked to the source file.
+export function Credit({ entry }) {
+  const { t } = useLocale();
+  if (!entry) return null;
+  const edition = entry.edition || {};
+  return (
+    <>
+      <span className={styles.creditName} title={t("nameInSource")}>
+        {entry.author ? <bdi>{entry.author}</bdi> : t("nameNotGiven")}
+      </span>
+      {edition.code && SEPARATOR}
+      {edition.code &&
+        (edition.sourceUrl ? (
+          <a href={edition.sourceUrl} target="_blank" rel="noopener noreferrer" className={styles.creditCode}>
+            {edition.code}
+            <span aria-hidden="true"> ↗</span>
+            <span className="visually_hidden"> {t("sourceOpensNewTab")}</span>
+          </a>
+        ) : (
+          <span className={styles.creditCode}>{edition.code}</span>
+        ))}
+    </>
+  );
+}
+
+// A translation as returned by the API: { languageCode, text, author, edition, isFallback }.
 // - isFallback: the English text, labelled so it never passes for the reader's language.
-// - null: no translation at all; say so, the Arabic above stands alone.
-export function Translation({ translation, clamped = false, showNote = false }) {
+// - null: no translation at all; say so, the Arabic above stands alone (or
+//   the extra translations below it, when the reader added some).
+export function Translation({ translation, clamped = false, showNote = false, othersShown = false }) {
   const { t, lang, languageName, directionOf } = useLocale();
 
   if (!translation || !translation.text) {
     return (
       <p className={styles.missing} role="note">
-        {t("noTranslation")}
+        {othersShown ? <WithLanguage text={t("extraMissing")} name={languageName(lang)} /> : t("noTranslation")}
       </p>
     );
   }
@@ -58,13 +116,12 @@ export function Translation({ translation, clamped = false, showNote = false }) 
             {code === "en" ? t("fallbackTranslation") : t("translationIn", { language: languageName(code) })}
           </span>
         ) : (
-          <span className={styles.label}>{t("translationIn", { language: languageName(code) })}</span>
-        )}
-        {translation.author && (
-          <span className={styles.author}>
-            {t("translator")}: {translation.author}
+          <span className={styles.label}>
+            <bdi>{languageName(code)}</bdi>
           </span>
         )}
+        {SEPARATOR}
+        <Credit entry={translation} />
       </div>
       {isFallback && showNote && (
         <p className={styles.fallbackNote}>{t("fallbackNote", { language: languageName(lang) })}</p>
@@ -80,15 +137,10 @@ export function Translation({ translation, clamped = false, showNote = false }) 
   );
 }
 
-// What a reader sees: the hadith's own translation in their language; else
-// the linked HadeethEnc translation (with the English fallback kept aside);
-// else the English fallback or nothing.
+// What a reader sees as the primary translation (see lib/translations).
 export function shownTranslation(hadith) {
-  const own = hadith && hadith.translation && hadith.translation.text ? hadith.translation : null;
-  const linked = hadith && hadith.linkedTranslation && hadith.linkedTranslation.text ? hadith.linkedTranslation : null;
-  if (own && !own.isFallback) return { linked: null, own };
-  if (linked) return { linked, own };
-  return { linked: null, own };
+  const { own, linked, fallback } = primaryTranslation(hadith);
+  return linked ? { linked, own: fallback } : { linked: null, own };
 }
 
 // HadeethEnc's translation of wording that appears verbatim in this hadith
@@ -112,26 +164,9 @@ export function LinkedTranslation({ linked, clamped = false, compact = false }) 
             {t("linkedTranslationLink")} <span aria-hidden="true">→</span>
           </Link>
         ) : (
-          <>
-            {linked.author && (
-              <span className={styles.author}>
-                {t("translator")}: {linked.author}
-              </span>
-            )}
-            {linked.edition && linked.edition.code && (
-              <span className={styles.author}>
-                {t("edition")} {linked.edition.code}
-                {linked.edition.sourceUrl && (
-                  <>
-                    {" · "}
-                    <a href={linked.edition.sourceUrl} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
-                      {t("sourceLink")}
-                    </a>
-                  </>
-                )}
-              </span>
-            )}
-          </>
+          <span className={styles.credit}>
+            <Credit entry={linked} />
+          </span>
         )}
       </div>
       {/* Said before the text, so it is read as what it is. */}
@@ -154,12 +189,99 @@ export function LinkedTranslation({ linked, clamped = false, compact = false }) 
   );
 }
 
-// Said once above a list whose cards show linked translations.
+// One extra language under the primary translation: its own translation,
+// HadeethEnc's translation of the same wording (labelled as HadeethEnc's,
+// linked to that hadith), or one muted line when there is neither.
+// `collapsible` (lists): on phones the text folds into a 44px row that opens
+// on a tap; wider screens always show it.
+export function ExtraTranslation({ slot, collapsible = false, compact = false }) {
+  const { t } = useLocale();
+  const nameOf = useExtraLanguageName();
+  const [open, setOpen] = useState(false);
+  const bodyId = useId();
+  const name = nameOf(slot);
+  const entry = slot.entry;
+
+  if (!entry) {
+    return (
+      <p className={styles.extraMissing} data-language={slot.code}>
+        <WithLanguage text={t("extraMissing")} name={name} />
+      </p>
+    );
+  }
+
+  const linked = entry.linked;
+  const direction = entry.direction || slot.direction || "auto";
+  const source = linked ? hadithPath({ id: linked.hadithId }) : null;
+
+  return (
+    <div
+      className={`${styles.extra} ${linked ? styles.linked : ""} ${collapsible ? styles.collapsible : ""}`}
+      data-language={slot.code}
+      data-open={open ? "true" : "false"}
+    >
+      <div className={styles.labelRow}>
+        {linked ? (
+          <span className={styles.linkedBadge}>
+            <WithLanguage text={t("linkedTranslation")} name={name} />
+          </span>
+        ) : (
+          <span className={styles.label}>
+            <bdi>{name}</bdi>
+          </span>
+        )}
+        {SEPARATOR}
+        <Credit entry={entry} />
+        {linked && (
+          <Link href={source} className={styles.linkedLink}>
+            {t("linkedTranslationLink")} <span aria-hidden="true">→</span>
+          </Link>
+        )}
+        {collapsible && (
+          <button
+            type="button"
+            className={styles.extraToggle}
+            aria-expanded={open ? "true" : "false"}
+            aria-controls={bodyId}
+            aria-label={open ? t("hideExtra", { language: name }) : t("showExtra", { language: name })}
+            onClick={() => setOpen((value) => !value)}
+          >
+            <ChevronDownIcon />
+          </button>
+        )}
+      </div>
+      <div id={bodyId} className={styles.extraBody}>
+        {linked && !compact && <p className={styles.linkedNote}>{t("linkedTranslationNote")}</p>}
+        <div className={styles.translationText} lang={slot.code} dir={direction}>
+          <TranslationText text={entry.text} code={slot.code} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Said once above a list whose cards show HadeethEnc's linked translations
+// (as the primary translation or as an extra one).
 export function LinkedTranslationNote({ hadiths }) {
   const { t, languageName } = useLocale();
-  const linked = (hadiths || []).map((hadith) => shownTranslation(hadith).linked).find(Boolean);
-  if (!linked) return null;
-  const language = languageName(linked.languageCode);
+  const nameOf = useExtraLanguageName();
+  const linked = new Map();
+  (hadiths || []).forEach((hadith) => {
+    const primary = shownTranslation(hadith).linked;
+    if (primary && !linked.has(primary.languageCode)) linked.set(primary.languageCode, languageName(primary.languageCode));
+    extraTranslations(hadith).forEach((slot) => {
+      if (slot.entry && slot.entry.linked && !linked.has(slot.code)) linked.set(slot.code, nameOf(slot));
+    });
+  });
+  if (!linked.size) return null;
+  if (linked.size > 1) {
+    return (
+      <p className={styles.linkedListNote} role="note">
+        {t("linkedListNoteAny")}
+      </p>
+    );
+  }
+  const language = [...linked.values()][0];
   return (
     <p className={styles.linkedListNote} role="note">
       {t("linkedListNote", { label: t("linkedTranslation", { language }), language })}
@@ -167,23 +289,39 @@ export function LinkedTranslationNote({ hadiths }) {
   );
 }
 
-// Cards, the detail page and the daily hadith all render translations here.
-// `compact`: the short linked-translation label of the cards.
-export function HadithTranslations({ hadith, clamped = false, showNote = false, compact = false }) {
+// Cards, the detail page and the daily hadith all render translations here:
+// the primary translation (own, HadeethEnc's linked one, or the labelled
+// English fallback), then the reader's extra languages in their order.
+// `compact`: the short linked-translation label of the cards;
+// `collapsible`: extra languages fold on phones (lists).
+export function HadithTranslations({ hadith, clamped = false, showNote = false, compact = false, collapsible = false }) {
   const { t, languageName } = useLocale();
-  const { linked, own } = shownTranslation(hadith);
+  const { own, linked, fallback } = primaryTranslation(hadith);
+  const extras = extraTranslations(hadith);
+  const othersShown = extras.some((slot) => slot.entry);
 
-  if (!linked) return <Translation translation={own} clamped={clamped} showNote={showNote} />;
-
-  return (
+  const primary = linked ? (
     <div className={styles.translations}>
       <LinkedTranslation linked={linked} clamped={clamped} compact={compact} />
-      {own && (
+      {fallback && !fallbackShownAsExtra(hadith) && (
         <details className={styles.fallbackDetails}>
-          <summary>{t("showFallbackTranslation", { language: languageName(own.languageCode) })}</summary>
-          <Translation translation={own} />
+          <summary>{t("showFallbackTranslation", { language: languageName(fallback.languageCode) })}</summary>
+          <Translation translation={fallback} />
         </details>
       )}
+    </div>
+  ) : (
+    <Translation translation={own} clamped={clamped} showNote={showNote} othersShown={othersShown} />
+  );
+
+  if (!extras.length) return primary;
+
+  return (
+    <div className={styles.stack}>
+      {primary}
+      {extras.map((slot) => (
+        <ExtraTranslation key={slot.code} slot={slot} collapsible={collapsible} compact={compact} />
+      ))}
     </div>
   );
 }

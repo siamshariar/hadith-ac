@@ -18,11 +18,13 @@ import {
   storedHadithRef,
 } from "../../lib/hadith";
 import { referenceText } from "../../lib/citation";
+import { TRANSLATIONS_PARAM, extraTranslations } from "../../lib/translations";
 import HadithOptions from "../content/HadithOptions";
 import { GradeBadge } from "./Grades";
 import HadithReference from "./HadithReference";
 import { ArabicText, HadithTranslations, shownTranslation } from "./HadithText";
 import ReaderBar, { barStyles } from "./ReaderBar";
+import TranslationPicker from "./TranslationPicker";
 import styles from "./HadithDetail.module.scss";
 
 // A related hadith (API `related`: same wording in another collection) by its citation.
@@ -68,48 +70,13 @@ function useScrolledPast(ref) {
   return past;
 }
 
-// Switches this hadith's language with ?lang= (shareable, does not change the
-// saved preference). Options come from the hadith's `availableLanguages`.
-function LanguageSwitch({ available, languages, linked }) {
-  const router = useRouter();
-  const { t, lang } = useLocale();
-  const names = new Map((languages || []).map((language) => [language.code, language]));
-  const codes = Array.isArray(available) ? [...available] : [];
-  const missingCurrent = !codes.includes(lang);
-  if (missingCurrent) codes.unshift(lang);
-  if (codes.length < 2) return null;
-
-  const label = (code) => {
-    const info = names.get(code);
-    // The reader's own language needs no English gloss (and the select stays short).
-    const name = !info
-      ? code
-      : code === lang || !info.nativeName || info.nativeName === info.name
-        ? info.nativeName || info.name
-        : `${info.nativeName} (${info.name})`;
-    if (!missingCurrent || code !== lang) return name;
-    // No translation of its own: say whether a linked HadeethEnc one is shown.
-    return linked && linked.languageCode === lang ? `${name} – HadeethEnc` : `${name} – ${t("notAvailableShort")}`;
-  };
-
-  const change = (event) => {
-    router.push({ pathname: router.pathname, query: { ...router.query, lang: event.target.value } }, undefined, {
-      scroll: false,
-    });
-  };
-
-  return (
-    <label className={styles.languageSwitch}>
-      <span className={styles.languageLabel}>{t("readIn")}</span>
-      <select value={lang} onChange={change}>
-        {codes.map((code) => (
-          <option key={code} value={code}>
-            {label(code)}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
+// One-off view settings a link keeps from page to page: ?lang= and ?tr=.
+function keptQuery(query) {
+  const params = new URLSearchParams();
+  if (query.lang) params.set("lang", String(query.lang));
+  if (query[TRANSLATIONS_PARAM] !== undefined) params.set(TRANSLATIONS_PARAM, String(query[TRANSLATIONS_PARAM]));
+  const text = params.toString();
+  return text ? `?${text.replace(/%2C/gi, ",")}` : "";
 }
 
 // HadeethEnc explanation, benefits (`hints`), word meanings and sources.
@@ -221,7 +188,8 @@ function HadithNavigation({ navigation, book, keepLang }) {
   );
 }
 
-export default function HadithDetail({ hadith, languages }) {
+// `translations`: the extra languages the page shows (lib/translations).
+export default function HadithDetail({ hadith, translations }) {
   const { t } = useLocale();
   const router = useRouter();
   const { addLastRead } = useContext(PinContext);
@@ -235,7 +203,9 @@ export default function HadithDetail({ hadith, languages }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hadith.id]);
 
-  const keepLang = router.query.lang ? `?lang=${encodeURIComponent(router.query.lang)}` : "";
+  // Links to other hadiths keep a one-off ?lang= and ?tr=.
+  const keepLang = keptQuery(router.query);
+  const extras = translations || (hadith.extraLanguages || []).map((language) => language.code);
   const categoryBook = isCategoryBook(book);
   const showChapter = chapter && !categoryBook;
   const chapterText = showChapter
@@ -247,11 +217,14 @@ export default function HadithDetail({ hadith, languages }) {
   const category = categoryBook && hadith.categories && hadith.categories[0];
   const reference = referenceText(hadith, book, t);
   const { linked, own } = shownTranslation(hadith);
-  const arabicOnly = !linked && !own;
+  const arabicOnly = !linked && !own && !extraTranslations(hadith).some((slot) => slot.entry);
 
+  // The translations chip is in the header; the reader bar shows it too once
+  // the header has scrolled away.
   return (
     <article className={styles.detail}>
       <ReaderBar
+        picker={{ translations: extras, book: book.slug, hidden: !titleScrolledAway }}
         trailing={
           <span className={`${barStyles.trailing} ${titleScrolledAway ? barStyles.trailingShown : ""}`} aria-hidden={!titleScrolledAway}>
             {reference}
@@ -289,7 +262,9 @@ export default function HadithDetail({ hadith, languages }) {
           )}
           <GradeBadge grades={hadith.grades} gradeText={hadith.gradeText} />
           {hadith.title && <span className={styles.fact}>{reference}</span>}
-          <LanguageSwitch available={hadith.availableLanguages} languages={languages} linked={hadith.linkedTranslation} />
+          <span className={styles.picker}>
+            <TranslationPicker translations={extras} book={book.slug} />
+          </span>
         </div>
 
         <AlsoIn related={hadith.related} keepLang={keepLang} />

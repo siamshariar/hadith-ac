@@ -1,8 +1,9 @@
 "use client";
 
 import { fonts, themes } from "../../lib/settings";
-import { useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import { SettingsContext } from "../../contexts/SettingsContext";
+import { compareLanguages, readLanguageCookie } from "../../lib/language";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -50,17 +51,17 @@ export default function SettingsContent() {
 
 // Content language: populated from /hadith/languages, saved in a cookie so
 // server-rendered pages use it as {localizationCode}. Arabic is not offered
-// here because the Arabic text is always shown.
+// here because the Arabic text is always shown. The translations panel of
+// the hadith pages saves the same cookie, so the value is read from it.
 const Language = () => {
   const { t, preferredLang, setLanguage, formatNumber } = useLocale();
   const { data, error, loading, retry } = useApi("languages", () => getLanguages());
+  const [saved, setSaved] = useState(null);
+  useEffect(() => {
+    setSaved(readLanguageCookie());
+  }, []);
 
-  const languages = (Array.isArray(data) ? data : [])
-    .filter((language) => language.code !== "ar")
-    .sort((a, b) => {
-      const rank = (code) => (code === "vi" ? 0 : code === "en" ? 1 : 2);
-      return rank(a.code) - rank(b.code) || a.name.localeCompare(b.name);
-    });
+  const languages = (Array.isArray(data) ? data : []).filter((language) => language.code !== "ar").sort(compareLanguages);
 
   return (
     <div className={`${styles.block} ${styles.language}`}>
@@ -73,8 +74,11 @@ const Language = () => {
         ) : (
           <select
             className={styles.language_select}
-            value={preferredLang}
-            onChange={(event) => setLanguage(event.target.value)}
+            value={saved || preferredLang}
+            onChange={(event) => {
+              setSaved(event.target.value);
+              setLanguage(event.target.value);
+            }}
             aria-label={t("contentLanguage")}
           >
             {languages.map((language) => (

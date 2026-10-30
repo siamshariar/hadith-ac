@@ -1,6 +1,7 @@
-// The hadith page: the language switch (?lang=, the saved preference stays),
-// grades, "Cũng có trong", the reference block and "Báo lỗi", canonical and
-// og:url, the legacy per-language URL, and the texts shown against the API.
+// The hadith page: the content language for one view (?lang=, the saved
+// preference stays), grades, "Cũng có trong", the reference block and "Báo
+// lỗi", canonical and og:url, the legacy per-language URL, and the texts
+// shown against the API.
 'use strict';
 
 const { BASE, api, assert, cleanText, lettered, loc, meta, norm, spec, until, waitForH1, waitForText } = require('./harness');
@@ -14,6 +15,8 @@ const BUKHARI = 'sahih-al-bukhari';
 const translationBlock = (page, code) => page.locator(`section[class*="translationBlock"] div[lang="${code}"]`).first();
 const arabicBlock = (page) => page.locator('section[class*="arabicBlock"] div[lang="ar"]');
 const languageCookie = async (context) => (await context.cookies()).find((c) => c.name === 'hadith_lang');
+// The translations chip of the page header ("Bản dịch: Tiếng Việt").
+const chip = (page) => page.locator('article > header').getByRole('button', { name: /^Bản dịch:/ });
 
 // The site URL the app builds permalinks from: the canonical of a page we
 // know, checked against the citable path below.
@@ -24,48 +27,40 @@ async function siteOf(page) {
 
 module.exports = spec(module, 'hadith page', (h) => {
   h.test(
-    'language switch: ?lang= changes the text, not the saved preference',
+    '?lang= changes the language for that view, not the saved preference',
     async (t) => {
       const [vi, en, bn] = await Promise.all(['vi', 'en', 'bn'].map((lang) => api(`/books/bukhari/hadiths/1${loc(lang)}`)));
       const languages = await api('/languages');
       const { page, context } = await h.open(t, `/books/${BUKHARI}/hadiths/1`);
-      const select = page.getByRole('combobox', { name: 'Đọc bằng' });
-      const codes = await select.locator('option').evaluateAll((options) => options.map((o) => o.value));
-      const expected = vi.availableLanguages.includes('vi') ? vi.availableLanguages : ['vi', ...vi.availableLanguages];
-      assert.deepEqual(codes, expected, 'the languages this hadith can be read in');
-      assert.equal(await select.inputValue(), 'vi');
-      assert.equal(norm(await select.locator('option[value="vi"]').textContent()), 'Tiếng Việt – chưa có bản dịch', 'says Vietnamese is missing');
+      await waitForText(chip(page), /^Bản dịch: Tiếng Việt\b/);
+      assert.equal(await chip(page).getAttribute('data-translations'), 'vi', 'Vietnamese, no extra language');
       assert.equal(squash(await translationBlock(page, 'en').innerText()), squash(cleanText(vi.translation.text)), 'Vietnamese page shows the English fallback');
       await waitForText(page.locator('section[class*="translationBlock"] span[class*="fallbackBadge"]'), 'Bản dịch tiếng Anh');
 
       for (const [code, data] of [['en', en], ['bn', bn]]) {
-        await page.getByRole('combobox', { name: 'Đọc bằng' }).selectOption(code);
-        await h.waitForPath(page, (url) => url.searchParams.get('lang') === code, `?lang=${code}`);
+        await h.goto(page, `/books/${BUKHARI}/hadiths/1?lang=${code}`);
         await until(async () => (await translationBlock(page, code).count()) === 1, `${code} translation shown`);
         assert.equal(squash(await translationBlock(page, code).innerText()), squash(cleanText(data.translation.text)), `${code} text is the API's`);
         assert.equal(data.translation.isFallback, false);
-        // the interface stays Vietnamese and nothing is saved
+        // the label names the language; the interface stays Vietnamese and nothing is saved
         const name = code === 'en' ? 'tiếng Anh' : languages.find((l) => l.code === code).nativeName;
-        await waitForText(page.locator('section[class*="translationBlock"] span[class*="label"]').first(), `Bản dịch ${name}`);
+        await waitForText(page.locator('section[class*="translationBlock"] span[class*="label"]').first(), name);
+        assert.equal(await chip(page).getAttribute('data-translations'), code);
         assert.equal(await languageCookie(context), undefined, 'no language cookie written');
         assert.equal((await meta(page)).lang, 'vi');
       }
 
       // Arabic: the original, with the English translation labelled as such
-      await page.getByRole('combobox', { name: 'Đọc bằng' }).selectOption('ar');
-      await h.waitForPath(page, (url) => url.searchParams.get('lang') === 'ar', '?lang=ar');
+      await h.goto(page, `/books/${BUKHARI}/hadiths/1?lang=ar`);
       assert.equal(norm(await arabicBlock(page).innerText()), norm(cleanText(vi.arabic)));
       assert.equal(await languageCookie(context), undefined);
 
       // the next page without ?lang= is Vietnamese again
       await h.goto(page, `/books/${BUKHARI}/hadiths/2`);
-      assert.equal(await page.getByRole('combobox', { name: 'Đọc bằng' }).inputValue(), 'vi');
-      // a hadith read through HadeethEnc's translation says so in the switch
+      assert.equal(await chip(page).getAttribute('data-translations'), 'vi');
+      // a hadith read through HadeethEnc's translation says so
       await h.goto(page, `/books/${BUKHARI}/hadiths/3`);
-      assert.equal(
-        norm(await page.getByRole('combobox', { name: 'Đọc bằng' }).locator('option[value="vi"]').textContent()),
-        'Tiếng Việt – HadeethEnc'
-      );
+      await waitForText(page.locator('section[class*="translationBlock"] span[class*="linkedBadge"]').first(), 'Bản dịch tiếng Việt theo HadeethEnc');
     },
     { smoke: true }
   );
@@ -202,7 +197,8 @@ module.exports = spec(module, 'hadith page', (h) => {
       assert.deepEqual(reference, [
         ['Tham chiếu', 'Sahih al-Bukhari 1'],
         ['Vị trí trong sách', `Chương ${one.inBookReference.chapterNo}, Hadith ${one.inBookReference.position}`],
-        ['Bản dịch tiếng Anh', `${one.translation.author} · ấn bản ${one.translation.edition.code} · nguồn (${one.translation.edition.code})`],
+        // the name the edition gives, as given, then the edition (linked to the source file)
+        ['Bản dịch tiếng Anh', `${one.translation.author} · ${one.translation.edition.code} ↗ (nguồn, mở trong thẻ mới)`],
       ]);
 
       // Muslim's 8.01 is cited 8a everywhere on its page
