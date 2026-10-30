@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import Drawer from "@mui/material/Drawer";
+import HeaderLogo from "../web/HeaderLogo";
 import SettingsModal from "./settings-modal";
 import CategoryModal from "./CategoryModal";
 import MenuBookIcon from "../icons/MenuBook";
@@ -144,17 +144,7 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
         <div className={styles.wrapper}>
           <div className={styles.menu_ctn}>
             <div className={styles.menu_top}>
-              <Link href="/" className={styles.logo}>
-
-                <Image
-                  src="/img/logo_full_white.png"
-                  alt="Hadith.vn"
-                  width={130}
-                  height={22}
-                  loading="eager"
-                />
-
-              </Link>
+              <HeaderLogo size="mobile" />
             </div>
 
             <ul className={styles.menu}>

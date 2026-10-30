@@ -11,6 +11,20 @@
   min-width: 0;
 }
 
+// The hadith of the day, right under the search, as wide as the figures.
+.dailySection {
+  min-width: 0;
+  max-width: 920px;
+  margin: 20px auto 0;
+}
+
+@media screen and (min-width: 1024px) {
+  .dailySection {
+    max-width: 1100px;
+    margin-top: 32px;
+  }
+}
+
 .sectionHead {
   display: flex;
   align-items: center;

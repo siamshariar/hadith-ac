@@ -35,27 +35,24 @@
   background: var(--bg11);
 }
 
+// The logo on the hero's light tint (dark green in the dark theme), over the
+// ribbon of the logo's gradient.
 .menu_top {
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 32px;
-  padding-bottom: 32px;
+  position: relative;
+  padding: 24px 16px 28px;
   margin-bottom: 18px;
   background: var(--band-bg);
-  background: linear-gradient(135deg, var(--band-bg) 0%, var(--band-bg2) 100%);
-}
-.logo {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-.logo img {
-  width: 130px;
-  height: 22px;
-  margin: 0;
-}
-.logo span {
-  display: none;
+  background: linear-gradient(160deg, var(--band-bg) 0%, var(--band-bg2) 100%);
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: var(--brand-ribbon);
+  }
 }
 
 // for center logo

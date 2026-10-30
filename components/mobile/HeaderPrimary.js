@@ -2,9 +2,9 @@ import { useState, useContext } from "react";
 import { SettingsContext } from "../../contexts/SettingsContext";
 import { useLocale } from "../../contexts/LocaleContext";
 import Link from "next/link";
-import Image from "next/image";
 import Container from "../core/container";
 import IconButton from "@mui/material/IconButton";
+import HeaderLogo from "../web/HeaderLogo";
 import MobileNav from "./MobileNav";
 import MenuIcon from "../icons/Menu";
 import SearchIcon from "../icons/Search";
@@ -52,15 +52,7 @@ export default function HeaderMobile({ selectedCategoryId }) {
             </div>
 
             <div className={styles.center}>
-              <Link href="/" className={styles.logo}>
-                <Image
-                  src={theme === "light" ? "/img/logo.png" : "/img/logo_full_white.png"}
-                  alt="Hadith.vn"
-                  width={130}
-                  height={22}
-                  loading="eager"
-                />
-              </Link>
+              <HeaderLogo size="mobile" />
             </div>
 
             <div className={styles.right}>

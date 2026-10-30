@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Container from "../core/container";
 import { useLocale } from "../../contexts/LocaleContext";
+import { site } from "../../lib/sites";
 import styles from "./Footer.module.scss";
 
 // Site footer on every layout and screen size: the site links, copyright
@@ -31,7 +32,7 @@ export default function FooterWeb() {
 
           <p className={styles.copyright}>
             <span>&copy; {new Date().getFullYear()} </span>
-            <Link href="/about">Hadith.vn</Link>
+            <Link href="/about">{site.siteName}</Link>
             <span>. {t("allRightsReserved")}</span>
           </p>
 

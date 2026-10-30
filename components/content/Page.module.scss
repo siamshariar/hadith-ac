@@ -239,15 +239,15 @@
   padding: 9px 18px;
   border: 0;
   border-radius: 6px;
-  background: var(--theme-color);
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-txt);
   font: inherit;
   font-size: 15px;
   cursor: pointer;
 
   &:hover,
   &:focus-visible {
-    opacity: 0.92;
+    background: var(--btn-bg-hover);
   }
 }
 
@@ -255,6 +255,13 @@
   border: 1px solid var(--bdr13);
   background: transparent;
   color: var(--txt11);
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--theme-color);
+    background: var(--accent-soft);
+    color: var(--main-color);
+  }
 }
 
 @media only screen and (min-width: 600px) {
@@ -527,9 +534,15 @@
     font-weight: 500;
   }
 
+  // the language of a group of editions: its own name on one line, the
+  // English one under it when the column is narrow
   tbody th {
+    min-width: 7.5em;
     font-weight: 600;
-    white-space: nowrap;
+
+    bdi {
+      white-space: nowrap;
+    }
   }
 }
 

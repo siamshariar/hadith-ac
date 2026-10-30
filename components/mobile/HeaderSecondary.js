@@ -1,8 +1,8 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import Container from "../core/container";
+import HeaderLogo from "../web/HeaderLogo";
 import CategoryModal from "./CategoryModal";
 import SettingsModal from "./settings-modal";
 import MobileNav from "./MobileNav";
@@ -11,7 +11,6 @@ import DropDownIcon from "../icons/ArrowDropDown";
 import MenuIcon from "../icons/Menu";
 import TuneIcon from "../icons/Tune";
 import SearchIcon from "../icons/Search";
-import { SettingsContext } from "../../contexts/SettingsContext";
 import { useLocale } from "../../contexts/LocaleContext";
 import styles from "./Header.module.scss";
 
@@ -21,7 +20,6 @@ import styles from "./Header.module.scss";
 export default function HeaderMobile({ selectedCategoryId, backLink }) {
   const router = useRouter();
   const { t } = useLocale();
-  const { theme } = useContext(SettingsContext);
 
   const ignoreTab = (event) =>
     event.type === "keydown" && (event.key === "Tab" || event.key === "Shift");
@@ -92,15 +90,7 @@ export default function HeaderMobile({ selectedCategoryId, backLink }) {
                   <DropDownIcon />
                 </button>
               ) : (
-                <Link href="/" className={styles.logo}>
-                  <Image
-                    src={theme === "light" ? "/img/logo.png" : "/img/logo_full_white.png"}
-                    alt="Hadith.vn"
-                    width={130}
-                    height={22}
-                    loading="eager"
-                  />
-                </Link>
+                <HeaderLogo size="mobile" />
               )}
             </div>
 

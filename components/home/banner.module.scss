@@ -1,42 +1,52 @@
-// Brand band: the main green (styles/_variables --band-*), a faint dot
-// grid for texture, the site heading and the search panel.
+// The hero (styles/_variables --hero-*): #F3F7F1 to white with a faint dot
+// grid in light, #16301D to the page in dark; the heading in the brand
+// green (#EEF3EC in dark) over a 56x4 bar of the logo's gradient.
 .banner {
-  padding: 24px 0 28px;
-  background-color: var(--band-bg);
-  background-image: radial-gradient(var(--band-line) 1px, transparent 1.5px),
-    linear-gradient(160deg, var(--band-bg) 0%, var(--band-bg2) 100%);
+  padding: 28px 0 30px;
+  background-color: var(--brand-50);
+  background-image: radial-gradient(var(--hero-dot) 1px, transparent 1.5px), var(--hero-bg);
   background-size: 20px 20px, 100% 100%;
-  border-bottom: 1px solid var(--band-line);
+  border-bottom: 1px solid var(--bdr11);
 }
 
 .heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   max-width: 760px;
-  margin: 0 auto 18px;
+  margin: 0 auto 22px;
   text-align: center;
 }
 
 .siteTitle {
-  color: var(--band-txt);
-  font-size: 26px;
-  font-weight: 600;
-  line-height: 1.25;
+  color: var(--hero-title);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
   letter-spacing: -0.01em;
 }
 
+// decoration only: never behind or under text
+.titleBar {
+  display: block;
+  width: 56px;
+  height: 4px;
+  margin-top: 12px;
+  border-radius: 2px;
+  background: var(--brand-ribbon);
+}
+
 .tagline {
-  margin-top: 6px;
-  color: var(--band-muted);
+  margin-top: 12px;
+  color: var(--hero-text);
   font-size: 15px;
   line-height: 1.55;
 }
 
+// The search card itself is the card (home/search.module.scss).
 .panel {
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 16px;
-  border-radius: 12px;
-  background-color: var(--bg11);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
 // hadith of the day
@@ -120,22 +130,22 @@
 }
 
 @media only screen and (min-width: 1024px) {
-  // The desktop header is transparent over the band (see web/Header .home).
+  // The fixed 64px header lies over the top of the hero.
   .banner {
-    padding: 104px 0 48px;
+    padding: 116px 0 56px;
   }
   .heading {
-    margin-bottom: 28px;
+    margin-bottom: 30px;
   }
   .siteTitle {
-    font-size: 36px;
+    font-size: 40px;
+  }
+  .titleBar {
+    margin-top: 16px;
   }
   .tagline {
-    margin-top: 10px;
+    margin-top: 14px;
     font-size: 17px;
-  }
-  .panel {
-    padding: 24px 32px;
   }
   .daily {
     padding: 24px 32px;

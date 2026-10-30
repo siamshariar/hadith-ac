@@ -11,13 +11,13 @@
   --main-color: #1f7ef9; // main theme color
   --txt00: #000000; // arabic text color
   --txt11: #2e3031; // bold text
-  --txt12: #666666; // normal text
-  --txt13: #627083; // light text (4.6:1 on white; was #9eabbe, 2.3:1)
+  --txt12: #5c635d; // normal text (6.2:1 on white)
+  --txt13: #5e6b60; // light text, green-grey (5.6:1 on white)
 
-  --bg11: #ffffff; // main bg
-  --bg12: #f4f4f4; // main bg rev
+  --bg11: #ffffff; // main bg: cards, header
+  --bg12: #f4f6f3; // page: a faint green-grey
   --bg21: #444444;
-  --bg22: #eeeeee; // icon bg
+  --bg22: #ecf1eb; // icon bg (hover)
 
   --bdr11: #e8e8ea;
   --bdr12: #e8e8ea;
@@ -32,19 +32,45 @@
   --hbnc1: #e80013;
   --hbnc2: #fce802;
 
-  // update
-  --theme-color: #466548;
-  --main-color: #466548;
-  --bsc11: #466548;
-  --sidebar-icon-color: rgba(0, 0, 0, 0.54);
-  --snsic: #138025;
+  // ---- brand, from the logo: "Hadith" #173A1D; ".vn" #DB241E -> #F1E416.
+  // The green scale carries text and controls (900 on white: 12.7:1; 600,
+  // the hover shade: 7.6:1); the flag gradient is decoration only, never
+  // text (its stops reach 1.3-4.9:1).
+  --brand-900: #173a1d;
+  --brand-800: #1f4a27;
+  --brand-600: #2c5e35;
+  --brand-500: #3e7a49;
+  --brand-100: #e3ede2;
+  --brand-50: #f3f7f1;
+  --brand-ribbon: linear-gradient(90deg, #db241e, #e05a1f 25%, #e6921a 50%, #ecb918 75%, #f1e416);
+  --brand-ink: #173a1d; // text in the brand colour: headings, the wordmark
 
-  // brand band (home hero, menu drawer): the main green, white text
-  --band-bg: #3d5a40;
-  --band-bg2: #4b6d4e;
-  --band-txt: #ffffff;
-  --band-muted: rgba(255, 255, 255, 0.85);
-  --band-line: rgba(255, 255, 255, 0.14);
+  --theme-color: #173a1d; // accents, borders, switches (white text on it: 12.7:1)
+  --main-color: #173a1d; // links and accent text
+  --main-color-hover: #2c5e35;
+  --bsc11: #173a1d;
+  --sidebar-icon-color: rgba(0, 0, 0, 0.54);
+  --snsic: #173a1d;
+
+  // primary buttons
+  --btn-bg: #173a1d;
+  --btn-bg-hover: #2c5e35;
+  --btn-txt: #ffffff;
+
+  // home hero: light, the brand green for text, dots for texture
+  --hero-bg: linear-gradient(#f3f7f1, #ffffff);
+  --hero-dot: rgba(23, 58, 29, 0.08);
+  --hero-title: #173a1d;
+  --hero-text: #3d4f40;
+  --hero-card-bg: #ffffff;
+  --hero-card-bdr: #7c8f80; // 3.4:1 on white: the field's edge is visible
+
+  // brand band (menu drawer top): kept light, like the hero
+  --band-bg: #f3f7f1;
+  --band-bg2: #ffffff;
+  --band-txt: #173a1d;
+  --band-muted: #3d4f40;
+  --band-line: rgba(23, 58, 29, 0.12);
 
   // type scale (interface)
   --text-xs: 0.75rem; // 12
@@ -64,56 +90,82 @@
   --font-arabic: var(--font-amiri-family), "Noto Naskh Arabic", "Traditional Arabic", serif;
   --font-trans: var(--font-ui-family), var(--font-amiri-family), "Segoe UI", sans-serif;
 
-  --focus-ring: #2f5c33;
+  --focus-ring: #173a1d;
 
   // hadith content states
-  --accent-soft: rgba(70, 101, 72, 0.1); // light tint of the main green
+  --accent-soft: rgba(23, 58, 29, 0.07); // light tint of the brand green
   --notice-bg: #fff7e3; // fallback translation / missing translation
   --notice-bdr: #f0d58c;
   --notice-txt: #6f4e00;
-  --grade-bg: #eef3ee;
-  --grade-txt: #2f4a31;
+  --grade-bg: #e8f0e6;
+  --grade-txt: #173a1d;
   --error-txt: #b3261e;
 }
 
+// Dark theme: green-tinted rather than navy, from the brand green. Page
+// #111712, cards #1A221C; text #E4EAE3 (13.9:1) and #C3CEC5 (10:1);
+// links #A8D5B0 (9.9:1 on cards); primary buttons the logo's gold with the
+// dark green on it (7.8:1).
 .dark {
-  --bg11: #232a3b;
-  --bg12: #293145;
-  --bg21: #25262c;
-  --bg22: #313a55;
-  --txt00: #ffffff;
-  --txt11: rgba(226, 232, 240, 1);
-  --txt12: #ffffff;
-  --bdr11: #313a55;
-  --bdr12: #313a55;
-  --bs11: 0px 3px 15px #293145;
-  --cbg: #33363c;
-  --snib: #888888;
-  --snbs: #737c84;
+  --bg11: #1a221c;
+  --bg12: #111712;
+  --bg21: #222b24;
+  --bg22: #26322a;
+  --txt00: #f1f5ef;
+  --txt11: #e4eae3;
+  --txt12: #c3cec5;
+  --txt13: #a3b1a6;
+  --bdr11: #2c3a2f;
+  --bdr12: #2c3a2f;
+  --bdr13: #5f7263; // 3.2:1 on cards: control edges
+  --bdr14: #2c3a2f;
+  --bs11: 0 3px 15px rgba(0, 0, 0, 0.45);
+  --bs21: 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+  --cbg: #1a221c;
+  --snib: #6e7d71;
+  --snbs: #7f8f83;
+  --scrollbar-thumb: #4c5d50;
 
-  --hbnc1: #2b395d;
-  // --hbnc2: #2b395d;
-  --hbnc2: #909090;
+  --hbnc1: #16301d;
+  --hbnc2: #8a968c;
 
-  // update
-  --main-color: #ffffff;
-  --bsc11: #313a55;
-  --sidebar-icon-color: #9eabbe;
-  --snsic: #ffffff;
+  --brand-100: rgba(168, 213, 176, 0.14);
+  --brand-50: #16301d;
+  --brand-ink: #eef3ec;
 
-  --band-bg: #1f3027;
-  --band-bg2: #29402f;
-  --band-line: rgba(255, 255, 255, 0.1);
+  // white text on it 5.2:1, against the page 3.5:1 (borders, switches)
+  --theme-color: #357a43;
+  --main-color: #a8d5b0;
+  --main-color-hover: #c6e6cb;
+  --bsc11: #2c3a2f;
+  --sidebar-icon-color: #a3b1a6;
+  --snsic: #a8d5b0;
 
-  --accent-soft: rgba(255, 255, 255, 0.08);
+  --btn-bg: #ecb918;
+  --btn-bg-hover: #f1cb45;
+  --btn-txt: #16301d;
+
+  --hero-bg: linear-gradient(#16301d, #111712);
+  --hero-dot: rgba(238, 243, 236, 0.07);
+  --hero-title: #eef3ec;
+  --hero-text: #b7c4b9;
+  --hero-card-bg: #1a221c;
+  --hero-card-bdr: #6f8273;
+
+  --band-bg: #16301d;
+  --band-bg2: #1a221c;
+  --band-txt: #eef3ec;
+  --band-muted: #b7c4b9;
+  --band-line: rgba(238, 243, 236, 0.1);
+
+  --accent-soft: rgba(168, 213, 176, 0.1);
   --notice-bg: #3a3420;
   --notice-bdr: #6b5a2a;
   --notice-txt: #f3dfa6;
-  --grade-bg: #2c3a35;
+  --grade-bg: #22322a;
   --grade-txt: #cfe3d1;
   --error-txt: #f2b8b5;
-  --txt13: #a9b4c4;
-  --focus-ring: #9fd3a3;
+  --focus-ring: #ecb918;
 }
 
 .blue {

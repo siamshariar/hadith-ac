@@ -7,8 +7,9 @@ import { cleanText, hadithPath } from "../../lib/hadith";
 import { referenceText } from "../../lib/citation";
 import styles from "./banner.module.scss";
 
-// The brand band in the main green: the site's heading and tagline, with
-// the search panel on it.
+// The hero, light as the reference sites have it: the site's heading in the
+// brand green over a short bar of the logo's gradient (decoration only), the
+// tagline, then the search card.
 export function Hero({ children }) {
   const { t } = useLocale();
   return (
@@ -18,6 +19,7 @@ export function Hero({ children }) {
           <h1 id="site-heading" className={styles.siteTitle}>
             {t("siteHeading")}
           </h1>
+          <span className={styles.titleBar} aria-hidden="true" />
           <p className={styles.tagline}>{t("siteTagline")}</p>
         </div>
         <div className={styles.panel}>{children}</div>

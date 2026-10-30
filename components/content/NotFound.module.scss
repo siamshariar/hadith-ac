@@ -49,13 +49,14 @@
   }
 
   .primary {
-    background: var(--theme-color);
-    border-color: var(--theme-color);
-    color: #fff;
+    background: var(--btn-bg);
+    border-color: var(--btn-bg);
+    color: var(--btn-txt);
 
     &:hover,
     &:focus-visible {
-      color: #fff;
+      background: var(--btn-bg-hover);
+      color: var(--btn-txt);
     }
   }
 }

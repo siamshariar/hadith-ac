@@ -3,6 +3,8 @@
 }
 
 @media only screen and (min-width: 1024px) {
+  // White on every page, the home page included; its bottom 4px are the
+  // ribbon of the logo's gradient (decoration only).
   .header {
     display: block;
     width: 100%;
@@ -11,23 +13,21 @@
     left: 0;
     border-bottom: none;
     background: var(--bg11);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
     z-index: 999;
-    transition: background 150ms ease-in, box-shadow 150ms ease-in;
     height: 64px;
-    padding: 0 17px;
-  }
+    padding: 0 17px 4px;
 
-  // home: transparent over the brand band until the page scrolls
-  .header.home {
-    position: fixed;
-    background: none;
-    box-shadow: none;
-  }
-
-  .header.home.scrolled {
-    background: var(--bg11);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+    &::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: var(--brand-ribbon);
+      pointer-events: none;
+    }
   }
 
   .content {
@@ -41,30 +41,6 @@
 
   .left {
     flex: 0 0 auto;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    min-height: 44px;
-
-    img {
-      width: 153px;
-      height: 26px;
-    }
-  }
-
-  // which logo shows (see Header.js)
-  .logoOnDark,
-  .header.home:not(.scrolled) .logoOnLight,
-  :global(body.dark) .logoOnLight {
-    display: none;
-  }
-
-  .logoOnLight,
-  .header.home:not(.scrolled) .logoOnDark,
-  :global(body.dark) .logoOnDark {
-    display: block;
   }
 
   .right {
@@ -99,13 +75,8 @@
     height: 24px;
   }
 
-  .header.home .btn svg {
-    fill: #fff;
-    transition: fill 150ms ease-in;
-  }
-
-  .header.home.scrolled .btn svg {
-    fill: var(--txt11);
+  .btn:hover svg {
+    fill: var(--main-color);
   }
 
   // search box

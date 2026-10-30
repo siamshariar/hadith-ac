@@ -1,11 +1,10 @@
 "use client";
 
 import styles from "./Header.module.scss";
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { SettingsContext } from "../../contexts/SettingsContext";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import Image from "next/image";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import MenuList from "@mui/material/MenuList";
@@ -26,6 +25,7 @@ import SettingsIcon from "../icons/SettingsOutlined";
 import SearchIcon from "../icons/Search";
 import MenuBookIcon from "../icons/MenuBook";
 import { useLocale } from "../../contexts/LocaleContext";
+import HeaderLogo from "./HeaderLogo";
 
 // Compact search box (GET /search?q=, so it also works before hydration).
 function HeaderSearch() {
@@ -58,9 +58,10 @@ function HeaderSearch() {
   );
 }
 
-// Desktop header (1024px and up). On the home page it lies transparent over
-// the brand band until the page scrolls; the home and search pages have
-// their own search box, so the header only links to /search there.
+// Desktop header (1024px and up): white with the colour logo on every page,
+// the home page included (the dark logo in the dark theme), over the 4px
+// ribbon of the logo's gradient. The home and search pages have their own
+// search box, so the header only links to /search there.
 export default function HeaderWeb({ page }) {
   const router = useRouter();
 
@@ -71,15 +72,6 @@ export default function HeaderWeb({ page }) {
     const newTheme = theme === "light" ? "dark" : "light";
     changeTheme(newTheme);
   };
-
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 5);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -130,31 +122,10 @@ export default function HeaderWeb({ page }) {
         title={modalTitle}
         content={modalContent}
       />
-      <div
-        className={`${styles.header} ${page ? styles[page] : ""} ${scrolled ? styles.scrolled : ""}`}
-      >
+      <div className={styles.header}>
         <div className={styles.content}>
           <div className={styles.left}>
-            {/* Dark logo on light backgrounds, white logo on the band and in
-                the dark theme (switched in CSS: no flash before hydration). */}
-            <Link href="/" className={styles.logo} aria-label="Hadith.vn">
-              <Image
-                className={styles.logoOnLight}
-                src="/img/logo.png"
-                alt=""
-                width={153}
-                height={26}
-                loading="eager"
-              />
-              <Image
-                className={styles.logoOnDark}
-                src="/img/logo_full_white.png"
-                alt=""
-                width={153}
-                height={26}
-                loading="eager"
-              />
-            </Link>
+            <HeaderLogo size="desktop" />
           </div>
 
           <div className={styles.right}>

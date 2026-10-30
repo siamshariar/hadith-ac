@@ -36,12 +36,21 @@ export default function Home({ home, error }) {
         </Container>
       ) : (
         <>
-          {/* The site heading and search (with "go to hadith"), where the
-              reader left off, the collections in groups, the hadith of the
-              day, the category tree and how the data is made. */}
+          {/* The site heading and search (with "go to hadith"), then the
+              hadith of the day and the figures; where the reader left off,
+              the collections in groups, the category tree and how the data
+              is made. */}
           <Hero>
             <HomeSearch />
           </Hero>
+
+          {home.dailyHadith && (
+            <Container>
+              <section className={styles.dailySection}>
+                <DailyHadith hadith={home.dailyHadith} />
+              </section>
+            </Container>
+          )}
           <Stats totals={home.totals} />
 
           <Container>
@@ -59,12 +68,6 @@ export default function Home({ home, error }) {
                 </div>
                 <BookGroups books={home.books} showTranslation />
               </section>
-
-              {home.dailyHadith && (
-                <section className={styles.section}>
-                  <DailyHadith hadith={home.dailyHadith} />
-                </section>
-              )}
 
               <section className={styles.section} aria-labelledby="home-categories">
                 <div className={styles.sectionHead}>

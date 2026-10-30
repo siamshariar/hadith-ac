@@ -1,0 +1,61 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 44px;
+
+  img {
+    display: block;
+    max-width: none;
+  }
+}
+
+.desktop img {
+  width: 153px;
+  height: 26px;
+}
+
+.mobile img {
+  width: 130px;
+  height: 22px;
+}
+
+// light / dark (body.dark: SettingsContext)
+.onDark {
+  display: none !important;
+}
+
+:global(body.dark) {
+  .onLight {
+    display: none !important;
+  }
+
+  .onDark {
+    display: block !important;
+  }
+}
+
+// The site name as a wordmark: the brand green (#EEF3EC in the dark theme)
+// over a bar of the logo's gradient, which is decoration only.
+.wordmark {
+  display: block;
+  padding-bottom: 4px;
+  background-image: var(--brand-ribbon);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 3px;
+}
+
+.wordmarkText {
+  display: block;
+  color: var(--brand-ink);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.mobile .wordmarkText {
+  font-size: 19px;
+}
