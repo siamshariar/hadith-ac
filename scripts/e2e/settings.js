@@ -256,13 +256,17 @@ module.exports = spec(module, 'settings', (h) => {
     await page.getByRole('combobox', { name: 'Ngôn ngữ bản dịch' }).selectOption('en');
     await until(async () => (await context.cookies()).some((c) => c.name === 'hadith_lang' && c.value === 'en'), 'cookie saved');
     await h.goto(page, `/books/${BUKHARI}/hadiths/1`);
-    // English content, and the interface follows (it is Vietnamese or English)
-    await waitForText(page.locator('section[class*="translationBlock"] span[class*="label"]').first(), 'English translation');
-    assert.equal(norm(await page.locator('section[class*="translationBlock"] div[lang="en"]').first().innerText()), norm(en.translation.text.replace(/\r\n?/g, '\n').trim()));
-    assert.equal(await page.evaluate(() => document.documentElement.lang), 'en');
+    // English content; the interface is the site's (Vietnamese), whatever the content language
+    const squash = (value) => String(value || '').replace(/\s+/g, '');
+    await until(
+      async () => squash(await page.locator('section[class*="translationBlock"] div[lang="en"]').first().innerText()) === squash(en.translation.text),
+      'the English translation is shown'
+    );
+    assert.equal(await page.evaluate(() => document.documentElement.lang), 'vi');
+    assert.ok((await page.title()).endsWith(' | Hadith tiếng Việt | Hadith.vn'), 'Vietnamese title');
 
     await h.goto(page, '/settings');
-    await page.getByRole('combobox', { name: 'Translation language' }).selectOption('vi');
+    await page.getByRole('combobox', { name: 'Ngôn ngữ bản dịch' }).selectOption('vi');
     await until(async () => (await context.cookies()).some((c) => c.name === 'hadith_lang' && c.value === 'vi'), 'cookie back to vi');
     await h.goto(page, '/');
     await waitForH1(page, 'Hadith tiếng Việt');

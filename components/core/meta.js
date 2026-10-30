@@ -1,8 +1,11 @@
 import Head from "next/head";
 import { useLocale } from "../../contexts/LocaleContext";
+import { site } from "../../lib/sites";
 
+// The page's <head>: title "{page} | {siteHeading} | {siteName}", description, social
+// cards. Site name and og:locale are the deployment's (config/countries.json).
 export default function Meta(props) {
-  const { t, ui } = useLocale();
+  const { t } = useLocale();
 
   return (
     <Head>
@@ -10,8 +13,6 @@ export default function Meta(props) {
       {/* Readers must be able to zoom (WCAG 1.4.4), e.g. into the Arabic text */}
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       <meta name="description" content={props.description || ""} />
-      <meta name="author" content="" />
-      <meta name="keywords" content="" />
       <meta httpEquiv="X-UA-Compatible" content="ie=edge" />
 
       {/* Android phone */}
@@ -19,7 +20,7 @@ export default function Meta(props) {
       <meta name="mobile-web-app-capable" content="yes" />
 
       {/* iOS phone */}
-      <meta name="apple-mobile-web-app-title" content="" />
+      <meta name="apple-mobile-web-app-title" content={site.siteName} />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
@@ -30,8 +31,8 @@ export default function Meta(props) {
       {/* <meta name="msapplication-config" content="browserconfig.xml" /> */}
 
       {/* Pinned Sites */}
-      <meta name="application-name" content="Hadith.vn" />
-      <meta name="msapplication-tooltip" content="Tooltip Text" />
+      <meta name="application-name" content={site.siteName} />
+      <meta name="msapplication-tooltip" content={site.siteName} />
       <meta name="msapplication-starturl" content={props.url || ""} />
 
       {/* Tap highlighting */}
@@ -63,12 +64,11 @@ export default function Meta(props) {
         content={props.description || ""}
         key="ogdesc"
       />
-      <meta property="og:locale" content={ui === "en" ? "en_US" : "vi_VN"} key="oglocale" />
-      <meta property="og:site_name" content="Hadith.vn" key="ogsitename" />
+      <meta property="og:locale" content={site.ogLocale} key="oglocale" />
+      <meta property="og:site_name" content={site.siteName} key="ogsitename" />
 
       {/* meta information for twitter */}
       <meta name="twitter:card" content="summary" key="twcard" />
-      <meta name="twitter:site" content="@hadith.vn" key="twsite" />
       <meta name="twitter:url" content={props.url || ""} key="twurl" />
       <meta name="twitter:title" content={props.title || ""} key="twtitle" />
       <meta
@@ -170,14 +170,15 @@ export default function Meta(props) {
         type="image/x-icon"
       />
 
-      <link rel="manifest" href="/site.webmanifest" />
+      {/* pages/manifest.webmanifest.js: the deployment's name and language */}
+      <link rel="manifest" href="/manifest.webmanifest" />
 
       {props.canonical && <link rel="canonical" href={props.canonical} />}
       {props.noindex && <meta name="robots" content="noindex" />}
 
       {/* page title */}
       <title>
-        {`${props.title ? props.title + " | " : ""}${t("siteHeading")} | Hadith.vn`}
+        {`${props.title ? props.title + " | " : ""}${t("siteHeading")} | ${site.siteName}`}
       </title>
 
       {/* Manifest.json */}

@@ -5,8 +5,7 @@ import Document, { Html, Head, Main, NextScript } from "next/document";
 import { ServerStyleSheets } from "@mui/styles";
 
 import { GA_TRACKING_ID } from "../lib/gtag";
-import { config } from "../lib/config";
-import { uiLanguage } from "../lib/language";
+import { INTERFACE_DIRECTION, INTERFACE_LANGUAGE } from "../lib/language";
 
 class CustomDocument extends Document {
   static async getInitialProps(ctx) {
@@ -15,14 +14,16 @@ class CustomDocument extends Document {
   }
 
   render() {
-    const pageProps = (this.props.__NEXT_DATA__ && this.props.__NEXT_DATA__.props && this.props.__NEXT_DATA__.props.pageProps) || {};
+    // The deployment's interface language (lib/language.js), whatever the content
+    // language: content blocks carry their own lang and dir.
     return (
-      <Html lang={pageProps.uiLang || uiLanguage(config.language)}>
+      <Html lang={INTERFACE_LANGUAGE} dir={INTERFACE_DIRECTION}>
         <Head>
-          {/* Global Site Tag (gtag.js) - Google Analytics, only when an ID is configured */}
+          {/* Global Site Tag (gtag.js) - Google Analytics, only when an ID is configured
+              (next.config.js accepts letters, digits and dashes only) */}
           {GA_TRACKING_ID && (
             <>
-              <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />
+              <script async src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_TRACKING_ID)}`} />
               <script
                 dangerouslySetInnerHTML={{
                   __html: `
@@ -31,7 +32,7 @@ class CustomDocument extends Document {
                       dataLayer.push(arguments);
                     }
                     gtag('js', new Date());
-                    gtag('config', '${GA_TRACKING_ID}', {
+                    gtag('config', ${JSON.stringify(GA_TRACKING_ID)}, {
                       page_path: window.location.pathname,
                     });
                   `,

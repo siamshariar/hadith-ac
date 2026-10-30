@@ -4,7 +4,8 @@
     "Keys are the Quran API's countries.code; `localization` is that country's localizations.code",
     "(the Quran apps' locale) and `language` the hadith language it maps to through",
     "hadith_languages.localization_id. `ui` is the interface language wanted: it is used when",
-    "lib/locales has that catalog, otherwise the interface falls back to English.",
+    "lib/locales has that catalog, otherwise the interface falls back to English. There is no",
+    "right-to-left interface yet: ar, ur and ku get the English interface (lib/i18n.js).",
     "Check against a running API: npm run check:sites"
   ],
   "vn": { "name": "Vietnam", "localization": "vn", "language": "vi", "ui": "vi", "ogLocale": "vi_VN", "siteName": "Hadith.vn", "logo": "/img/logo.png", "logoDark": "/img/logo_dark.png", "contactEmail": "quran.vn@gmail.com" },

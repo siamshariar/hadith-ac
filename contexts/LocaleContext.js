@@ -2,20 +2,52 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useRouter } from "next/router";
 import {
   DEFAULT_LANGUAGE,
+  INTERFACE_DIRECTION,
+  INTERFACE_LANGUAGE,
+  INTERFACE_LOCALE,
+  isRtlLanguage,
   normalizeLanguage,
   readLanguageCookie,
-  uiLanguage,
   writeLanguageCookie,
 } from "../lib/language";
 import { formatNumber, languageName, translate } from "../lib/i18n";
+import { site } from "../lib/sites";
 
 export const LocaleContext = createContext(null);
 
+// The interface language is the deployment's (lib/language.js), the same on the server
+// and in the browser, whatever the content language.
+const ui = INTERFACE_LANGUAGE;
+
+// A language's name from the API's language object ({ code, name, nativeName }): its
+// English name in the English interface, its own name in the others.
+const apiName = (language) => (language ? (ui === "en" ? language.name : language.nativeName) || null : null);
+
+// The catalog's name for `code`, else the API's: `fallback` (a language object or a
+// name), else the page language's description.
+function nameOf(code, fallback, info) {
+  const given = fallback && typeof fallback === "object" ? apiName(fallback) : fallback;
+  return languageName(ui, code, given || (info && code === info.code ? apiName(info) : null));
+}
+
+// Filled into every interface string (callers' variables win): the site name and the
+// name of the country's content language ("Hadith tiếng Việt", "বাংলা হাদিস").
+const siteVars = { site: site.siteName, siteLanguage: nameOf(site.language, null, null) };
+const t = (key, vars) => translate(ui, key, vars ? { ...siteVars, ...vars } : siteVars);
+
+// Text direction of content in `code`, when known.
+function directionOf(code, info) {
+  if (info && code === info.code) return info.direction || "ltr";
+  if (isRtlLanguage(code)) return "rtl";
+  if (code === "en" || code === "vi" || code === "bn") return "ltr";
+  return "auto";
+}
+
 // `pageLang` is the content language a server-rendered page was fetched in
-// (from `?lang=`, the preference cookie or the default) and `languageInfo` the
-// API's description of it ({ code, name, nativeName, direction }). Static
+// (from `?lang=`, the preference cookie or the country's default) and `languageInfo`
+// the API's description of it ({ code, name, nativeName, direction }). Static
 // pages have neither and read the cookie after mounting.
-export default function LocaleProvider({ pageLang, pageUi, languageInfo, children }) {
+export default function LocaleProvider({ pageLang, languageInfo, children }) {
   const router = useRouter();
   const [preferred, setPreferred] = useState(null);
 
@@ -40,30 +72,22 @@ export default function LocaleProvider({ pageLang, pageUi, languageInfo, childre
   );
 
   const value = useMemo(() => {
-    // Interface language: from the server (saved preference) when given,
-    // else from the preference read on the client.
-    const ui = pageUi === "vi" || pageUi === "en" ? pageUi : uiLanguage(preferredLang);
     const info = languageInfo && languageInfo.code === lang ? languageInfo : null;
-    const nameOf = (code) =>
-      languageName(ui, code, info && code === info.code ? (ui === "vi" ? info.nativeName : info.name) : null);
     return {
       lang,
       preferredLang,
       ui,
+      dir: INTERFACE_DIRECTION,
+      locale: INTERFACE_LOCALE, // BCP 47, for Intl date formats
       languageInfo: info,
-      // Text direction of content in `code`, when known.
-      directionOf: (code) => {
-        if (info && code === info.code) return info.direction || "ltr";
-        if (code === "ar") return "rtl";
-        if (code === "en" || code === "vi") return "ltr";
-        return "auto";
-      },
+      directionOf: (code) => directionOf(code, info),
       setLanguage,
-      t: (key, vars) => translate(ui, key, vars),
-      languageName: nameOf,
+      t,
+      // languageName(code, fallback?): fallback is the API's language object or a name
+      languageName: (code, fallback) => nameOf(code, fallback, info),
       formatNumber: (number) => formatNumber(number, ui),
     };
-  }, [lang, preferredLang, pageUi, languageInfo, setLanguage]);
+  }, [lang, preferredLang, languageInfo, setLanguage]);
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
@@ -72,16 +96,17 @@ export function useLocale() {
   const context = useContext(LocaleContext);
   if (context) return context;
   // Outside the provider (should not happen): default language, no switching.
-  const ui = uiLanguage(DEFAULT_LANGUAGE);
   return {
     lang: DEFAULT_LANGUAGE,
     preferredLang: DEFAULT_LANGUAGE,
     ui,
+    dir: INTERFACE_DIRECTION,
+    locale: INTERFACE_LOCALE,
     languageInfo: null,
-    directionOf: (code) => (code === "ar" ? "rtl" : "auto"),
+    directionOf: (code) => directionOf(code, null),
     setLanguage: () => {},
-    t: (key, vars) => translate(ui, key, vars),
-    languageName: (code, fallback) => languageName(ui, code, fallback),
+    t,
+    languageName: (code, fallback) => nameOf(code, fallback, null),
     formatNumber: (number) => formatNumber(number, ui),
   };
 }

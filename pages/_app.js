@@ -35,6 +35,11 @@ const arabicFont = localFont({
   display: "swap",
   adjustFontFallback: "Times New Roman",
 });
+// Neither font has Bengali (the bd interface and content): name the platforms' own
+// Bengali faces so the browser does not fall back to its last resort, e.g. Vrinda on
+// Windows. Noto Sans Bengali: Android, ChromeOS, Linux; Nirmala UI: Windows 8+;
+// Kohinoor Bangla, Bangla Sangam MN: Apple. Latin text keeps the UI font.
+const scriptFallbacks = '"Noto Sans Bengali", "Nirmala UI", "Kohinoor Bangla", "Bangla Sangam MN"';
 
 const App = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -69,11 +74,11 @@ const App = ({ Component, pageProps }) => {
   const getLayout = Component.getLayout || ((page) => page);
 
   return (
-    <LocaleProvider pageLang={pageProps.lang} pageUi={pageProps.uiLang} languageInfo={pageProps.languageInfo}>
+    <LocaleProvider pageLang={pageProps.lang} languageInfo={pageProps.languageInfo}>
       {/* On :root so MUI portals (menus, modals) get the fonts too. */}
       <style jsx global>{`
         :root {
-          --font-ui-family: ${uiFont.style.fontFamily};
+          --font-ui-family: ${uiFont.style.fontFamily}, ${scriptFallbacks};
           --font-amiri-family: ${arabicFont.style.fontFamily};
         }
       `}</style>
