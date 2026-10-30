@@ -20,6 +20,10 @@
 //                     country.js tests it, platform.js checks it too; without it
 //                     the country tests are skipped
 //   SITE_NAME_BD      that instance's NEXT_PUBLIC_SITE_NAME, if it has one
+//   BASE_AC           an instance built as the international edition
+//                     (NEXT_PUBLIC_COUNTRY_CODE=ac), e.g. http://127.0.0.1:3002:
+//                     international.js tests it; skipped without it
+//   SITE_NAME_AC      that instance's NEXT_PUBLIC_SITE_NAME, if it has one
 // One area only: node --test scripts/e2e/search.js
 // Some tests:    node --test --test-name-pattern="go to hadith" scripts/e2e/
 // Each profile runs its tests one at a time in a fresh browser context per
@@ -43,4 +47,5 @@ run([
   require('./errors'),
   require('./platform'),
   require('./country'),
+  require('./international'),
 ]);

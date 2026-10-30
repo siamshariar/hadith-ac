@@ -1,13 +1,15 @@
 // Platform pages: robots.txt and sitemap.xml (checked against the API), the web app
 // manifest, HTTP 404 for unknown books, chapters, hadiths and categories, HTTP 500 for
 // /500, and the 500 page itself (Vietnamese, inside the site frame). The HTTP checks
-// run against BASE, and against BASE_BD too when it is set (scripts/e2e/country.js).
+// run against BASE, and against BASE_BD and BASE_AC too when they are set
+// (scripts/e2e/country.js, international.js).
 'use strict';
 
 const { BASE, api, assert, loc, meta, norm, spec, waitForH1 } = require('./harness');
 
 const BASE_BD = (process.env.BASE_BD || '').replace(/\/+$/, '');
-const TARGETS = [BASE, BASE_BD].filter(Boolean);
+const BASE_AC = (process.env.BASE_AC || '').replace(/\/+$/, '');
+const TARGETS = [BASE, BASE_BD, BASE_AC].filter(Boolean);
 // The documents asked for here are a 404 and a 500: browsers log those as failed resources.
 const ALLOW_ERRORS = [/status of 404/, /status of 500/];
 

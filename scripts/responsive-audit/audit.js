@@ -1,6 +1,11 @@
 // Responsive audit of hadith-vn: every page at every viewport, in Chromium and WebKit.
 // Usage: node audit.js [outDir] [--engine=chromium|webkit|both] [--vp=phone,tablet] [--pages=/,/books] [--shots]
+//          [--locale=vi-VN] [--click=<selector>]
 // then: python3 summarize.py outDir/results-<engine>.json
+// --locale: the browser's language (Accept-Language), default vi-VN; the international site
+// (ac) picks its content and interface from it. --click: a control to click on each page before
+// it is inspected (its first visible match), e.g. --click='button[data-interface]' opens the
+// interface menu of the ac site.
 // playwright-core is not a project dependency: point PLAYWRIGHT_CORE at an installed copy
 // (its browsers come from ~/.cache/ms-playwright).
 const pw = require(process.env.PLAYWRIGHT_CORE || 'playwright-core');
@@ -16,6 +21,8 @@ const option = (name, fallback) => {
   return arg ? arg.slice(name.length + 3) : fallback;
 };
 const ENGINE = option('engine', 'chromium');
+const LOCALE = option('locale', 'vi-VN');
+const CLICK = option('click', '');
 const SHOTS = args.includes('--shots');
 const pagesArg = args.find(a => a.startsWith('--pages='));
 const vpArg = args.find(a => a.startsWith('--vp='));
@@ -169,7 +176,7 @@ async function runEngine(name) {
       const [vpName, vp, p] = queue.shift();
       // WebKit has no isMobile emulation
       const opts = name === 'webkit' ? { ...vp, isMobile: undefined } : vp;
-      contexts[vpName] = contexts[vpName] || browser.newContext({ ...opts, locale: 'vi-VN' });
+      contexts[vpName] = contexts[vpName] || browser.newContext({ ...opts, locale: LOCALE });
       const ctx = await contexts[vpName];
       const page = await ctx.newPage();
       const errors = [];
@@ -182,6 +189,10 @@ async function runEngine(name) {
         const res = await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 60000 });
         status = res && res.status();
         await page.evaluate(() => document.fonts && document.fonts.ready);
+        if (CLICK) {
+          await page.locator(CLICK).filter({ visible: true }).first().click();
+          await page.waitForTimeout(600); // the menu's opening transition
+        }
         const data = await page.evaluate(inspect);
         if (SHOTS) {
           const dir = path.join(OUT, 'shots', name, vpName.split(' ')[0]);
