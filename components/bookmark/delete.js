@@ -1,30 +1,24 @@
-import { useContext } from "react";
-import { BookmarkContext } from "../../contexts/BookmarkContext";
+import { useContext, useRef } from "react";
+import { BookmarkContext, folderLabel } from "../../contexts/BookmarkContext";
+import { useLocale } from "../../contexts/LocaleContext";
 import Modal from "@mui/material/Modal";
 import Backdrop from "@mui/material/Backdrop";
 import Fade from "@mui/material/Fade";
 import CloseIcon from "../icons/Close";
 import styles from "./modal.module.scss";
 
+// Deletes a bookmark folder (not the default one) with its bookmarks.
 export default function DeleteBookmark({ open, closer, bookmarkKey }) {
   const { bookmarks, changeBookmarks } = useContext(BookmarkContext);
-
-  const checkKeyExists = (obj, key) => {
-    return Object.keys(obj).some((el) => {
-      return el === key;
-    });
-  };
-
-  const elementRemove = (obj, key) => {
-    delete obj[key];
-    return obj;
-  };
+  const { t } = useLocale();
+  // Keeps the name while the dialog fades out after the folder is gone.
+  const name = useRef("");
+  if (bookmarkKey && bookmarks[bookmarkKey]) name.current = folderLabel(bookmarkKey, bookmarks[bookmarkKey], t);
 
   const handleDeleteBookmark = (e) => {
-    if (checkKeyExists(bookmarks, bookmarkKey)) {
-      let newBookmarks = bookmarks;
-      newBookmarks = elementRemove(newBookmarks, bookmarkKey);
-      changeBookmarks(newBookmarks);
+    if (Object.prototype.hasOwnProperty.call(bookmarks, bookmarkKey)) {
+      const { [bookmarkKey]: _deleted, ...rest } = bookmarks;
+      changeBookmarks(rest);
       closer(false)(e);
     }
   };
@@ -42,21 +36,20 @@ export default function DeleteBookmark({ open, closer, bookmarkKey }) {
     >
       <Fade in={open} timeout={250}>
         <div className={styles.content}>
-          <button className={styles.close} onClick={closer(false)}>
+          <button type="button" className={styles.close} onClick={closer(false)} aria-label={t("close")} title={t("close")}>
             <CloseIcon />
           </button>
 
-          <h2 className={styles.title}>Delete bookmark?</h2>
-          <div className={styles.title_desc}>
-            Are you sure you want to delete the bookmark?
-          </div>
+          <h2 className={styles.title}>{t("deleteFolderTitle")}</h2>
+          <div className={styles.title_desc}>{t("deleteFolderText", { name: name.current })}</div>
 
           <div className={styles.buttons}>
             <button
+              type="button"
               className={`${styles.btn} ${styles.btn_remove}`}
               onClick={handleDeleteBookmark}
             >
-              Delete
+              {t("remove")}
             </button>
           </div>
         </div>

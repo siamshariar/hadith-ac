@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useContext } from "react";
-import { BookmarkContext } from "../../contexts/BookmarkContext";
+import { BookmarkContext, folderLabel } from "../../contexts/BookmarkContext";
 import { useLocale } from "../../contexts/LocaleContext";
 import Modal from "@mui/material/Modal";
 import Backdrop from "@mui/material/Backdrop";
@@ -51,9 +51,9 @@ export default function AddBookmark({ open, closer, entry }) {
 
     if (folderKey === "create") {
       if (newFolderKey === "") {
-        handleShowMessage("Folder name must not be empty!");
+        handleShowMessage(t("folderNameEmpty"));
       } else if (bookmarks.hasOwnProperty(newFolderKey)) {
-        handleShowMessage(newFolderName + " is already exists!");
+        handleShowMessage(t("folderExists", { name: newFolderName }));
       } else {
         changeBookmarks({
           ...bookmarks,
@@ -86,27 +86,31 @@ export default function AddBookmark({ open, closer, entry }) {
     >
       <Fade in={open} timeout={250}>
         <div className={styles.content}>
-          <button className={styles.close} onClick={handleClose}>
+          <button type="button" className={styles.close} onClick={handleClose} aria-label={t("close")} title={t("close")}>
             <CloseIcon />
           </button>
           <h2 className={styles.title}>{t("bookmark")}</h2>
           <div className={styles.input_area}>
-            <h2 className={styles.sub_title}>Choose Folder</h2>
+            <label className={styles.sub_title} htmlFor="bookmark-folder">
+              {t("chooseFolder")}
+            </label>
             <select
+              id="bookmark-folder"
               value={folderKey}
               onChange={(e) => changeFolder(e.target.value)}
             >
               {Object.keys(bookmarks).map((key) => (
                 <option value={key} key={key}>
-                  {bookmarks[key].name}
+                  {folderLabel(key, bookmarks[key], t)}
                 </option>
               ))}
-              <option value="create">Create New Folder</option>
+              <option value="create">{t("createFolder")}</option>
             </select>
             <input
               type="text"
               name="create"
-              placeholder="Folder name"
+              placeholder={t("folderName")}
+              aria-label={t("folderName")}
               onChange={(e) => handleCreateNewFolder(e.target.value)}
               className={folderKey === "create" ? styles.open : ""}
             />
@@ -117,16 +121,18 @@ export default function AddBookmark({ open, closer, entry }) {
                   ? `${styles.message} ${styles.open}`
                   : styles.message
               }
+              role="alert"
             >
               {message.text}
             </div>
 
             <div className={styles.buttons}>
               <button
+                type="button"
                 className={`${styles.btn} ${styles.btn_add}`}
                 onClick={handleAddBookmark}
               >
-                Add
+                {t("add")}
               </button>
             </div>
           </div>

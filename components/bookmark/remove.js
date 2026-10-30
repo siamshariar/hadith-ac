@@ -1,7 +1,8 @@
 "use client";
 
 import { useContext } from "react";
-import { BookmarkContext } from "../../contexts/BookmarkContext";
+import { BookmarkContext, folderLabel } from "../../contexts/BookmarkContext";
+import { useLocale } from "../../contexts/LocaleContext";
 import Modal from "@mui/material/Modal";
 import Backdrop from "@mui/material/Backdrop";
 import Fade from "@mui/material/Fade";
@@ -17,6 +18,7 @@ export default function RemoveBookmark({
   isBookmarkPage,
 }) {
   const { bookmarks, changeBookmarks } = useContext(BookmarkContext);
+  const { t } = useLocale();
 
   const handleRemoveBookmark = (e) => {
     const folder = bookmarks[bookmarkKey];
@@ -49,21 +51,22 @@ export default function RemoveBookmark({
     >
       <Fade in={open} timeout={250}>
         <div className={styles.content}>
-          <button className={styles.close} onClick={closer(false)}>
+          <button type="button" className={styles.close} onClick={closer(false)} aria-label={t("close")} title={t("close")}>
             <CloseIcon />
           </button>
 
-          <h2 className={styles.title}>Remove bookmark?</h2>
+          <h2 className={styles.title}>{t("removeBookmarkTitle")}</h2>
           <div className={styles.title_desc}>
-            Are you sure you want to remove this hadith from your bookmarks?
+            {t("removeBookmarkText", { name: folderLabel(bookmarkKey, bookmarks[bookmarkKey], t) })}
           </div>
 
           <div className={styles.buttons}>
             <button
+              type="button"
               className={`${styles.btn} ${styles.btn_remove}`}
               onClick={handleRemoveBookmark}
             >
-              Remove
+              {t("remove")}
             </button>
           </div>
         </div>

@@ -1,13 +1,16 @@
 import { useState, useContext } from "react";
-import { BookmarkContext } from "../../contexts/BookmarkContext";
+import { BookmarkContext, folderLabel } from "../../contexts/BookmarkContext";
+import { useLocale } from "../../contexts/LocaleContext";
 import { useRouter } from "next/router";
 import FolderIcon from "../icons/Folder";
 import CloseIcon from "../icons/Close";
 import DeleteBookmark from "./delete";
 import styles from "./list.module.scss";
 
+// The bookmark folders in the desktop header's dialog; a folder opens its page.
 export default function BookmarkList({ controller }) {
   const { bookmarks } = useContext(BookmarkContext);
+  const { t, formatNumber } = useLocale();
   const router = useRouter();
 
   const handleClick = (e, href) => {
@@ -38,33 +41,37 @@ export default function BookmarkList({ controller }) {
     <>
       <div className={styles.content}>
         <div className={styles.lists}>
-          {Object.keys(bookmarks).map((key) => (
-            <div key={key} className={styles.item}>
-              <div
-                className={styles.link}
-                onClick={(e) => handleClick(e, `/bookmarks?key=${key}`)}
-              >
-                <div className={styles.left}>
-                  <span className={styles.icon}>
-                    <FolderIcon />
-                  </span>
-                  <span className={styles.desc}>
-                    <span>{bookmarks[key]["name"]}</span>
-                    <span>{bookmarks[key].entry.length} items</span>
-                  </span>
-                </div>
-              </div>
+          {Object.keys(bookmarks).map((key) => {
+            const name = folderLabel(key, bookmarks[key], t);
+            const href = `/bookmarks?key=${encodeURIComponent(key)}`;
+            return (
+              <div key={key} className={styles.item}>
+                <a href={href} className={styles.link} onClick={(e) => handleClick(e, href)}>
+                  <div className={styles.left}>
+                    <span className={styles.icon}>
+                      <FolderIcon />
+                    </span>
+                    <span className={styles.desc}>
+                      <span>{name}</span>
+                      <span>{t("folderCount", { count: formatNumber((bookmarks[key].entry || []).length) })}</span>
+                    </span>
+                  </div>
+                </a>
 
-              {key !== "favorites" && (
-                <span
-                  className={styles.delete_icon}
-                  onClick={(e) => handleDeleteBookmark(e, key)}
-                >
-                  <CloseIcon />
-                </span>
-              )}
-            </div>
-          ))}
+                {key !== "favorites" && (
+                  <button
+                    type="button"
+                    className={styles.delete_icon}
+                    onClick={(e) => handleDeleteBookmark(e, key)}
+                    aria-label={t("deleteFolder", { name })}
+                    title={t("deleteFolder", { name })}
+                  >
+                    <CloseIcon />
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

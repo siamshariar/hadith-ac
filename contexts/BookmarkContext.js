@@ -10,6 +10,13 @@ var defaultBookmarks = {
 
 export const BookmarkContext = createContext();
 
+// The default folder is stored as "Favorites" and shown in the interface
+// language; other folders keep the name the reader gave them.
+export const folderLabel = (key, folder, t) =>
+  key === "favorites" && (!folder || !folder.name || folder.name === defaultBookmarks.favorites.name)
+    ? t("favorites")
+    : (folder && folder.name) || t("unnamedFolder");
+
 // Bookmark folders keep their names; entries are references (ids and
 // numbers). Entries from the previous app version are archived, see lib/storage.
 const BookmarkContextProvider = ({ children }) => {

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
-import { BookmarkContext } from "../../contexts/BookmarkContext";
+import { BookmarkContext, folderLabel } from "../../contexts/BookmarkContext";
 import { useLocale } from "../../contexts/LocaleContext";
 import { ApiError, getHadith } from "../../lib/api";
 import HadithCard, { HadithCardSkeleton } from "../hadith/HadithCard";
@@ -82,7 +82,7 @@ export default function BookmarkContent({ folderKey }) {
     <div className={styles.wrapper}>
       <div className={styles.content}>
         <div className={styles.title}>
-          <h1 className={styles.title_text}>{folder ? folder.name : folderKey}</h1>
+          <h1 className={styles.title_text}>{folder ? folderLabel(folderKey, folder, t) : folderKey}</h1>
         </div>
 
         {archived > 0 && <p className={styles.notice}>{t("legacyArchived", { count: archived })}</p>}

@@ -46,6 +46,7 @@
 }
 
 .sub_title {
+  display: block; // a <label> for the folder select
   margin-bottom: 12px;
   font-weight: normal;
   font-size: 15px;

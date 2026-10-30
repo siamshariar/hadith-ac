@@ -55,8 +55,10 @@
   position: absolute;
   top: 50%;
   right: 14px;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
   transform: translateY(-50%);
   z-index: 9;
   display: flex;
@@ -64,6 +66,7 @@
   align-items: center;
   border-radius: 50%;
   background-color: var(--bg12);
+  cursor: pointer;
 }
 
 .delete_icon svg {
@@ -134,7 +137,8 @@
     visibility: hidden;
     background-color: transparent;
   }
-  .item:hover .delete_icon {
+  .item:hover .delete_icon,
+  .item:focus-within .delete_icon {
     visibility: visible;
   }
   .item .delete_icon:hover {
