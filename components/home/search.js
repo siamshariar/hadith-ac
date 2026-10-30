@@ -12,34 +12,49 @@ export function GoToHadith({ book = "", compact = false }) {
   const router = useRouter();
   const { t } = useLocale();
   const [value, setValue] = useState("");
+  // Pressing "Đi" with nothing typed says what to type.
+  const [hint, setHint] = useState(false);
+  const id = book ? `go-${book}` : "go-hadith";
 
   const submit = (event) => {
     event.preventDefault();
     const go = value.trim();
-    if (!go) return;
+    if (!go) {
+      setHint(true);
+      return;
+    }
     router.push({ pathname: "/search", query: book ? { go, book } : { go } });
   };
 
   return (
     <form action="/search" method="get" className={`${styles.goTo} ${compact ? styles.goCompact : ""}`} onSubmit={submit}>
-      <label className={styles.goLabel} htmlFor={book ? `go-${book}` : "go-hadith"}>
+      <label className={styles.goLabel} htmlFor={id}>
         {book ? t("goToNumber") : t("goToHadith")}
       </label>
       <div className={styles.goField}>
         <input
-          id={book ? `go-${book}` : "go-hadith"}
+          id={id}
           type="text"
           name="go"
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={(event) => {
+            setValue(event.target.value);
+            setHint(false);
+          }}
           placeholder={book ? t("numberPlaceholder") : t("goToPlaceholder")}
           autoComplete="off"
           inputMode={book ? "text" : undefined}
           enterKeyHint="go"
+          aria-describedby={hint ? `${id}-hint` : undefined}
         />
         {book && <input type="hidden" name="book" value={book} />}
         <button type="submit">{t("goButton")}</button>
       </div>
+      {hint && (
+        <p id={`${id}-hint`} className={styles.goHint} role="alert">
+          {book ? t("numberHelp") : t("referenceHelp")}
+        </p>
+      )}
     </form>
   );
 }

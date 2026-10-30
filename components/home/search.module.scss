@@ -138,6 +138,15 @@
   }
 }
 
+// what to type, after "Đi" with an empty box
+.goHint {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--txt11);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
 .goCompact .goField {
   flex-basis: 180px;
   max-width: 260px;
