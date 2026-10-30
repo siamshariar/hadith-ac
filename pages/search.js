@@ -14,6 +14,7 @@ import {
 } from "../lib/api";
 import { REFERENCE_NUMBER, parseReference } from "../lib/reference";
 import { booksBySlug, hadithPath, shortBookName } from "../lib/hadith";
+import { compareLanguages } from "../lib/language";
 import { useLocale } from "../contexts/LocaleContext";
 import useRouteLoading from "../hooks/useRouteLoading";
 import Meta from "../components/core/meta";
@@ -352,13 +353,11 @@ export async function getServerSideProps(context) {
         results,
         notFound,
         books: books.map(({ slug, code, name, source, totalHadith }) => ({ slug, code, name, source, totalHadith })),
+        // the deployment's language first, then English, then by name
         languages: languages
           .filter((language) => language.code !== "ar")
           .map(({ code, name, nativeName }) => ({ code, name, nativeName }))
-          .sort((a, b) => {
-            const rank = (code) => (code === "vi" ? 0 : code === "en" ? 1 : 2);
-            return rank(a.code) - rank(b.code) || a.name.localeCompare(b.name);
-          }),
+          .sort(compareLanguages),
         sidebarData: await sidebarCategoriesData(lang),
         backLink: "/",
       },

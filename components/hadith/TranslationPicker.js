@@ -6,8 +6,7 @@ import Skeleton from "react-loading-skeleton";
 import { useLocale } from "../../contexts/LocaleContext";
 import useApi from "../../hooks/useApi";
 import { getEditions, getLanguages } from "../../lib/api";
-import { writeLanguageCookie } from "../../lib/language";
-import { site } from "../../lib/sites";
+import { DEFAULT_LANGUAGE, compareLanguages, writeLanguageCookie } from "../../lib/language";
 import {
   MAX_EXTRA_TRANSLATIONS,
   TRANSLATIONS_PARAM,
@@ -193,23 +192,22 @@ export default function TranslationPicker({ translations, book = null, variant =
     setDraft(next);
   };
 
-  // The site's language, English, then the rest by name; the languages the
-  // collection has no edition in wait behind "Hiện tất cả".
+  // The deployment's language, English, then the rest by name; the languages
+  // the collection has no edition in wait behind "Hiện tất cả".
   const needle = fold(query.trim());
   const matches = (code) => {
     if (!needle) return true;
     const info = byCode.get(code);
     return [code, info && info.name, info && info.nativeName, names.get(code)].some((value) => fold(value).includes(needle));
   };
+  // compareLanguages ranks the deployment's language, then English; the rest
+  // go A–Z by the names the interface shows ("Tiếng Bangla" under B).
   const sortKey = (code) => fold(names.get(code) || code).replace(/^tieng\s+/, "");
   const rest = languages
     .map((item) => item.code)
     .filter((code) => !draft.includes(code))
-    .sort((a, b) => {
-      const rank = (code) => (code === site.language ? 0 : code === "en" ? 1 : 2);
-      return rank(a) - rank(b) || sortKey(a).localeCompare(sortKey(b), ui);
-    });
-  const pinned = (code) => code === site.language || code === "en";
+    .sort((a, b) => compareLanguages({ code: a, name: sortKey(a) }, { code: b, name: sortKey(b) }));
+  const pinned = (code) => code === DEFAULT_LANGUAGE || code === "en";
   const visible = rest.filter((code) => pinned(code) || inCollection(code));
   const hidden = rest.filter((code) => !pinned(code) && !inCollection(code));
   const listed = needle ? rest.filter(matches) : visible;

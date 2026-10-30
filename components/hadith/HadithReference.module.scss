@@ -123,4 +123,11 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0 6px;
+
+  // 24px tall: tap targets
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+  }
 }
