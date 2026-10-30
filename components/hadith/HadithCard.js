@@ -48,6 +48,8 @@ export default function HadithCard({ hadith, book, showContext = false, inBookRe
   const { t } = useLocale();
   const href = citablePath(hadith, book);
   const inBook = isCategoryBook(book) ? null : inBookText(hadith.inBookReference || inBookReference, t);
+  // The copied citation carries the in-book reference the card shows.
+  const withInBook = !hadith.inBookReference && inBookReference ? { ...hadith, inBookReference } : hadith;
   const { linked, own } = shownTranslation(hadith);
   // Without any translation the Arabic stays, even when the reader hides it.
   const arabicOnly = !linked && !own;
@@ -88,7 +90,7 @@ export default function HadithCard({ hadith, book, showContext = false, inBookRe
 
       <footer className={styles.foot}>
         <HadithOptions
-          hadith={hadith}
+          hadith={withInBook}
           book={book}
           isBookmarkPage={isBookmarkPage}
           updateBookmarksData={updateBookmarksData}
