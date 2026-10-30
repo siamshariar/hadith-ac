@@ -1,14 +1,15 @@
+import { useLocale } from "../../contexts/LocaleContext";
 import css from "./style.module.scss";
 import styles from "./about.module.scss";
 
 export default function PrivacyPolicyContent() {
+  const { t } = useLocale();
   return (
     <div className={css.wrapper}>
-      <div className={css.page_title}>Privacy Policy</div>
-
       <div className={css.page_item}>
         <div className={styles.quran_content}>
-          <p>You are allowed to use content for non-commercial purpose.</p>
+          <h1 className={styles.title}>{t("privacyPolicy")}</h1>
+          <p>{t("privacyText")}</p>
         </div>
       </div>
     </div>

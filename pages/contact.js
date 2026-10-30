@@ -1,14 +1,16 @@
 import { server } from "../lib/config";
+import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
 import Layout from "../components/layouts/LayoutTertiary";
 import ContactContent from "../components/pages/contact";
 
 export default function ContactPage() {
+  const { t } = useLocale();
   return (
     <>
       <Meta
-        title="Contact"
-        description={`Hadith application in Vietnamese. For all inquiries, please email us. We'll get back to you as soon as we can insha'Allah.`}
+        title={t("contact")}
+        description={t("contactText")}
         url={`${server}/contact`}
         image={`${server}/img/s_logo.png`}
         type="website"
@@ -23,10 +25,11 @@ ContactPage.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
+// The phone header shows the page title (an interface string).
 export async function getStaticProps() {
   return {
     props: {
-      contentTitle: "Contact",
+      contentTitleKey: "contact",
     },
   };
 }

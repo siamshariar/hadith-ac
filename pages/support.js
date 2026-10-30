@@ -1,14 +1,16 @@
 import { server } from "../lib/config";
+import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
 import Layout from "../components/layouts/LayoutTertiary";
 import SupportContent from "../components/pages/support";
 
 export default function SupportPage() {
+  const { t } = useLocale();
   return (
     <>
       <Meta
-        title="Support"
-        description="Please mail us if you want to support. Any kind of support is highly appreciable. Email: deeniinfotech@gmail.com"
+        title={t("support")}
+        description={t("supportText")}
         url={`${server}/support`}
         image={`${server}/img/s_logo.png`}
         type="website"
@@ -23,10 +25,11 @@ SupportPage.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
+// The phone header shows the page title (an interface string).
 export async function getStaticProps() {
   return {
     props: {
-      contentTitle: "Support",
+      contentTitleKey: "support",
     },
   };
 }

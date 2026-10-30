@@ -4,8 +4,24 @@ import { useLocale } from "../../contexts/LocaleContext";
 import css from "./style.module.scss";
 import styles from "./about.module.scss";
 
-const DEENI_URL = "http://deeniinfotech.com";
+export const DEENI_URL = "http://deeniinfotech.com";
 const EMAILS = ["deeniinfotech@gmail.com", "quran.vn@gmail.com"];
+
+// "Email: a@b | c@d" as mailto links (about, contact, support pages).
+export function EmailLinks({ emails = EMAILS }) {
+  const { t } = useLocale();
+  return (
+    <p>
+      {t("email")}:{" "}
+      {emails.map((email, index) => (
+        <Fragment key={email}>
+          {index > 0 && " | "}
+          <a href={`mailto:${email}`}>{email}</a>
+        </Fragment>
+      ))}
+    </p>
+  );
+}
 
 export default function AboutContent() {
   const { t } = useLocale();
@@ -27,15 +43,7 @@ export default function AboutContent() {
             </a>
             : {t("aboutDeeni")}
           </p>
-          <p>
-            {t("email")}:{" "}
-            {EMAILS.map((email, index) => (
-              <Fragment key={email}>
-                {index > 0 && " | "}
-                <a href={`mailto:${email}`}>{email}</a>
-              </Fragment>
-            ))}
-          </p>
+          <EmailLinks />
         </div>
       </div>
     </div>

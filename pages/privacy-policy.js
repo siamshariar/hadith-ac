@@ -1,14 +1,16 @@
 import { server } from "../lib/config";
+import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
 import Layout from "../components/layouts/LayoutTertiary";
 import PrivacyPolicyContent from "../components/pages/privacy-policy";
 
 export default function PrivacyPolicyPage() {
+  const { t } = useLocale();
   return (
     <>
       <Meta
-        title="Privacy Policy"
-        description="Hadith application in Vietnamese"
+        title={t("privacyPolicy")}
+        description={t("privacyText")}
         url={`${server}/privacy-policy`}
         image={`${server}/img/s_logo.png`}
         type="website"
@@ -23,10 +25,11 @@ PrivacyPolicyPage.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
+// The phone header shows the page title (an interface string).
 export async function getStaticProps() {
   return {
     props: {
-      contentTitle: "Privacy Policy",
+      contentTitleKey: "privacyPolicy",
     },
   };
 }

@@ -1,26 +1,28 @@
+import { useLocale } from "../../contexts/LocaleContext";
+import { DEENI_URL, EmailLinks } from "./about";
 import css from "./style.module.scss";
 import styles from "./about.module.scss";
 
 export default function DeeniinfotechContent() {
+  const { t } = useLocale();
   return (
     <div className={css.wrapper}>
-      <div className={css.page_title}>About Deeni Info Tech</div>
       <div className={css.page_item}>
         <div className={styles.quran_content}>
+          <h1 className={styles.title}>Deeni Info Tech</h1>
           <p>
-            <a href="http://deeniinfotech.com" target="_blank">
+            <a href={DEENI_URL} target="_blank" rel="noopener noreferrer">
               Deeni Info Tech
             </a>
-            : A non-profitable software development organization to spread Dawah
-            all over the world.
+            : {t("deeniText")}
           </p>
           <p>
-            Website:{" "}
-            <a href="http://deeniinfotech.com" target="_blank">
+            {t("website")}:{" "}
+            <a href={DEENI_URL} target="_blank" rel="noopener noreferrer">
               www.DeeniInfoTech.com
             </a>
           </p>
-          <p>Email: deeniinfotech@gmail.com</p>
+          <EmailLinks emails={["deeniinfotech@gmail.com"]} />
         </div>
       </div>
     </div>

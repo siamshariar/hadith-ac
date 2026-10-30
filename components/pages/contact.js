@@ -1,18 +1,17 @@
+import { useLocale } from "../../contexts/LocaleContext";
+import { EmailLinks } from "./about";
 import css from "./style.module.scss";
 import styles from "./about.module.scss";
 
 export default function ContactContent() {
+  const { t } = useLocale();
   return (
     <div className={css.wrapper}>
-      <div className={css.page_title}>Contact</div>
-
       <div className={css.page_item}>
         <div className={styles.quran_content}>
-          <p>
-            For all inquiries, please email us. We'll get back to you as soon as
-            we can In Sha Allah.
-          </p>
-          <p>Email: deeniinfotech@gmail.com | quran.vn@gmail.com</p>
+          <h1 className={styles.title}>{t("contact")}</h1>
+          <p>{t("contactText")}</p>
+          <EmailLinks />
         </div>
       </div>
     </div>

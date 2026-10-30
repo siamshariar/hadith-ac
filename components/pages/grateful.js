@@ -1,18 +1,15 @@
+import { useLocale } from "../../contexts/LocaleContext";
 import css from "./style.module.scss";
 import styles from "./about.module.scss";
 
 export default function GratefulContent() {
+  const { t } = useLocale();
   return (
     <div className={css.wrapper}>
-      <div className={css.page_title}>Grateful</div>
-
       <div className={css.page_item}>
         <div className={styles.quran_content}>
-          <p>
-            By the grace of almighty Allah, extremely thankful to Quran
-            Encyclopedia for providing authentic data to spread the message of
-            Allah.
-          </p>
+          <h1 className={styles.title}>{t("grateful")}</h1>
+          <p>{t("gratefulText")}</p>
         </div>
       </div>
     </div>
