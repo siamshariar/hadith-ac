@@ -13,28 +13,25 @@ import {
 import { inBookText, referenceText } from "../../lib/citation";
 import HadithOptions from "../content/HadithOptions";
 import { GradeBadge } from "./Grades";
+import { Highlighted } from "./Highlight";
 import { ArabicText, HadithTranslations, LinkedTranslationNote, shownTranslation } from "./HadithText";
 import styles from "./HadithCard.module.scss";
 
-// Book › chapter, for lists that mix chapters (search results).
+// Book › chapter, for lists that mix chapters (search results). Nothing for
+// HadeethEnc: its one chapter is technical and the citation names the book.
 function CardContext({ hadith, book }) {
   const { t } = useLocale();
-  if (!book) return null;
   const chapterNo = hadith.chapterNo;
-  const showChapter = chapterNo != null && !isCategoryBook(book);
+  if (!book || isCategoryBook(book) || chapterNo == null) return null;
   return (
     <p className={styles.context}>
       <Link href={bookPath(book)}>{shortBookName(book)}</Link>
-      {showChapter && (
-        <>
-          <span className={styles.contextSep} aria-hidden="true">
-            ›
-          </span>
-          <Link href={chapterPath(book.slug, chapterNo)}>
-            {chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapterNo}`}
-          </Link>
-        </>
-      )}
+      <span className={styles.contextSep} aria-hidden="true">
+        ›
+      </span>
+      <Link href={chapterPath(book.slug, chapterNo)}>
+        {chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapterNo}`}
+      </Link>
     </p>
   );
 }
@@ -70,7 +67,10 @@ export default function HadithCard({ hadith, book, showContext = false, inBookRe
 
       {hadith.title && (
         <h3 className={styles.title} dir="auto">
-          <Link href={href}>{cleanText(hadith.title)}</Link>
+          {/* HadeethEnc titles are in the language of its translation */}
+          <Link href={href}>
+            <Highlighted text={cleanText(hadith.title)} field={hadith.translation && hadith.translation.languageCode} />
+          </Link>
         </h3>
       )}
 
