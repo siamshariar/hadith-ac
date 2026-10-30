@@ -58,13 +58,15 @@ const interfaceFor = (entry, lang) => (lang === entry.language || !i18n.isInterf
 const ogLocaleFor = (entry, ui) => (ui === entry.ui ? entry.ogLocale : i18n.catalogLocale(ui).replace("-", "_"));
 
 // Book names in a content language: lib/names/<lang>.json (the e2e fixture with NAMES_FIXTURE=1),
-// else the API's.
+// else the API's; the topic collection's is the interface's topicCollection string, in `ui`.
 const NAMES_DIR = process.env.NAMES_FIXTURE === "1" ? path.join(root, "scripts", "e2e", "fixtures", "names") : path.join(root, "lib", "names");
 function namesOf(lang) {
   const file = path.join(NAMES_DIR, `${lang}.json`);
   return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};
 }
-const bookName = (lang, book) => (namesOf(lang).books || {})[book.slug] || book.name;
+const isTopicCollection = (book) => [book.slug, book.code, book.source].includes("hadeethenc");
+const bookName = (lang, book, ui) =>
+  isTopicCollection(book) ? i18n.translate(ui, "topicCollection") : (namesOf(lang).books || {})[book.slug] || book.name;
 
 const api = async (p) => {
   const res = await fetch(`${API}${p}`);
@@ -152,9 +154,11 @@ async function checkCountry(browser, code, languages) {
   // books and categories, named in the country's language
   const books = await api(`/hadith/books/localizations/${loc}`);
   const booksText = await open("/books");
-  const missingBooks = books.map((b) => bookName(entry.language, b)).filter((name) => !booksText.includes(norm(name)));
+  const missingBooks = books.map((b) => bookName(entry.language, b, expectedUi)).filter((name) => !booksText.includes(norm(name)));
   check("book names", !missingBooks.length, missingBooks.length ? `missing ${missingBooks.join(", ")}` : `${books.length} books`);
-  const categories = (await api(`/hadith/categories/localizations/${loc}`)).filter((c) => !c.parentId).slice(0, 6);
+  // the lists leave out the categories with nothing in the language (lib/api readableCategories)
+  const readable = (c) => entry.language === "ar" || c.totalTranslated == null || c.totalTranslated > 0;
+  const categories = (await api(`/hadith/categories/localizations/${loc}`)).filter((c) => !c.parentId && readable(c)).slice(0, 6);
   const categoriesText = await open("/categories");
   const missingCats = categories.filter((c) => !categoriesText.includes(norm(c.title))).map((c) => c.title);
   check("category titles", !missingCats.length, missingCats.length ? `missing ${missingCats.join(" | ")}` : `${categories.length} top categories`);
@@ -205,7 +209,7 @@ async function checkCountry(browser, code, languages) {
   const saved = ((await context.cookies(BASE)).find((c) => c.name === "hadith_lang") || {}).value;
   check(
     `menu: ${other} for the content and the interface`,
-    after.lang === otherUi && after.h1 === norm(bookName(other, book)) && saved === other,
+    after.lang === otherUi && after.h1 === norm(bookName(other, book, otherUi)) && saved === other,
     `html ${after.lang} (want ${otherUi}), h1 ${after.h1}, cookie ${saved}`
   );
   await open("/");
@@ -221,7 +225,7 @@ async function checkCountry(browser, code, languages) {
 
 // Readers of the international edition, by the language their browser asks for: the content
 // language is the best match among the API's languages, and the interface follows it: its
-// catalog when there is one (bn, vi), else English (fr until lib/locales registers it; ur: no
+// catalog when there is one (bn, vi, fr), else English (ur: no
 // right-to-left interface yet).
 const READERS = [
   { locale: "en-US", content: "en" },

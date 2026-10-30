@@ -51,7 +51,7 @@ export default function SettingsContent() {
 
 // The language, as the header's language menu sets it (components/core/LanguageMenu):
 // every language of /hadith/languages, saved in a cookie so server-rendered pages use it as
-// {localizationCode}, for the translation, the book and chapter names and, when there is a
+// {localizationCode}, for the translation, the book names and, when there is a
 // catalog for it, the interface (lib/language.js interfaceFor). The translations panel of
 // the hadith pages saves the same cookie, so the value is read from it. An international
 // site that knows no preference yet shows the browser's language, the one its pages pick

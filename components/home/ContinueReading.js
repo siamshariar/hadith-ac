@@ -18,8 +18,8 @@ export default function ContinueReading() {
   const entry = pins && pins.lastRead ? pins.lastRead.find(isCurrentStoredRef) : null;
   if (!entry) return null;
 
-  const label = storedRefLabel(entry, names);
-  const source = storedRefSource(entry, names);
+  const label = storedRefLabel(entry, names, t("topicCollection"));
+  const source = storedRefSource(entry, names, t("topicCollection"));
 
   return (
     <Link href={storedRefHref(entry)} className={styles.card}>

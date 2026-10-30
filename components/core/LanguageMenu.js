@@ -35,7 +35,7 @@ const capitalize = (text) => (text ? text.charAt(0).toLocaleUpperCase() + text.s
 // phone menu ("menu"). It lists every language of the API (/hadith/languages, loaded when it
 // opens): its own name, then its name in the interface (the catalog's, else the API's English
 // one) and how many hadiths are translated, with a filter. Choosing one saves it (hadith_lang)
-// and shows the page in it: the translation, the book and chapter names, and the interface
+// and shows the page in it: the translation, the book names, and the interface
 // when there is a catalog for it (lib/language.js interfaceFor); when there is none, the
 // current row says which interface stays. Desktop: a panel under the button; phones: a
 // full-height sheet.

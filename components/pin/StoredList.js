@@ -45,8 +45,8 @@ export default function StoredList({ kind, controller }) {
       <div className={styles.lists}>
         {items.map((item) => {
           const href = storedRefHref(item, { preferContext: isPin });
-          const label = storedRefLabel(item, names);
-          const source = storedRefSource(item, names);
+          const label = storedRefLabel(item, names, t("topicCollection"));
+          const source = storedRefSource(item, names, t("topicCollection"));
           return (
             <div key={item.id} className={styles.item}>
               <a href={href} className={styles.link} onClick={(event) => open(event, href)}>

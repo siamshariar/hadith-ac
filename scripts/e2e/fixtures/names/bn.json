@@ -1,18 +1,11 @@
 {
+  "_note": "End-to-end fixture (NAMES_FIXTURE=1): two of lib/names/bn.json's attested book names, so that the suite does not depend on the rest of that file; Sunan Abu Dawud is left out on purpose (a book without a name keeps the API's).",
   "books": {
-    "sahih-al-bukhari": "সহিহ বুখারি",
-    "sahih-muslim": "সহিহ মুসলিম",
-    "hadeethenc": "হাদিস বিশ্বকোষ"
+    "sahih-al-bukhari": "সহীহ বুখারী",
+    "sahih-muslim": "সহীহ মুসলিম"
   },
-  "bookSources": {},
-  "chapters": {
-    "sahih-al-bukhari": {
-      "1": "ওহীর সূচনা",
-      "2": "ঈমান",
-      "3": "ইলম"
-    },
-    "sahih-muslim": {
-      "1": "ঈমান অধ্যায়"
-    }
+  "bookSources": {
+    "sahih-al-bukhari": "wikidata:Q1023470 সহীহ বুখারী",
+    "sahih-muslim": "wikidata:Q886659 সহীহ মুসলিম"
   }
 }

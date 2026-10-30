@@ -1,15 +1,20 @@
 // The language menu of the vn site (components/core/LanguageMenu) and what it changes: every
 // language of the API, a filter, the current one marked; choosing Bengali gives the Bengali
-// interface (<html lang="bn">, its strings) and the Bengali book and chapter names of the
-// fixture (scripts/e2e/fixtures/names/bn.json: the instance and this run need NAMES_FIXTURE=1,
-// docs/DEPLOY.md), on every page and list; a language without a catalog keeps the site's
-// interface and says so. Also: the categories with nothing in the content language are left
-// out of the lists, except in Arabic, and still open by URL.
+// interface (<html lang="bn">, its strings) and the Bengali book names of the fixture
+// (scripts/e2e/fixtures/names/bn.json: the instance and this run need NAMES_FIXTURE=1,
+// docs/DEPLOY.md), on every page and list, while chapters keep the API's names; the topic
+// collection is named by the interface (topicCollection); a language without a catalog keeps
+// the site's interface and says so. Also: the categories with nothing in the content language
+// are left out of the lists, except in Arabic, and still open by URL.
 'use strict';
 
 const { NAMES_FIXTURE, api, assert, breadcrumbs, interfaceStrings, loc, meta, namesOf, norm, spec, until, viNumber, waitForH1, waitForText } = require('./harness');
 
 const BUKHARI = 'sahih-al-bukhari';
+const TOPIC = 'hadeethenc';
+// the name on a collection's card of the home page
+const cardName = (page, slug) =>
+  page.locator(`section[aria-labelledby="home-books"] a[href="/books/${slug}"] span[class*="name"]`).first().innerText().then(norm);
 const menuButton = (page) => page.locator('button[data-language-menu]').filter({ visible: true }).first();
 // the open panel (its name is the interface's word for "language")
 const panel = (page) => page.locator('[role="dialog"][id^="language-menu-"]');
@@ -101,9 +106,10 @@ module.exports = spec(module, 'language menu', (h) => {
   );
 
   h.test(
-    'Bengali on the vn site: the Bengali interface and book and chapter names, everywhere',
+    'Bengali on the vn site: the Bengali interface and book names, everywhere; chapters keep the API names',
     async (t) => {
       const bn = await interfaceStrings('bn');
+      const vi = await interfaceStrings('vi');
       const [book, chapter1, chapter2, abuDawud] = await Promise.all([
         api(`/books/bukhari${loc('bn')}`),
         api(`/books/bukhari/chapters/1${loc('bn')}?perPage=1`),
@@ -113,7 +119,6 @@ module.exports = spec(module, 'language menu', (h) => {
       const names = namesOf('bn');
       const fixture = NAMES_FIXTURE && names.books && names.books[BUKHARI];
       const name = (names.books || {})[BUKHARI] || book.name;
-      const chapterName = (no, fallback) => ((names.chapters || {})[BUKHARI] || {})[no] || fallback;
 
       const { page, context } = await h.open(t, `/books/${BUKHARI}`, { allow: [/status of 404/] });
       await choose(page, 'bn', 'bn');
@@ -129,8 +134,7 @@ module.exports = spec(module, 'language menu', (h) => {
       ]);
       await waitForText(page.locator('#book-chapters'), bn('chapterCount', { count: book.chapters.length }));
       const chapterRows = (await page.locator('#book-chapters + ol li').allInnerTexts()).map(norm);
-      assert.ok(chapterRows[0].includes(chapterName(1, book.chapters[0].name)), `chapter 1: ${chapterRows[0]}`);
-      assert.ok(chapterRows[3].includes(book.chapters[3].name), 'a chapter the names do not have keeps the API name');
+      assert.ok(chapterRows[0].includes(norm(book.chapters[0].name)), `chapter 1 keeps the API name: ${chapterRows[0]}`);
       if (h.desktop) {
         const sidebar = (await page.locator('aside [class*="summary_root"] a').allInnerTexts()).map(norm);
         assert.ok(sidebar.some((text) => text.startsWith(name)), 'the sidebar names the book');
@@ -147,19 +151,22 @@ module.exports = spec(module, 'language menu', (h) => {
       );
       assert.equal(norm(await page.title()), `${name} 1 | ${bn('siteHeading')} | Hadith.vn`);
       const bar = (await page.locator('[class*="ReaderBar"] a').allInnerTexts()).map(norm);
-      assert.ok(bar.includes(bn('chapterNumberName', { number: 1, name: chapterName(1, chapter1.chapter.name) })), `reader bar: ${bar.join(' | ')}`);
+      assert.ok(bar.includes(norm(bn('chapterNumberName', { number: 1, name: chapter1.chapter.name }))), `reader bar: ${bar.join(' | ')}`);
 
-      // a chapter: its name in the title and the h1
+      // a chapter: the API's name in the title and the h1, the book's in Bengali
       await h.goto(page, `/books/${BUKHARI}/chapters/2`);
-      await waitForH1(page, `2. ${chapterName(2, chapter2.chapter.name)}`);
-      assert.ok(norm(await page.title()).startsWith(`${chapterName(2, chapter2.chapter.name)} - ${name} |`));
+      await waitForH1(page, `2. ${chapter2.chapter.name}`);
+      assert.ok(norm(await page.title()).startsWith(`${norm(chapter2.chapter.name)} - ${name} |`));
 
       // the last-read entry (stored with the source's name) is named in the reader's language
       await h.goto(page, '/');
       await waitForText(page.locator('a[class*="ContinueReading_card"] span[class*="title"]'), `${name} 1`);
       // the books are named in the home page's lists too
-      const cards = (await page.locator('section[aria-labelledby="home-books"] a[href^="/books/"] span[class*="name"]').allInnerTexts()).map(norm);
-      assert.ok(cards.includes(name));
+      assert.equal(await cardName(page, BUKHARI), name);
+      // the topic collection: the interface's name for it
+      assert.equal(await cardName(page, TOPIC), bn('topicCollection'));
+      await h.goto(page, `/books/${TOPIC}`);
+      await waitForH1(page, bn('topicCollection'));
 
       // the static 404 page switches to Bengali in the browser
       await h.goto(page, '/no-such-page');
@@ -173,12 +180,16 @@ module.exports = spec(module, 'language menu', (h) => {
       await waitForText(dialog.locator('[aria-checked="true"] [data-interface-note]'), 'Giao diện: Tiếng Việt');
       await page.keyboard.press('Escape');
       await dialog.waitFor({ state: 'hidden' });
+      await h.goto(page, '/');
+      assert.equal(await cardName(page, TOPIC), vi('topicCollection'), 'the topic collection in the Vietnamese interface');
 
       // and back: Vietnamese, with the API's names
+      await h.goto(page, `/books/${BUKHARI}`);
       await choose(page, 'vi', 'vi');
       await waitForH1(page, (await api(`/books/bukhari${loc()}`)).name);
       await h.goto(page, '/');
       await waitForText(page.locator('a[class*="ContinueReading_card"] span[class*="title"]'), 'Sahih al-Bukhari 1');
+      assert.equal(await cardName(page, TOPIC), vi('topicCollection'));
     },
     { smoke: true }
   );

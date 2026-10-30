@@ -33,7 +33,7 @@ Setting it only at `npm start` has no effect.
 | `NEXT_PUBLIC_CONTACT_EMAIL` | no | The address readers write to. Default: the country's `contactEmail`. |
 | `GOOGLE_ANALYTICS_ID` | no | GA4 measurement ID (`G-…`). Empty: no analytics. |
 | `ALLOW_LOCAL_BUILD` | no | `1` lets a **local test build** use local or http addresses. Never set it for a build you deploy. |
-| `NAMES_FIXTURE` | no | `1` (with `ALLOW_LOCAL_BUILD=1` only) replaces the book and chapter names with the end-to-end suite's few (`scripts/e2e/fixtures/names`). For test builds; never deploy one. |
+| `NAMES_FIXTURE` | no | `1` (with `ALLOW_LOCAL_BUILD=1` only) replaces the book names with the end-to-end suite's few (`scripts/e2e/fixtures/names`). For test builds; never deploy one. |
 
 The country decides:
 
@@ -46,8 +46,8 @@ The country decides:
 **The interface follows the content language.** For the country's own `language` it is the
 country's `ui` (so `kr` keeps a Korean interface over its English content); for any other
 language it is that language's catalog when `lib/locales` has one, else the country's `ui`
-again. A Bengali reader of hadith.vn gets the Bengali interface, and the book and chapter
-names in Bengali (`lib/names/bn.json`); an Indonesian reader gets Indonesian hadiths in the
+again. A Bengali reader of hadith.vn gets the Bengali interface, and the book names in
+Bengali (`lib/names/bn.json`); an Indonesian reader gets Indonesian hadiths in the
 Vietnamese interface, and the language menu says so. `<html lang>`, `og:locale` and dates
 follow the interface.
 
@@ -62,12 +62,18 @@ carries its own `dir`.
 Interface catalogs and names:
 
 - `lib/locales/<code>.js`, one per interface language, registered by one line in
-  `lib/locales/index.js`. Only English is in the scripts every page loads: each page gets its
-  catalog with its data, and the 404 and 500 pages, built once in the country's interface,
-  load the reader's in the browser. Check them with `npm run i18n:missing`.
-- `lib/names/<code>.json`: the book and chapter names of one content language, applied to what
-  the API returns. A name a file does not have, or a language without a file, keeps the API's
-  (English) name.
+  `lib/locales/index.js`: en, vi, bn, ru, ja, zh, ko, fr, de, pt, da, km, tl, ar, ur, ku. Those
+  marked "draft" there were drafted by an AI and need a native speaker's review. Only English
+  is in the scripts every page loads: each page gets its catalog with its data, and the 404
+  and 500 pages, built once in the country's interface, load the reader's in the browser.
+  Check them with `npm run i18n:missing`; a string a catalog lacks is shown in English.
+- `lib/names/<code>.json`: the book names of one content language that a source attests
+  (a Wikidata label, or the API's Arabic name), with that source in `bookSources`; applied to
+  what the API returns. A book a file does not have, or a language without a file, keeps the
+  API's (English) name. Chapters always keep the API's names.
+- The topic collection (HadeethEnc's hadiths by category) is named by the interface, not by a
+  source: the catalog string `topicCollection` ("Hadiths by Topic", "Hadith theo chủ đề" …),
+  wherever the book's name is shown.
 - The lists of categories (home page, category tree, sidebar) leave out the categories with
   nothing in the content language, except in Arabic; their pages still open by their URL.
 
@@ -435,10 +441,9 @@ browsers; set `PLAYWRIGHT_CORE` to the installed package.
       languages, the language directory against `/hadith/languages`), then the language menu,
       `?lang=`, the cookies and a directory link. With `NAMES_FIXTURE=1` the servers and the
       checks use the e2e suite's names.
-- [ ] The interface catalogs and the names files have been reviewed by native speakers. Those
-      drafted by an AI (`lib/locales/bn.js` and the others, `lib/names/*.json`) need this
-      before any site offers them, and every site offers every registered catalog to the
-      readers who pick its language.
+- [ ] The interface catalogs have been reviewed by native speakers. Those drafted by an AI
+      (marked "draft" in `lib/locales/index.js`) need this before any site offers them, and
+      every site offers every registered catalog to the readers who pick its language.
 - [ ] End-to-end suite, against test builds made with `NAMES_FIXTURE=1` (and
       `ALLOW_LOCAL_BUILD=1`): `NAMES_FIXTURE=1 BASE=<vn site> BASE_BD=<bd site>
       BASE_AC=<ac site> PLAYWRIGHT_CORE=… npm run test:e2e`. All tests pass. The Vietnamese

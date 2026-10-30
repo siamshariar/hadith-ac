@@ -121,9 +121,10 @@ async function interfaceStrings(ui, { site = 'Hadith.vn', language = 'vi' } = {}
   return tr;
 }
 
-// The book and chapter names the site under test shows (lib/names.js): those of the fixture
-// when the builds and this run have NAMES_FIXTURE=1 (scripts/e2e/fixtures/names), else of
-// lib/names; the API's where they have none.
+// The book names the site under test shows (lib/names.js): those of the fixture when the
+// builds and this run have NAMES_FIXTURE=1 (scripts/e2e/fixtures/names), else of lib/names;
+// the API's where they have none. Chapters keep the API's names. The topic collection is
+// named by the interface: pass that interface's strings (interfaceStrings) as `tr`.
 const NAMES_FIXTURE = process.env.NAMES_FIXTURE === '1';
 const NAMES_DIR = NAMES_FIXTURE ? path.join(__dirname, 'fixtures', 'names') : path.join(__dirname, '..', '..', 'lib', 'names');
 const namesCache = new Map();
@@ -134,8 +135,9 @@ function namesOf(lang) {
   }
   return namesCache.get(lang);
 }
-const bookName = (lang, book) => (namesOf(lang).books || {})[book.slug] || book.name;
-const chapterName = (lang, slug, chapter) => ((namesOf(lang).chapters || {})[slug] || {})[chapter.chapterNo] || chapter.name;
+const isTopicCollection = (book) => [book.slug, book.code, book.source].includes('hadeethenc');
+const bookName = (lang, book, tr = null) =>
+  (isTopicCollection(book) && tr ? tr('topicCollection') : null) || (namesOf(lang).books || {})[book.slug] || book.name;
 
 // ------------------------------------------------------------------ browsers
 
@@ -391,7 +393,6 @@ module.exports = {
   assert,
   bookName,
   breadcrumbs,
-  chapterName,
   cleanText,
   lettered,
   interfaceStrings,

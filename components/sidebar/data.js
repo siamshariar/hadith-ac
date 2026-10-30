@@ -4,7 +4,7 @@ import { getBook, getBooks, getCategories, readableCategories } from "../../lib/
 // (`sidebarData`), so the desktop sidebar comes with the page instead of
 // after hydration and one or two requests in a row. Only the fields the
 // sidebar shows (and filters by: the English name too, under a name in the
-// reader's language); getBooks / getBook / getCategories are memoised in
+// reader's language or the topic collection's interface name); getBooks / getBook / getCategories are memoised in
 // lib/api, so pages that already fetched them pay nothing.
 const slimBook = ({ slug, code, source, name, nameEnglish, nameArabic, totalHadith }) => ({
   slug,

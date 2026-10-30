@@ -36,8 +36,8 @@ async function i18n() {
 }
 
 // Readers by the language their browser asks for: the content language they must get; the
-// interface follows it (French: English until lib/locales registers fr; Urdu: English, no
-// right-to-left interface yet).
+// interface follows it (French: the French catalog; Urdu: English, no right-to-left
+// interface while lib/i18n RTL_INTERFACES is off).
 const READERS = [
   { locale: 'en-US', content: 'en' },
   { locale: 'bn-BD', content: 'bn' },
