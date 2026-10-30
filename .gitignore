@@ -41,4 +41,4 @@ yarn-error.log*
 # claude code local state
 /.claude/
 # responsive audit output
-/scripts/responsive-audit/out*/
+/scripts/responsive-audit/out*
