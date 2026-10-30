@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Drawer from "@mui/material/Drawer";
@@ -51,9 +51,12 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
       return;
     }
     setSettingsOpen(open);
+    // Close the menu (as for the categories): while it is open the rest of
+    // the page, the settings dialog included, is aria-hidden and outside
+    // its focus trap.
     setTimeout(() => {
       navControl(false)(event);
-    }, 50000000);
+    }, 0);
   };
 
   // category modal
@@ -106,6 +109,19 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
   // handle bookmark page
   const { bookmarkOpen, changeBookmarkOpen } = useContext(SidenavContext);
   const router = useRouter();
+
+  // Pages that share a layout keep it (and this menu) mounted, so a link
+  // to one of them would leave the menu open over the new page: close it
+  // whenever a navigation starts.
+  const latest = useRef({ navOpen, navControl });
+  latest.current = { navOpen, navControl };
+  useEffect(() => {
+    const close = () => {
+      if (latest.current.navOpen) latest.current.navControl(false)({ type: "route", preventDefault() {} });
+    };
+    router.events.on("routeChangeStart", close);
+    return () => router.events.off("routeChangeStart", close);
+  }, [router]);
 
   const handleBookmarkPage = (e, tab) => {
     e.preventDefault();
