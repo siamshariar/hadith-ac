@@ -26,6 +26,7 @@ import SearchIcon from "../icons/Search";
 import MenuBookIcon from "../icons/MenuBook";
 import { useLocale } from "../../contexts/LocaleContext";
 import HeaderLogo from "./HeaderLogo";
+import InterfaceSwitcher from "../core/InterfaceSwitcher";
 
 // Compact search box (GET /search?q=, so it also works before hydration).
 function HeaderSearch() {
@@ -61,7 +62,8 @@ function HeaderSearch() {
 // Desktop header (1024px and up): white with the colour logo on every page,
 // the home page included (the dark logo in the dark theme), over the 4px
 // ribbon of the logo's gradient. The home and search pages have their own
-// search box, so the header only links to /search there.
+// search box, so the header only links to /search there. An international
+// site adds its interface menu ("English ▾", components/core/InterfaceSwitcher).
 export default function HeaderWeb({ page }) {
   const router = useRouter();
 
@@ -136,6 +138,8 @@ export default function HeaderWeb({ page }) {
                 <SearchIcon />
               </IconButton>
             )}
+
+            <InterfaceSwitcher variant="desktop" className={styles.interface} />
 
             <IconButton component={Link} href="/books" className={styles.btn} aria-label={t("books")} title={t("books")}>
               <MenuBookIcon />

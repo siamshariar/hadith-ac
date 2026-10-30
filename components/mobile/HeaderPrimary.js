@@ -5,6 +5,7 @@ import Link from "next/link";
 import Container from "../core/container";
 import IconButton from "@mui/material/IconButton";
 import HeaderLogo from "../web/HeaderLogo";
+import InterfaceSwitcher from "../core/InterfaceSwitcher";
 import MobileNav from "./MobileNav";
 import MenuIcon from "../icons/Menu";
 import SearchIcon from "../icons/Search";
@@ -12,7 +13,8 @@ import Brightness4Icon from "../icons/Brightness4";
 import Brightness7Icon from "../icons/Brightness7";
 import styles from "./Header.module.scss";
 
-// Home page header (phones and tablets): menu, logo, search, theme.
+// Home page header (phones and tablets): menu, logo, search, theme; an
+// international site adds its interface menu (the globe).
 export default function HeaderMobile({ selectedCategoryId }) {
   const { theme, changeTheme } = useContext(SettingsContext);
   const { t } = useLocale();
@@ -56,6 +58,7 @@ export default function HeaderMobile({ selectedCategoryId }) {
             </div>
 
             <div className={styles.right}>
+              <InterfaceSwitcher variant="phone" />
               <Link href="/search" className={styles.icon} aria-label={t("search")}>
                 <SearchIcon />
               </Link>

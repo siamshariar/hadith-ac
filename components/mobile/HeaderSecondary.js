@@ -6,6 +6,7 @@ import HeaderLogo from "../web/HeaderLogo";
 import CategoryModal from "./CategoryModal";
 import SettingsModal from "./settings-modal";
 import MobileNav from "./MobileNav";
+import InterfaceSwitcher from "../core/InterfaceSwitcher";
 import BackIcon from "../icons/NavigateBefore";
 import DropDownIcon from "../icons/ArrowDropDown";
 import MenuIcon from "../icons/Menu";
@@ -16,7 +17,8 @@ import styles from "./Header.module.scss";
 
 // Header of the content pages (phones and tablets): back, menu, then the
 // category tree on category pages or the logo elsewhere; search and the
-// reader settings on the right.
+// reader settings on the right, after the interface menu of an international
+// site (from 360px; narrower, the menu drawer has it).
 export default function HeaderMobile({ selectedCategoryId, backLink }) {
   const router = useRouter();
   const { t } = useLocale();
@@ -95,6 +97,7 @@ export default function HeaderMobile({ selectedCategoryId, backLink }) {
             </div>
 
             <div className={styles.right}>
+              <InterfaceSwitcher variant="phone" className={styles.wideOnly} />
               <Link href="/search" className={styles.icon} aria-label={t("search")}>
                 <SearchIcon />
               </Link>

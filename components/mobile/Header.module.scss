@@ -75,6 +75,15 @@
   margin-right: -10px;
 }
 
+// The interface menu (international site) leaves the content pages' header
+// below 360px, where it would not fit beside back, menu, logo, search and
+// settings; the menu drawer has it too.
+@media (max-width: 359px) {
+  .wideOnly {
+    display: none !important;
+  }
+}
+
 // page title (LayoutTertiary)
 .title {
   flex: 1 1 auto;
