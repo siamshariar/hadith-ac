@@ -33,10 +33,15 @@
   gap: 12px;
 }
 
+// Same width on both sides, whatever the labels, so previous and next are
+// always in the same place.
 .navLink {
   display: flex;
+  flex: 0 1 48%;
   flex-direction: column;
+  justify-content: center;
   gap: 2px;
+  min-height: 56px;
   max-width: 48%;
   padding: 10px 14px;
   border: 1px solid var(--bdr11);
