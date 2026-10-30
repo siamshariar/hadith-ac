@@ -10,12 +10,17 @@ const path = require('path');
 const BASE = process.env.BASE || 'http://127.0.0.1:3000';
 const args = process.argv.slice(2);
 const OUT = args.find(a => !a.startsWith('--')) || path.join(__dirname, 'out');
-const ENGINE = (args.find(a => a.startsWith('--engine=')) || '--engine=chromium').split('=')[1];
+// --name=value; the value may itself contain '=' (e.g. a page URL with ?page=2)
+const option = (name, fallback) => {
+  const arg = args.find(a => a.startsWith(`--${name}=`));
+  return arg ? arg.slice(name.length + 3) : fallback;
+};
+const ENGINE = option('engine', 'chromium');
 const SHOTS = args.includes('--shots');
 const pagesArg = args.find(a => a.startsWith('--pages='));
 const vpArg = args.find(a => a.startsWith('--vp='));
 
-const PAGES = pagesArg ? pagesArg.split('=')[1].split(',') : [
+const PAGES = pagesArg ? option('pages').split(',') : [
   '/', '/books', '/books/bukhari', '/books/muslim', '/books/bukhari/chapters/1',
   '/books/bukhari/hadiths/1', '/books/muslim/hadiths/8a', '/hadiths/1', '/categories',
   '/categories/the-creed', '/categories/the-creed/hadiths', '/search?q=c%E1%BA%A7u%20nguy%E1%BB%87n',
@@ -47,7 +52,7 @@ const ALL_VIEWPORTS = {
   'desktop-2560': { viewport: { width: 2560, height: 1440 } },
 };
 const VIEWPORTS = vpArg
-  ? Object.fromEntries(Object.entries(ALL_VIEWPORTS).filter(([k]) => vpArg.split('=')[1].split(',').some(v => k.startsWith(v))))
+  ? Object.fromEntries(Object.entries(ALL_VIEWPORTS).filter(([k]) => option('vp').split(',').some(v => k.startsWith(v))))
   : ALL_VIEWPORTS;
 
 // Runs in the page: layout problems a reader would notice
@@ -94,6 +99,9 @@ function inspect() {
     if (!visible(el) || !el.childNodes.length) continue;
     const hasText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
     if (!hasText) continue;
+    // screen-reader-only text (the 1px visually-hidden pattern) is clipped on purpose
+    const box = el.getBoundingClientRect();
+    if (box.width <= 1 || box.height <= 1) continue;
     const st = getComputedStyle(el);
     if ((st.overflowX === 'hidden' || st.overflow === 'hidden') && el.scrollWidth > el.clientWidth + 2 && st.textOverflow !== 'ellipsis') {
       clipped.push(`${sel(el)} "${el.textContent.trim().slice(0, 40)}"`);
