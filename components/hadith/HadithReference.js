@@ -1,18 +1,12 @@
-import { useState } from "react";
 import Link from "next/link";
-import Snackbar from "@mui/material/Snackbar";
-import Share from "../core/share";
-import FileCopyIcon from "../icons/FileCopy";
-import LinkIcon from "../icons/Link";
-import ShareIcon from "../icons/Share";
+import FeedbackIcon from "../icons/Feedback";
 import { useLocale } from "../../contexts/LocaleContext";
 import {
-  buildCitation,
   displayedTranslations,
   inBookText,
   linkedLabel,
-  permalink,
   referenceText,
+  reportErrorHref,
   translationLabel,
 } from "../../lib/citation";
 import { hadithPath, isCategoryBook } from "../../lib/hadith";
@@ -58,66 +52,10 @@ export function GradesTable({ grades, gradeText }) {
   );
 }
 
-// Copy citation, copy permalink, share.
-function HadithActions({ hadith, book }) {
-  const locale = useLocale();
-  const { t } = locale;
-  const [message, setMessage] = useState(null);
-  const [shareOpen, setShareOpen] = useState(false);
-  const url = permalink(hadith);
-  const title = `${referenceText(hadith, book, t)} | Hadith.vn`;
-
-  const copy = (text) => {
-    if (typeof navigator === "undefined" || !navigator.clipboard) return;
-    navigator.clipboard
-      .writeText(text)
-      .then(() => setMessage(t("copied")))
-      .catch(() => {});
-  };
-
-  const share = () => {
-    if (typeof navigator !== "undefined" && navigator.share) {
-      navigator.share({ title, url }).catch(() => {});
-    } else {
-      setShareOpen(true);
-    }
-  };
-
-  const closeShare = (open) => (event) => {
-    if (event && event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) return;
-    setShareOpen(open);
-  };
-
-  return (
-    <div className={styles.actions}>
-      <button type="button" className={styles.action} onClick={() => copy(buildCitation(hadith, book, locale))}>
-        <FileCopyIcon />
-        <span>{t("copyCitation")}</span>
-      </button>
-      <button type="button" className={styles.action} onClick={() => copy(url)}>
-        <LinkIcon />
-        <span>{t("copyLink")}</span>
-      </button>
-      <button type="button" className={styles.action} onClick={share}>
-        <ShareIcon />
-        <span>{t("share")}</span>
-      </button>
-
-      <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        open={Boolean(message)}
-        autoHideDuration={2500}
-        onClose={() => setMessage(null)}
-        message={message || ""}
-      />
-      {shareOpen && <Share open={shareOpen} closer={closeShare} url={url} title={title} />}
-    </div>
-  );
-}
-
-// The reference block under each hadith: citation, in-book reference
-// (detail page), who translated the text shown and from which edition, and
-// the grades.
+// The reference block under the hadith on its page, as sunnah.com has it:
+// citation, in-book reference, who translated the text shown and from which
+// edition, the grades, and "report an error" (an e-mail with the citation
+// and permalink filled in). Copy and share are in the icon row at the top.
 export default function HadithReference({ hadith, book }) {
   const { t, languageName } = useLocale();
   const { own, linked } = displayedTranslations(hadith);
@@ -178,7 +116,12 @@ export default function HadithReference({ hadith, book }) {
 
       <GradesTable grades={hadith.grades} gradeText={hadith.gradeText} />
 
-      <HadithActions hadith={hadith} book={book} />
+      <p className={styles.report}>
+        <a href={reportErrorHref(hadith, book, t)} className={styles.reportLink}>
+          <FeedbackIcon />
+          {t("reportError")}
+        </a>
+      </p>
     </section>
   );
 }

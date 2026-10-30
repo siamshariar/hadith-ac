@@ -92,36 +92,27 @@
   }
 }
 
-.actions {
+.report {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 8px;
 }
 
-.action {
+.reportLink {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 36px;
-  padding: 6px 12px;
-  border: 1px solid var(--bdr11);
-  border-radius: 999px;
-  background: var(--bg11);
-  color: var(--txt11);
-  font: inherit;
+  min-height: 44px;
+  color: var(--txt12);
   font-size: var(--text-sm);
-  cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease;
 
   svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     fill: currentColor;
   }
 
   &:hover,
   &:focus-visible {
-    border-color: var(--theme-color);
     color: var(--main-color);
+    text-decoration: underline;
   }
 }

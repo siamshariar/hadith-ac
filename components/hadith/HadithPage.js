@@ -4,9 +4,10 @@ import {
   UNASSIGNED_CHAPTER,
   bookPath,
   chapterPath,
+  citablePath,
   citation,
   cleanText,
-  hadithPath,
+  excerpt,
   isCategoryBook,
   lettered,
   shortBookName,
@@ -46,18 +47,22 @@ export default function HadithPage({ hadith, languages, error }) {
   }
   crumbs.push({ label: `${t("hadith")} ${lettered(hadith.referenceNumber)}` });
 
-  // Only describe the page with translation text that is in the page language.
-  const translation = hadith.translation;
-  const snippet =
-    translation && translation.text && !translation.isFallback ? cleanText(translation.text).slice(0, 160) : "";
+  // Described by its own translation (the page language, else English).
+  // HadeethEnc's linked translation is another text, so it is only used,
+  // labelled, when the hadith has no translation at all.
+  const own = hadith.translation && hadith.translation.text ? hadith.translation : null;
+  const linked = hadith.linkedTranslation && hadith.linkedTranslation.text ? hadith.linkedTranslation : null;
+  const snippet = own ? excerpt(own.text) : linked ? `HadeethEnc: ${excerpt(linked.text, 145)}` : "";
+  // The citable URL (/books/{book}/hadiths/8a), whichever URL was opened.
+  const url = `${server}${citablePath(hadith, book)}`;
 
   return (
     <>
       <Meta
         title={hadith.title ? `${cleanText(hadith.title).slice(0, 70)} - ${reference}` : reference}
         description={snippet || `${reference} - ${book.name}`}
-        url={`${server}${hadithPath(hadith)}`}
-        canonical={`${server}${hadithPath(hadith)}`}
+        url={url}
+        canonical={url}
         image={`${server}/img/s_logo.png`}
         type="article"
       />
