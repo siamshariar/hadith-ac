@@ -5,13 +5,13 @@ import {
   bookPath,
   chapterPath,
   citablePath,
-  citation,
   cleanText,
   excerpt,
   isCategoryBook,
   lettered,
   shortBookName,
 } from "../../lib/hadith";
+import { referenceText } from "../../lib/citation";
 import { useLocale } from "../../contexts/LocaleContext";
 import Meta from "../core/meta";
 import Breadcrumbs from "../core/breadcrumbs";
@@ -33,7 +33,9 @@ export default function HadithPage({ hadith, languages, error }) {
   }
 
   const { book, chapter } = hadith;
-  const reference = citation(hadith, book);
+  // "Sahih Muslim 8a"; records the source does not number say so, so their
+  // title is not just the collection's name.
+  const reference = referenceText(hadith, book, t);
   const crumbs = [
     { href: "/", label: t("home") },
     { href: "/books", label: t("books") },
@@ -45,7 +47,7 @@ export default function HadithPage({ hadith, languages, error }) {
       label: chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapter.chapterNo}`,
     });
   }
-  crumbs.push({ label: `${t("hadith")} ${lettered(hadith.referenceNumber)}` });
+  crumbs.push({ label: hadith.referenceNumber ? `${t("hadith")} ${lettered(hadith.referenceNumber)}` : t("hadith") });
 
   // Described by its own translation (the page language, else English).
   // HadeethEnc's linked translation is another text, so it is only used,
