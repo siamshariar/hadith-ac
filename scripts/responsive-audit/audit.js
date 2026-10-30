@@ -4,8 +4,9 @@
 // then: python3 summarize.py outDir/results-<engine>.json
 // --locale: the browser's language (Accept-Language), default vi-VN; the international site
 // (ac) picks its content and interface from it. --click: a control to click on each page before
-// it is inspected (its first visible match), e.g. --click='button[data-interface]' opens the
-// interface menu of the ac site.
+// it is inspected (its first visible match; a page without one is inspected as it is, and its
+// result says clicked: false), e.g. --click='button[data-interface]' opens the interface menu of
+// the ac site.
 // playwright-core is not a project dependency: point PLAYWRIGHT_CORE at an installed copy
 // (its browsers come from ~/.cache/ms-playwright).
 const pw = require(process.env.PLAYWRIGHT_CORE || 'playwright-core');
@@ -189,11 +190,16 @@ async function runEngine(name) {
         const res = await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 60000 });
         status = res && res.status();
         await page.evaluate(() => document.fonts && document.fonts.ready);
+        let clicked;
         if (CLICK) {
-          await page.locator(CLICK).filter({ visible: true }).first().click();
-          await page.waitForTimeout(600); // the menu's opening transition
+          const target = page.locator(CLICK).filter({ visible: true }).first();
+          clicked = (await target.count()) > 0;
+          if (clicked) {
+            await target.click();
+            await page.waitForTimeout(600); // the menu's opening transition
+          }
         }
-        const data = await page.evaluate(inspect);
+        const data = { ...(await page.evaluate(inspect)), ...(CLICK ? { clicked } : {}) };
         if (SHOTS) {
           const dir = path.join(OUT, 'shots', name, vpName.split(' ')[0]);
           fs.mkdirSync(dir, { recursive: true });
