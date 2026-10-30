@@ -1,9 +1,9 @@
 .item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
-  padding: 14px 16px 16px;
+  padding: 12px 16px 14px;
   border: 1px solid var(--bdr11);
   border-radius: 10px;
   background: var(--bg11);
@@ -14,46 +14,40 @@
   &:focus-visible {
     border-color: var(--theme-color);
     box-shadow: var(--bs21);
+
+    .name {
+      color: var(--main-color);
+    }
   }
 }
 
+// name and Arabic name side by side; the Arabic wraps under a long name
 .top {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  min-height: 44px;
-  margin-bottom: 4px;
-}
-
-.number {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--bg22);
-  color: var(--txt11);
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-
-.arabic {
-  min-width: 0;
-  font-family: var(--font-arabic);
-  font-size: 24px;
-  line-height: 1.5;
-  color: var(--txt00);
-  text-align: right;
+  gap: 0 12px;
+  margin-bottom: 2px;
 }
 
 .name {
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--txt11);
   font-size: var(--text-md);
   font-weight: 600;
   line-height: var(--leading-tight);
+}
+
+.arabic {
+  flex: 0 1 auto;
+  margin-inline-start: auto;
+  font-family: var(--font-arabic);
+  font-size: 22px;
+  line-height: 1.6;
+  color: var(--txt00);
+  text-align: right;
 }
 
 .bottom {

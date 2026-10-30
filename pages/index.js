@@ -9,7 +9,8 @@ import Layout from "../components/layouts/LayoutPrimary";
 import DailyHadith, { Hero } from "../components/home/banner";
 import HomeSearch from "../components/home/search";
 import Stats from "../components/home/Stats";
-import BookList from "../components/home/book-list";
+import ContinueReading from "../components/home/ContinueReading";
+import { BookGroups } from "../components/home/book-list";
 import CategoryList from "../components/home/category-list";
 import styles from "../components/home/Home.module.scss";
 
@@ -20,7 +21,7 @@ export default function Home({ home, error }) {
     <>
       <Meta
         title={t("home")}
-        description="Hadith collections in Arabic with translations: Sahih al-Bukhari, Sahih Muslim, the Sunan, Muwatta Malik, the forty-hadith books and HadeethEnc."
+        description={t("siteTagline")}
         url={server}
         image={`${server}/img/s_logo.png`}
         type="website"
@@ -28,14 +29,16 @@ export default function Home({ home, error }) {
 
       {error || !home ? (
         <Container>
+          <h1 className="visually_hidden">{t("siteHeading")}</h1>
           <div className={styles.error}>
             <ErrorState error={error} />
           </div>
         </Container>
       ) : (
         <>
-          {/* Search first (with "go to hadith"), then the collections, the
-              category tree, the hadith of the day and how the data is made. */}
+          {/* The site heading and search (with "go to hadith"), where the
+              reader left off, the collections in groups, the hadith of the
+              day, the category tree and how the data is made. */}
           <Hero>
             <HomeSearch />
           </Hero>
@@ -43,6 +46,8 @@ export default function Home({ home, error }) {
 
           <Container>
             <div className={styles.sections}>
+              <ContinueReading />
+
               <section className={styles.section} aria-labelledby="home-books">
                 <div className={styles.sectionHead}>
                   <h2 id="home-books" className={styles.sectionTitle}>
@@ -52,8 +57,14 @@ export default function Home({ home, error }) {
                     {t("viewAll")} <span aria-hidden="true">→</span>
                   </Link>
                 </div>
-                <BookList books={home.books} showTranslation />
+                <BookGroups books={home.books} showTranslation />
               </section>
+
+              {home.dailyHadith && (
+                <section className={styles.section}>
+                  <DailyHadith hadith={home.dailyHadith} />
+                </section>
+              )}
 
               <section className={styles.section} aria-labelledby="home-categories">
                 <div className={styles.sectionHead}>
@@ -66,12 +77,6 @@ export default function Home({ home, error }) {
                 </div>
                 <CategoryList categories={home.categories} columns={2} />
               </section>
-
-              {home.dailyHadith && (
-                <section className={styles.section}>
-                  <DailyHadith hadith={home.dailyHadith} />
-                </section>
-              )}
 
               <p className={styles.sources}>
                 <Link href="/sources">

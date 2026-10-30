@@ -3,9 +3,10 @@ import { useLocale } from "../../contexts/LocaleContext";
 import { bookPath } from "../../lib/hadith";
 import styles from "./book-card.module.scss";
 
-// One collection. With `showTranslation`, says how much of it can be read in
-// the reader's language (most collections only have English).
-export default function BookCard({ book, index, showTranslation = false }) {
+// One collection: name and Arabic name, counts and, with `showTranslation`,
+// how much of it can be read in the reader's language (most collections
+// only have English).
+export default function BookCard({ book, showTranslation = false }) {
   const { t, lang, formatNumber, languageName } = useLocale();
 
   const counts = [`${formatNumber(book.totalHadith)} ${t("hadiths")}`];
@@ -35,14 +36,13 @@ export default function BookCard({ book, index, showTranslation = false }) {
   return (
     <Link href={bookPath(book)} className={styles.item}>
       <span className={styles.top}>
-        <span className={styles.number}>{index}</span>
+        <span className={styles.name}>{book.name}</span>{" "}
         {book.nameArabic && (
           <span className={styles.arabic} dir="rtl" lang="ar">
             {book.nameArabic}
           </span>
         )}
       </span>
-      <span className={styles.name}>{book.name}</span>
       <span className={styles.bottom}>{counts.join(" · ")}</span>
       {notes.map((note) => (
         <span key={note.key} className={`${styles.translation} ${note.strong ? styles.hasTranslation : ""}`}>

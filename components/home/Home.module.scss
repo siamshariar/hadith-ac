@@ -13,10 +13,10 @@
 
 .sectionHead {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .sectionTitle {
@@ -26,6 +26,10 @@
 }
 
 .sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
   color: var(--main-color);
   font-size: 14px;
   font-weight: 500;
@@ -53,12 +57,16 @@
 }
 
 .sources {
-  padding: 14px 16px;
+  padding: 4px 16px;
   border: 1px dashed var(--bdr13);
   border-radius: 8px;
   text-align: center;
 
   a {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 44px;
     color: var(--main-color);
     font-weight: 600;
 

@@ -7,12 +7,19 @@ import { cleanText, hadithPath } from "../../lib/hadith";
 import { referenceText } from "../../lib/citation";
 import styles from "./banner.module.scss";
 
-// Hadith.vn's brand band (header colours) with the search panel on it.
+// The brand band in the main green: the site's heading and tagline, with
+// the search panel on it.
 export function Hero({ children }) {
   const { t } = useLocale();
   return (
-    <section className={styles.banner} aria-label={t("search")}>
+    <section className={styles.banner} aria-labelledby="site-heading">
       <Container>
+        <div className={styles.heading}>
+          <h1 id="site-heading" className={styles.siteTitle}>
+            {t("siteHeading")}
+          </h1>
+          <p className={styles.tagline}>{t("siteTagline")}</p>
+        </div>
         <div className={styles.panel}>{children}</div>
       </Container>
     </section>

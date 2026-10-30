@@ -1,23 +1,42 @@
-// Brand gradient band (red / yellow, as in the header) with the search panel.
+// Brand band: the main green (styles/_variables --band-*), a faint dot
+// grid for texture, the site heading and the search panel.
 .banner {
-  padding: 20px 0 24px;
-  background: linear-gradient(
-    90deg,
-    var(--hbnc1) 0%,
-    var(--hbnc2) 50%,
-    var(--hbnc2) 50%,
-    var(--hbnc1) 100%
-  );
+  padding: 24px 0 28px;
+  background-color: var(--band-bg);
+  background-image: radial-gradient(var(--band-line) 1px, transparent 1.5px),
+    linear-gradient(160deg, var(--band-bg) 0%, var(--band-bg2) 100%);
+  background-size: 20px 20px, 100% 100%;
+  border-bottom: 1px solid var(--band-line);
+}
+
+.heading {
+  max-width: 760px;
+  margin: 0 auto 18px;
+  text-align: center;
+}
+
+.siteTitle {
+  color: var(--band-txt);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  margin-top: 6px;
+  color: var(--band-muted);
+  font-size: 15px;
+  line-height: 1.55;
 }
 
 .panel {
-  max-width: 920px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 18px 16px;
-  border: 1px solid var(--bdr11);
+  padding: 16px;
   border-radius: 12px;
   background-color: var(--bg11);
-  box-shadow: 0 7px 13px rgba(71, 88, 114, 0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
 // hadith of the day
@@ -49,6 +68,9 @@
 }
 
 .citation {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
   color: var(--txt12);
   font-size: var(--text-sm);
 
@@ -81,6 +103,10 @@
 }
 
 .more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
   margin-left: auto;
   color: var(--main-color);
   font-size: var(--text-base);
@@ -96,10 +122,20 @@
 @media only screen and (min-width: 1024px) {
   // The desktop header is transparent over the band (see web/Header .home).
   .banner {
-    padding: 96px 0 40px;
+    padding: 104px 0 48px;
+  }
+  .heading {
+    margin-bottom: 28px;
+  }
+  .siteTitle {
+    font-size: 36px;
+  }
+  .tagline {
+    margin-top: 10px;
+    font-size: 17px;
   }
   .panel {
-    padding: 28px 36px;
+    padding: 24px 32px;
   }
   .daily {
     padding: 24px 32px;

@@ -1,10 +1,50 @@
-// Grid of collection cards (home and /books).
+// Grid of collection cards (home and /books): three columns on desktop,
+// two on tablets, one on phones.
 .list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 10px;
 
   > li {
     display: flex;
   }
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// "Sáu bộ sách chính ——— الكتب الستة"
+.groupTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 10px;
+  color: var(--main-color);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  &::after {
+    content: "";
+    flex: 1 1 40px;
+    order: 1;
+    align-self: center;
+    border-top: 1px solid var(--bdr11);
+  }
+}
+
+.groupArabic {
+  order: 2;
+  color: var(--txt12);
+  font-family: var(--font-arabic);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.4;
+  text-transform: none;
 }
