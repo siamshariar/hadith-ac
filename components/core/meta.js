@@ -2,10 +2,12 @@ import Head from "next/head";
 import { useLocale } from "../../contexts/LocaleContext";
 import { site } from "../../lib/sites";
 
-// The page's <head>: title "{page} | {siteHeading} | {siteName}", description, social
-// cards. Site name and og:locale are the deployment's (config/countries.json).
+// The page's <head>: title "{page} | {siteHeading} | {siteName}" (or `fullTitle` as it
+// is), description, social cards. Site name and og:locale are the deployment's
+// (config/countries.json); on an international site og:locale is the reader's interface.
 export default function Meta(props) {
-  const { t } = useLocale();
+  const { t, ogLocale } = useLocale();
+  const title = props.fullTitle || props.title;
 
   return (
     <Head>
@@ -55,7 +57,7 @@ export default function Meta(props) {
       <meta name="format-detection" content="telephone=no" />
 
       {/* meta information for facebook */}
-      <meta property="og:title" content={props.title || ""} key="ogtitle" />
+      <meta property="og:title" content={title || ""} key="ogtitle" />
       <meta property="og:url" content={props.url || ""} key="ogurl" />
       <meta property="og:image" content={props.image || ""} key="ogimage" />
       <meta property="og:type" content={props.type || "website"} key="ogtype" />
@@ -64,13 +66,13 @@ export default function Meta(props) {
         content={props.description || ""}
         key="ogdesc"
       />
-      <meta property="og:locale" content={site.ogLocale} key="oglocale" />
+      <meta property="og:locale" content={ogLocale} key="oglocale" />
       <meta property="og:site_name" content={site.siteName} key="ogsitename" />
 
       {/* meta information for twitter */}
       <meta name="twitter:card" content="summary" key="twcard" />
       <meta name="twitter:url" content={props.url || ""} key="twurl" />
-      <meta name="twitter:title" content={props.title || ""} key="twtitle" />
+      <meta name="twitter:title" content={title || ""} key="twtitle" />
       <meta
         name="twitter:description"
         content={props.description || ""}
@@ -178,7 +180,7 @@ export default function Meta(props) {
 
       {/* page title */}
       <title>
-        {`${props.title ? props.title + " | " : ""}${t("siteHeading")} | ${site.siteName}`}
+        {props.fullTitle || `${props.title ? props.title + " | " : ""}${t("siteHeading")} | ${site.siteName}`}
       </title>
 
       {/* Manifest.json */}

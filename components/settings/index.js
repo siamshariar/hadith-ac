@@ -3,7 +3,7 @@
 import { fonts, themes } from "../../lib/settings";
 import { useEffect, useState, useContext } from "react";
 import { SettingsContext } from "../../contexts/SettingsContext";
-import { compareLanguages, readLanguageCookie } from "../../lib/language";
+import { DEFAULT_LANGUAGE, browserLanguages, compareLanguages, matchLanguage, readLanguageCookie } from "../../lib/language";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -52,7 +52,9 @@ export default function SettingsContent() {
 // Content language: populated from /hadith/languages, saved in a cookie so
 // server-rendered pages use it as {localizationCode}. Arabic is not offered
 // here because the Arabic text is always shown. The translations panel of
-// the hadith pages saves the same cookie, so the value is read from it.
+// the hadith pages saves the same cookie, so the value is read from it. An
+// international site that knows no preference yet shows the browser's
+// language, the one its pages pick (lib/language.js).
 const Language = () => {
   const { t, preferredLang, setLanguage, formatNumber } = useLocale();
   const { data, error, loading, retry } = useApi("languages", () => getLanguages());
@@ -62,6 +64,14 @@ const Language = () => {
   }, []);
 
   const languages = (Array.isArray(data) ? data : []).filter((language) => language.code !== "ar").sort(compareLanguages);
+  const current =
+    saved ||
+    preferredLang ||
+    matchLanguage(
+      browserLanguages(),
+      languages.map((language) => language.code)
+    ) ||
+    DEFAULT_LANGUAGE;
 
   return (
     <div className={`${styles.block} ${styles.language}`}>
@@ -74,7 +84,7 @@ const Language = () => {
         ) : (
           <select
             className={styles.language_select}
-            value={saved || preferredLang}
+            value={current}
             onChange={(event) => {
               setSaved(event.target.value);
               setLanguage(event.target.value);

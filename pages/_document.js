@@ -5,7 +5,7 @@ import Document, { Html, Head, Main, NextScript } from "next/document";
 import { ServerStyleSheets } from "@mui/styles";
 
 import { GA_TRACKING_ID } from "../lib/gtag";
-import { INTERFACE_DIRECTION, INTERFACE_LANGUAGE } from "../lib/language";
+import { INTERFACE_DIRECTION, INTERFACE_LANGUAGE, INTERNATIONAL, isInterfaceLanguage } from "../lib/language";
 
 class CustomDocument extends Document {
   static async getInitialProps(ctx) {
@@ -15,9 +15,13 @@ class CustomDocument extends Document {
 
   render() {
     // The deployment's interface language (lib/language.js), whatever the content
-    // language: content blocks carry their own lang and dir.
+    // language: content blocks carry their own lang and dir. An international site's
+    // pages say which interface the reader got (lib/api loadPage); its static pages are
+    // in the default one until LocaleContext switches them.
+    const pageProps = (this.props.__NEXT_DATA__ && this.props.__NEXT_DATA__.props && this.props.__NEXT_DATA__.props.pageProps) || {};
+    const lang = INTERNATIONAL && isInterfaceLanguage(pageProps.uiLang) ? pageProps.uiLang : INTERFACE_LANGUAGE;
     return (
-      <Html lang={INTERFACE_LANGUAGE} dir={INTERFACE_DIRECTION}>
+      <Html lang={lang} dir={INTERFACE_DIRECTION}>
         <Head>
           {/* Global Site Tag (gtag.js) - Google Analytics, only when an ID is configured
               (next.config.js accepts letters, digits and dashes only) */}

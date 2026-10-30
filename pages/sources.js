@@ -2,7 +2,7 @@ import Link from "next/link";
 import { server } from "../lib/config";
 import { getBooks, getEditions, getLanguages, loadPage } from "../lib/api";
 import { bookPath, shortBookName } from "../lib/hadith";
-import { DEFAULT_LANGUAGE, INTERFACE_LANGUAGE, compareLanguages } from "../lib/language";
+import { DEFAULT_LANGUAGE, INTERNATIONAL, compareLanguages, resolveInterfaceLanguage } from "../lib/language";
 import { site } from "../lib/sites";
 import { useLocale } from "../contexts/LocaleContext";
 import Meta from "../components/core/meta";
@@ -16,7 +16,8 @@ const HADEETHENC_URL = "https://hadeethenc.com";
 
 // Prose in each interface language with a catalog (English when there is
 // none); figures come from the API. {site} is the site's name, {language} the
-// deployment's content language (lib/sites.js), whose coverage is described.
+// deployment's content language (lib/sites.js), whose coverage is described; on
+// an international site, the reader's.
 const COPY = {
   vi: {
     title: "Nguồn & phương pháp",
@@ -145,8 +146,8 @@ const COPY = {
 export default function Sources({ books, coverage, translators, hencLanguages }) {
   const { t, ui, formatNumber, languageName } = useLocale();
   const base = COPY[ui] || COPY.en;
-  // the deployment's content language, as the interface names it in a sentence
-  const language = languageName(DEFAULT_LANGUAGE, coverage && coverage.language);
+  // the language described (the deployment's), as the interface names it in a sentence
+  const language = languageName((coverage && coverage.language && coverage.language.code) || DEFAULT_LANGUAGE, coverage && coverage.language);
   const copy = {
     ...base,
     intro: base.intro.replace("{site}", site.siteName),
@@ -341,17 +342,19 @@ function translatorsByLanguage(editions) {
 
 export async function getServerSideProps(context) {
   return loadPage(context, async (lang) => {
-    // Coverage of the deployment's content language (none for Arabic, the original).
+    // Coverage of the deployment's content language, on an international site the
+    // reader's (none for Arabic, the original).
+    const described = INTERNATIONAL ? lang : DEFAULT_LANGUAGE;
     const [books, languages, siteBooks] = await Promise.all([
       getBooks(lang),
       getLanguages().catch(() => []),
-      DEFAULT_LANGUAGE === "ar" ? Promise.resolve([]) : getBooks(DEFAULT_LANGUAGE).catch(() => []),
+      described === "ar" ? Promise.resolve([]) : getBooks(described).catch(() => []),
     ]);
 
     let coverage = null;
     if (siteBooks.length) {
       const henc = siteBooks.find((book) => book.source === "hadeethenc");
-      const info = languages.find((item) => item.code === DEFAULT_LANGUAGE);
+      const info = languages.find((item) => item.code === described);
       coverage = {
         language: info ? { code: info.code, name: info.name, nativeName: info.nativeName } : null,
         own: siteBooks.reduce((sum, book) => sum + (book.totalTranslated || 0), 0),
@@ -377,7 +380,7 @@ export async function getServerSideProps(context) {
         coverage,
         translators,
         hencLanguages: languages.filter((language) => language.code !== "ar").length,
-        contentTitle: (COPY[INTERFACE_LANGUAGE] || COPY.en).title,
+        contentTitle: (COPY[resolveInterfaceLanguage(context)] || COPY.en).title,
         sidebarData: await sidebarCategoriesData(lang),
         backLink: "/",
       },

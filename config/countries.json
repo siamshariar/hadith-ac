@@ -6,6 +6,9 @@
     "hadith_languages.localization_id. `ui` is the interface language wanted: it is used when",
     "lib/locales has that catalog, otherwise the interface falls back to English. There is no",
     "right-to-left interface yet: ar, ur and ku get the English interface (lib/i18n.js).",
+    "An entry with \"international\": true (ac) is one site for every language, with no",
+    "`localization`: the content and interface languages follow the reader (lib/language.js),",
+    "`language` and `ui` are only the defaults, and English is shown beside other languages.",
     "Check against a running API: npm run check:sites"
   ],
   "vn": { "name": "Vietnam", "localization": "vn", "language": "vi", "ui": "vi", "ogLocale": "vi_VN", "siteName": "Hadith.vn", "logo": "/img/logo.png", "logoDark": "/img/logo_dark.png", "contactEmail": "quran.vn@gmail.com" },
@@ -23,5 +26,6 @@
   "sa": { "name": "Saudi Arabia", "localization": "ar", "language": "ar", "ui": "ar", "ogLocale": "ar_AR" },
   "pk": { "name": "Pakistan", "localization": "ur", "language": "ur", "ui": "ur", "ogLocale": "ur_PK" },
   "ru": { "name": "Russian Federation", "localization": "ru", "language": "ru", "ui": "ru", "ogLocale": "ru_RU" },
-  "iq": { "name": "Iraq", "localization": "ku", "language": "ku", "ui": "ku", "ogLocale": "ku_TR" }
+  "iq": { "name": "Iraq", "localization": "ku", "language": "ku", "ui": "ku", "ogLocale": "ku_TR" },
+  "ac": { "name": "International", "international": true, "language": "en", "ui": "en", "ogLocale": "en_US", "siteName": "Hadith.ac" }
 }

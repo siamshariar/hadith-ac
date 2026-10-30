@@ -12,6 +12,9 @@
 //   - /api/hadith/home/localizations/{localization} answers in its `language`, and so
 //     does /home/localizations/{language} (what the site sends);
 //   - which interface it gets: its `ui` catalog (lib/locales), or English.
+// An international entry (ac: "international": true) has no localization and no country in
+// the Quran database: only its default `language` is checked, and its interface follows the
+// reader among the catalogs.
 // Exits 1 on any mismatch, 2 when the API cannot be reached.
 //
 // API: the Quran API base (default NEXT_PUBLIC_API_BASE_URL, else
@@ -27,13 +30,16 @@ process.on("warning", (warning) => {
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const countries = JSON.parse(readFileSync(path.join(root, "config", "countries.json"), "utf8"));
-const { hasCatalog, interfaceLanguageFor, isRtlLanguage } = await import(pathToFileURL(path.join(root, "lib", "i18n.js")).href);
+const { hasCatalog, interfaceLanguageFor, interfaceLanguages, isRtlLanguage } = await import(
+  pathToFileURL(path.join(root, "lib", "i18n.js")).href
+);
 
 const API = (process.env.API || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8090/api")
   .replace(/\/+$/, "")
   .replace(/\/hadith$/, "");
 const TIMEOUT = 20000;
 const FIELDS = ["name", "localization", "language", "ui", "ogLocale"];
+const INTERNATIONAL_FIELDS = ["name", "language", "ui", "ogLocale"];
 
 const all = Object.keys(countries).filter((key) => key !== "_comment");
 const wanted = process.argv.slice(2);
@@ -66,12 +72,14 @@ function interfaceNote(ui) {
 
 async function checkCountry(code, localizations) {
   const entry = countries[code];
+  const international = entry.international === true;
   const problems = [];
-  const missing = FIELDS.filter((field) => !entry[field]);
+  const missing = (international ? INTERNATIONAL_FIELDS : FIELDS).filter((field) => !entry[field]);
   if (missing.length) problems.push(`no ${missing.join(", ")}`);
   if (entry.ogLocale && !/^[a-z]{2,3}_[A-Z]{2}$/.test(entry.ogLocale)) problems.push(`ogLocale "${entry.ogLocale}" is not ll_CC`);
 
-  if (entry.localization) {
+  if (international && entry.localization) problems.push("an international entry has no localization");
+  if (entry.localization && !international) {
     const localization = localizations.find((item) => item.code === entry.localization);
     const country = localization && localization.country ? localization.country.code : null;
     if (!localization) problems.push(`/localizations has no "${entry.localization}"`);
@@ -94,7 +102,8 @@ async function checkCountry(code, localizations) {
     }
   }
 
-  return { code, entry, problems, ui: entry.ui ? interfaceNote(entry.ui) : "?" };
+  const ui = international ? `the reader's (${interfaceLanguages.join(", ")})` : entry.ui ? interfaceNote(entry.ui) : "?";
+  return { code, entry, problems, ui };
 }
 
 let localizations;
@@ -117,7 +126,7 @@ try {
 const header = ["country", "localization", "language", "interface", "result"];
 const table = rows.map((row) => [
   row.code,
-  row.entry.localization || "?",
+  row.entry.international === true ? "(international)" : row.entry.localization || "?",
   row.entry.language || "?",
   row.ui,
   row.problems.length ? "MISMATCH" : "ok",
@@ -130,7 +139,9 @@ table.forEach((cells) => console.log(line(cells)));
 const failed = rows.filter((row) => row.problems.length);
 failed.forEach((row) => row.problems.forEach((problem) => console.log(`\n${row.code}: ${problem}`)));
 
-const withCatalog = rows.filter((row) => interfaceLanguageFor(row.entry.ui) === row.entry.ui).map((row) => row.code);
+const withCatalog = rows
+  .filter((row) => row.entry.international !== true && interfaceLanguageFor(row.entry.ui) === row.entry.ui)
+  .map((row) => row.code);
 console.log(`\nInterface catalog of their own: ${withCatalog.length ? withCatalog.join(", ") : "none"}; the others use English.`);
 if (failed.length) {
   console.log(`${failed.length === 1 ? "1 country does" : `${failed.length} countries do`} not match the API.`);

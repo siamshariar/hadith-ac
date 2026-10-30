@@ -9,7 +9,10 @@ const countries = require("./config/countries.json");
 // an API the browser cannot call from an https page. ALLOW_LOCAL_BUILD=1 lets a local
 // test build use local URLs; such a build must never be deployed.
 
+// An international entry (ac: one site for every language) has no localization.
 const COUNTRY_FIELDS = ["name", "localization", "language", "ui", "ogLocale"];
+const INTERNATIONAL_FIELDS = ["name", "language", "ui", "ogLocale"];
+const HEX_COLOUR = /^#[0-9a-f]{6}$/i;
 const LOCAL_HOST = /^(localhost|.+\.localhost|127(\.\d{1,3}){3}|0\.0\.0\.0|\[::1?\])$/i;
 
 const countryCodes = () => Object.keys(countries).filter((key) => key !== "_comment");
@@ -34,9 +37,14 @@ function checkCountry({ required }) {
   if (!known.includes(code)) {
     fail(`NEXT_PUBLIC_COUNTRY_CODE="${code}" is not a country of config/countries.json.`, `Use one of ${known.join(", ")}.`);
   }
-  const missing = COUNTRY_FIELDS.filter((field) => !countries[code][field]);
+  const entry = countries[code];
+  const missing = (entry.international === true ? INTERNATIONAL_FIELDS : COUNTRY_FIELDS).filter((field) => !entry[field]);
   if (missing.length) {
     fail(`config/countries.json "${code}" has no ${missing.join(", ")}.`);
+  }
+  // The accent goes into the style attribute of <html> (pages/_document.js): colours only.
+  if (entry.accent !== undefined && !(Array.isArray(entry.accent) && entry.accent.length >= 2 && entry.accent.every((stop) => HEX_COLOUR.test(stop)))) {
+    fail(`config/countries.json "${code}": accent must be a list of two or more #rrggbb colours.`);
   }
 }
 

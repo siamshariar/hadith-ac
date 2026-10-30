@@ -74,7 +74,12 @@ const App = ({ Component, pageProps }) => {
   const getLayout = Component.getLayout || ((page) => page);
 
   return (
-    <LocaleProvider pageLang={pageProps.lang} languageInfo={pageProps.languageInfo}>
+    <LocaleProvider
+      pageLang={pageProps.lang}
+      pageUi={pageProps.uiLang}
+      pagePreferred={pageProps.preferredLang}
+      languageInfo={pageProps.languageInfo}
+    >
       {/* On :root so MUI portals (menus, modals) get the fonts too. */}
       <style jsx global>{`
         :root {
