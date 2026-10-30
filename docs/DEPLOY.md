@@ -359,6 +359,10 @@ browsers; set `PLAYWRIGHT_CORE` to the installed package.
 
 - [ ] `npm run check:sites -- <country>` against the production API: "matches the API".
 - [ ] `npm run i18n:missing`: no gaps in any catalog.
+- [ ] `PLAYWRIGHT_CORE=… npm run check:countries [-- <country> …]` on a checkout with the
+      API reachable: it serves the site once per country (on port 3001, from a temporary
+      worktree) and checks the interface language, og:locale, site name, book names,
+      category titles and the translations shown against the API. "0 failed check(s)".
 - [ ] The interface catalog has been reviewed by a native speaker. `lib/locales/bn.js`
       was drafted by an AI and needs this before the bd launch.
 - [ ] End-to-end suite: `BASE=<vn site> BASE_BD=<bd site> PLAYWRIGHT_CORE=… npm run test:e2e`.
