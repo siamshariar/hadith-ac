@@ -50,7 +50,7 @@ export default function CategoryHadiths({ data, books, direct, filtered, counts,
   return (
     <>
       <Meta
-        title={`${t("hadithsInCategory")}: ${category.title}`}
+        title={t("labelValue", { label: t("hadithsInCategory"), value: category.title })}
         description={`${category.title}: ${t("hadithCount", { count: pagination.total })}.`}
         url={`${server}${pageHref(basePath, query, pagination.page)}`}
         image={shareImage}

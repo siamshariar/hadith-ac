@@ -18,7 +18,7 @@ export function GradesTable({ grades, gradeText }) {
     <div className={styles.grades}>
       {gradeText && (
         <p className={styles.gradeText}>
-          <span className={styles.term}>{t("grades")}:</span> <strong>{gradeText}</strong>
+          <span className={styles.term}>{t("labelColon", { label: t("grades") })}</span> <strong>{gradeText}</strong>
         </p>
       )}
       {list.length > 0 && (

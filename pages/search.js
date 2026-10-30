@@ -179,7 +179,7 @@ export default function Search({ query, book, results, books, languages, notFoun
   return (
     <>
       <Meta
-        title={query ? `${t("search")}: ${query}` : t("search")}
+        title={query ? t("labelValue", { label: t("search"), value: query }) : t("search")}
         description={t("searchTips")}
         url={`${server}/search`}
         image={shareImage}

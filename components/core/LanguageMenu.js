@@ -57,7 +57,7 @@ export default function LanguageMenu({ variant = "desktop", className = "" }) {
   // The site's language, English, then by name (lib/language.js compareLanguages).
   const languages = useMemo(() => (Array.isArray(data) ? [...data].sort(compareLanguages) : []), [data]);
   const name = (languageInfo && (languageInfo.nativeName || languageInfo.name)) || (loadedCatalog(lang) || {}).nativeName || languageName(lang);
-  const label = `${t("language")}: ${name}`;
+  const label = t("labelValue", { label: t("language"), value: name });
   // Its name in the interface: "Tiếng Anh", "Bengali".
   const interfaceName = (language) => capitalize(languageName(language.code, language.name));
 
@@ -211,7 +211,7 @@ export default function LanguageMenu({ variant = "desktop", className = "" }) {
         )}
         {variant === "menu" && (
           <span className={styles.text}>
-            {t("language")}: <span lang={lang}>{name}</span>
+            {t("labelColon", { label: t("language") })} <span lang={lang}>{name}</span>
           </span>
         )}
       </button>

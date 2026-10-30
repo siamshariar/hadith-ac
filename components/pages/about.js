@@ -14,7 +14,7 @@ export function EmailLinks({ emails = EMAILS }) {
   const { t } = useLocale();
   return (
     <p>
-      {t("email")}:{" "}
+      {t("labelColon", { label: t("email") })}{" "}
       {emails.map((email, index) => (
         <Fragment key={email}>
           {index > 0 && " | "}

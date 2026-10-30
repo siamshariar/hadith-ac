@@ -39,7 +39,7 @@ export default function CategoryCard({ category, index }) {
       </Link>
 
       {children.length > 0 && (
-        <ul className={styles.children} aria-label={`${t("subcategories")}: ${category.title}`}>
+        <ul className={styles.children} aria-label={t("labelValue", { label: t("subcategories"), value: category.title })}>
           {children.map((child) => {
             const childTranslated = showTranslated && child.totalTranslated != null;
             const muted = childTranslated && child.totalTranslated === 0;

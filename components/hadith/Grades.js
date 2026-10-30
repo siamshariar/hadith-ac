@@ -53,8 +53,8 @@ export function GradeBadge({ grades, gradeText }) {
   const all = list.map((grade) => `${grade.graderName}: ${grade.grade}`).join("; ");
 
   return (
-    <span className={styles.gradeBadge} title={all ? `${t("grades")}: ${all}` : t("grades")}>
-      <span className="visually_hidden">{t("grades")}: </span>
+    <span className={styles.gradeBadge} title={all ? t("labelValue", { label: t("grades"), value: all }) : t("grades")}>
+      <span className="visually_hidden">{t("labelColon", { label: t("grades") })} </span>
       <bdi className={styles.gradeBadgeGrade}>{gradeText || first.grade}</bdi>
       {first && first.graderName && <span className={styles.gradeBadgeGrader}>· {first.graderName}</span>}
       {more > 0 && (

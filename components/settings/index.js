@@ -403,7 +403,7 @@ const Note = () => {
   return (
     <div className={`${styles.block} ${styles.note}`}>
       <p className={styles.note_text}>
-        <span>{t("settingsNoteLabel")}: </span>
+        <span>{t("labelColon", { label: t("settingsNoteLabel") })} </span>
         {t("settingsNote")}
       </p>
     </div>

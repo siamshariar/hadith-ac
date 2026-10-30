@@ -11,7 +11,7 @@ export default function DeeniInfoTech() {
     <>
       <Meta
         title="Deeni Info Tech"
-        description={`Deeni Info Tech: ${t("deeniText")}`}
+        description={t("labelValue", { label: "Deeni Info Tech", value: t("deeniText") })}
         url={`${server}/deeniinfotech`}
         image={shareImage}
         type="website"
