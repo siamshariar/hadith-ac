@@ -26,7 +26,7 @@ Setting it only at `npm start` has no effect.
 
 | Variable | Required | Meaning |
 |---|---|---|
-| `NEXT_PUBLIC_COUNTRY_CODE` | yes | Key of `config/countries.json`: `vn`, `bd`, `usa`, `kh`, `fr`, `ph`, `jp`, `de`, `cn`, `pt`, `kr`, `dk`, `sa`, `pk`, `ru`, `iq`. |
+| `NEXT_PUBLIC_COUNTRY_CODE` | yes | Key of `config/countries.json`: `vn`, `bd`, `usa`, `kh`, `fr`, `ph`, `jp`, `de`, `cn`, `pt`, `kr`, `dk`, `sa`, `pk`, `ru`, `iq`, or `ac` for the international edition (section 2.1). |
 | `NEXT_PUBLIC_SITE_URL` | yes | The site's public address at the root of its domain, e.g. `https://hadith.vn`. Used for canonical links, citations, share links, robots.txt and the sitemap. |
 | `NEXT_PUBLIC_API_BASE_URL` | yes | The Quran API, e.g. `https://api.alquranarabia.com/api`. Must be HTTPS. |
 | `NEXT_PUBLIC_SITE_NAME` | no | Site name in titles, the header and the web app manifest. Default: the country's `siteName`, else "Hadith". |
@@ -39,7 +39,11 @@ The country decides:
 - the default content language (the reader can pick another; the cookie `hadith_lang`
   and `?lang=` override it);
 - the interface language, which is the same for every reader of that site;
-- `<html lang>`, `og:locale`, and the default site name, logo and contact email.
+- `<html lang>`, `og:locale`, and the default site name, logo, ribbon colours (`accent`) and
+  contact email.
+
+The international edition (`ac`) is the exception: there both languages follow the reader
+(section 2.1).
 
 The interface is the country's `ui` language when `lib/locales` has a catalog for it.
 Today that is Vietnamese (vn), Bengali (bd) and English (usa). Every other country gets
@@ -49,10 +53,54 @@ added, until the layout supports RTL. Their content (Arabic, Urdu, Kurdish) is s
 shown right to left, because each text block carries its own `dir`.
 `npm run check:sites` prints which interface each country gets.
 
+### 2.1 The international edition (ac)
+
+`NEXT_PUBLIC_COUNTRY_CODE=ac` builds **Hadith.ac**, one site for every language, like the
+Quran team's Quran.ac. Its entry has `"international": true` and no `localization`: the Quran
+database has no `ac` localization or country, and the site does not need one.
+
+- **Content language**, for each request: `?lang=`, then the `hadith_lang` cookie, then the
+  best match of the browser's `Accept-Language` among the API's 72 hadith languages (`bn-BD`
+  gives `bn`, `zh-TW` gives `zh`, `fil` gives `tl`), then English.
+- **Interface**, for each request: the `hadith_ui` cookie (set by the globe menu in the
+  header), then the best `Accept-Language` match among the catalogs (Vietnamese, English,
+  Bengali; right-to-left ones are still left out), then English. `<html lang>`, `og:locale`
+  (`en_US`, `vi_VN`, `bn_BD`) and dates follow it. The statically built pages (about,
+  contact, 404 …) are built in English and switch to the reader's interface in the browser.
+- **Translations:** until the reader chooses (no `hadith_tr` cookie, no `?tr=`), English is
+  shown under any other content language. The translations panel lists every language.
+- **Home page:** "Hadith in all languages" and a directory of every language, linking to
+  `/?lang=xx`.
+- **Brand:** `public/img/logo_ac.png` and `logo_ac_dark.png` (rebuilt by
+  `python3 scripts/logo-ac.py`), the teal-blue-indigo ribbon, and `s_logo_ac.png` as the
+  share image.
+
+Pages depend on the request's `Accept-Language` and cookies, so the site sends
+`Vary: Accept-Language, Cookie`. Do not cache its HTML in nginx or a CDN (the configuration
+below caches only `/_next/static/`).
+
+Build and run it like a country (sections 3 to 5), e.g. on port 3104:
+
+```bash
+NEXT_PUBLIC_COUNTRY_CODE=ac NEXT_PUBLIC_SITE_URL=https://hadith.ac \
+NEXT_PUBLIC_API_BASE_URL=https://api.alquranarabia.com/api npm run build
+npm start -- -p 3104 -H 127.0.0.1
+```
+
+To try it locally, next to the vn dev server, from a git worktree (two dev servers cannot share
+one `.next`):
+
+```bash
+git worktree add --detach ../hadith-ac HEAD && ln -s "$PWD/node_modules" ../hadith-ac/node_modules
+cd ../hadith-ac && NEXT_PUBLIC_COUNTRY_CODE=ac NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3002 \
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8090/api npx next dev -p 3002 -H 127.0.0.1
+```
+
 `next build` stops with an explanation, before compiling anything, when:
 
 - `NEXT_PUBLIC_COUNTRY_CODE` is missing or not a key of `config/countries.json`, or that
-  entry lacks `name`, `localization`, `language`, `ui` or `ogLocale`;
+  entry lacks `name`, `localization` (not for an international entry), `language`, `ui` or
+  `ogLocale`, or has an `accent` that is not a list of `#rrggbb` colours;
 - `NEXT_PUBLIC_SITE_URL` is missing, not an absolute http(s) URL, has a path, or points
   at localhost, 127.0.0.1, 0.0.0.0 or ::1 (http works but triggers a warning);
 - `NEXT_PUBLIC_API_BASE_URL` is missing, not https, or local;
@@ -344,6 +392,7 @@ Each country gets its own directory, build, port, service and nginx server block
 | vn | hadith.vn | 3101 | /srv/hadith/vn | hadith@vn |
 | bd | bd.hadith.example | 3102 | /srv/hadith/bd | hadith@bd |
 | usa | en.hadith.example | 3103 | /srv/hadith/usa | hadith@usa |
+| ac | hadith.ac | 3104 | /srv/hadith/ac | hadith@ac |
 
 - Give each country its own domain or subdomain. The site must be at the root of its
   domain: it has no base path.
@@ -363,20 +412,27 @@ browsers; set `PLAYWRIGHT_CORE` to the installed package.
       API reachable: it serves the site once per country (on port 3001, from a temporary
       worktree) and checks the interface language, og:locale, site name, book names,
       category titles and the translations shown against the API. "0 failed check(s)".
+      For `ac` it checks readers whose browsers ask for en-US, bn-BD, vi-VN, fr-FR and ur-PK
+      instead (content and interface languages, `<html lang>`, the English shown beside other
+      languages, the language directory against `/hadith/languages`), then the globe menu,
+      `?lang=`, the cookies and a directory link.
 - [ ] The interface catalog has been reviewed by a native speaker. `lib/locales/bn.js`
-      was drafted by an AI and needs this before the bd launch.
-- [ ] End-to-end suite: `BASE=<vn site> BASE_BD=<bd site> PLAYWRIGHT_CORE=… npm run test:e2e`.
-      All tests pass. The Vietnamese suite runs against a vn site; `scripts/e2e/country.js`
-      runs against `BASE_BD`.
+      was drafted by an AI and needs this before the bd launch, and before ac (which offers
+      the Bengali interface) too.
+- [ ] End-to-end suite: `BASE=<vn site> BASE_BD=<bd site> BASE_AC=<ac site> PLAYWRIGHT_CORE=…
+      npm run test:e2e`. All tests pass. The Vietnamese suite runs against a vn site;
+      `scripts/e2e/country.js` runs against `BASE_BD` and `scripts/e2e/international.js`
+      against `BASE_AC` (each is skipped when its variable is not set).
 - [ ] Responsive audit of the main pages, Chromium at every viewport and WebKit at phone and
       tablet sizes: `BASE=<site> node scripts/responsive-audit/audit.js <out> --engine=chromium`,
       then `python3 scripts/responsive-audit/summarize.py <out>/results-chromium.json`.
-      No horizontal overflow.
+      No horizontal overflow. For ac, also with the browser in another language and the globe
+      menu open: `--locale=bn-BD --click='button[data-interface]'`.
 - [ ] `https://<domain>/robots.txt` names `https://<domain>/sitemap.xml`. The sitemap lists
       `https://<domain>/…` URLs. Submit it in Google Search Console.
 - [ ] `curl -sI https://<domain>/` shows HSTS and the other headers, with no `X-Powered-By`.
       `/_next/image` answers 403, and an unknown URL answers 404 with the site's page.
 - [ ] Titles end in the right site name. `og:locale` is the country's (e.g. `bn_BD`), and
-      `<html lang>` is the interface language.
+      `<html lang>` is the interface language (on ac, the reader's: `en_US`, `vi_VN`, `bn_BD`).
 - [ ] The contact address (`NEXT_PUBLIC_CONTACT_EMAIL` or the country's `contactEmail`) is
       read by someone.
