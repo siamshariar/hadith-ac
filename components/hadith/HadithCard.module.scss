@@ -94,6 +94,11 @@
   font-weight: 500;
   line-height: 1.45;
 
+  // a block, so even a one-line title is a 24px+ tap target
+  a {
+    display: block;
+  }
+
   a:hover,
   a:focus-visible {
     color: var(--main-color);

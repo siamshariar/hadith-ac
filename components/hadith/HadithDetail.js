@@ -51,15 +51,17 @@ function AlsoIn({ related, keepLang }) {
   );
 }
 
-// True once `ref`'s element has scrolled above the viewport.
+// True once `ref`'s element has scrolled up under the header and reader bar.
+const COVERED = 100;
 function useScrolledPast(ref) {
   const [past, setPast] = useState(false);
   useEffect(() => {
     const element = ref.current;
     if (!element || typeof IntersectionObserver === "undefined") return undefined;
-    const observer = new IntersectionObserver(([entry]) => {
-      setPast(!entry.isIntersecting && entry.boundingClientRect.top < 0);
-    });
+    const observer = new IntersectionObserver(
+      ([entry]) => setPast(!entry.isIntersecting && entry.boundingClientRect.top < COVERED),
+      { rootMargin: `-${COVERED}px 0px 0px 0px` }
+    );
     observer.observe(element);
     return () => observer.disconnect();
   }, [ref]);
