@@ -45,10 +45,10 @@ export default function HadithPage({ hadith, translations, error }) {
   if (chapter && !isCategoryBook(book)) {
     crumbs.push({
       href: chapterPath(book.slug, chapter.chapterNo),
-      label: chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapter.chapterNo}`,
+      label: chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : t("chapterNumber", { number: chapter.chapterNo }),
     });
   }
-  crumbs.push({ label: hadith.referenceNumber ? `${t("hadith")} ${lettered(hadith.referenceNumber)}` : t("hadith") });
+  crumbs.push({ label: hadith.referenceNumber ? t("hadithNumbered", { number: lettered(hadith.referenceNumber) }) : t("hadith") });
 
   // Described by its own translation (the page language, else English).
   // HadeethEnc's linked translation is another text, so it is only used,

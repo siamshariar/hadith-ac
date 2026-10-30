@@ -41,7 +41,7 @@ const capitalize = (text) => (text ? text.charAt(0).toLocaleUpperCase() + text.s
 // full-height sheet.
 export default function LanguageMenu({ variant = "desktop", className = "" }) {
   const router = useRouter();
-  const { t, ui, lang, languageInfo, languageName, formatNumber, setLanguage } = useLocale();
+  const { t, ui, lang, languageInfo, languageName, setLanguage } = useLocale();
   const [anchor, setAnchor] = useState(null);
   const [query, setQuery] = useState("");
   // Phones: the current language gets the focus, and stays in view, until the reader types
@@ -139,7 +139,7 @@ export default function LanguageMenu({ variant = "desktop", className = "" }) {
               const current = language.code === lang;
               const native = language.nativeName || language.name;
               const named = interfaceName(language);
-              const count = formatNumber(language.totalTranslated || 0);
+              const count = language.totalTranslated || 0;
               return (
                 <MenuItem
                   key={language.code}

@@ -57,7 +57,7 @@ export default function SettingsContent() {
 // site that knows no preference yet shows the browser's language, the one its pages pick
 // (lib/language.js).
 const Language = () => {
-  const { t, preferredLang, setLanguage, formatNumber } = useLocale();
+  const { t, preferredLang, setLanguage } = useLocale();
   const { data, error, loading, retry } = useApi("languages", () => getLanguages());
   const [saved, setSaved] = useState(null);
   useEffect(() => {
@@ -93,7 +93,7 @@ const Language = () => {
             aria-label={t("language")}
           >
             {languages.map((language) => {
-              const count = formatNumber(language.totalTranslated);
+              const count = language.totalTranslated || 0;
               return (
                 <option key={language.code} value={language.code}>
                   {language.nativeName}

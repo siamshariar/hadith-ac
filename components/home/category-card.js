@@ -20,7 +20,7 @@ export default function CategoryCard({ category, index }) {
         <span className={styles.left}>
           <bdi className={styles.name}>{category.title}</bdi>
           <span className={styles.count}>
-            {formatNumber(category.totalHadith)} {t("hadiths")}
+            {t("hadithCount", { count: category.totalHadith })}
             {showTranslated && (
               <>
                 {" · "}
@@ -49,7 +49,7 @@ export default function CategoryCard({ category, index }) {
                   total: formatNumber(child.totalHadith),
                   language,
                 })
-              : `${formatNumber(child.totalHadith)} ${t("hadiths")}`;
+              : t("hadithCount", { count: child.totalHadith });
             return (
               <li key={child.id}>
                 <Link href={categoryPath(child)} className={`${styles.child} ${muted ? styles.muted : ""}`} title={countLabel}>

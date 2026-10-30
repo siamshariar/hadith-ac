@@ -9,8 +9,8 @@ import styles from "./book-card.module.scss";
 export default function BookCard({ book, showTranslation = false }) {
   const { t, lang, formatNumber, languageName } = useLocale();
 
-  const counts = [`${formatNumber(book.totalHadith)} ${t("hadiths")}`];
-  if (book.totalChapter > 1) counts.push(`${formatNumber(book.totalChapter)} ${t("chapters")}`);
+  const counts = [t("hadithCount", { count: book.totalHadith })];
+  if (book.totalChapter > 1) counts.push(t("chapterCount", { count: book.totalChapter }));
 
   // Own translations and linked HadeethEnc translations are counted apart:
   // a book with only linked ones is not "translated".

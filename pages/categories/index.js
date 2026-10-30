@@ -32,7 +32,7 @@ export default function Categories({ categories, total, error }) {
           {total > 0 && (
             <p className={styles.meta}>
               <span>
-                {formatNumber(total)} {t("categories").toLowerCase()}
+                {t("categoryCount", { count: total })}
               </span>
             </p>
           )}

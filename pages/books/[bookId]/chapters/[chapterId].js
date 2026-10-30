@@ -15,7 +15,7 @@ import ReaderBar, { barStyles } from "../../../../components/hadith/ReaderBar";
 import styles from "../../../../components/content/Page.module.scss";
 
 const chapterLabel = (chapter, t) =>
-  chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapter.chapterNo}`;
+  chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : t("chapterNumber", { number: chapter.chapterNo });
 
 // The book's chapters in a select, like quran.com's surah switcher.
 function ChapterSwitcher({ book, chapter, chapters, query }) {
@@ -125,7 +125,7 @@ export default function Chapter({ data, chapters, neighbours, onlyReadable, read
           )}
           <p className={styles.meta}>
             <span>
-              {formatNumber(chapter.totalHadith)} {t("hadiths")}
+              {t("hadithCount", { count: chapter.totalHadith })}
             </span>
             {pagination.lastPage > 1 && (
               <span>

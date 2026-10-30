@@ -211,7 +211,7 @@ export default function HadithDetail({ hadith, translations }) {
   const chapterText = showChapter
     ? chapter.chapterNo === UNASSIGNED_CHAPTER
       ? t("unassignedChapter")
-      : `${t("chapter")} ${chapter.chapterNo}: ${chapter.name}`
+      : t("chapterNumberName", { number: chapter.chapterNo, name: chapter.name })
     : null;
   // HadeethEnc is browsed by category: its first one stands for the chapter.
   const category = categoryBook && hadith.categories && hadith.categories[0];
