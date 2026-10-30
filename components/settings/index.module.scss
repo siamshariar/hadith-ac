@@ -299,6 +299,9 @@
 
 .language_select {
   width: 100%;
+  // Safari lets the long option text add to the page width (sideways
+  // scrolling on narrow phones); keep it inside the box
+  contain: paint;
   padding: 10px 12px;
   border: 1px solid var(--bdr13);
   border-radius: 6px;
