@@ -2,11 +2,17 @@
   "name": "hadith-vn",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check:sites": "node scripts/check-sites.mjs",
+    "i18n:missing": "node scripts/i18n-missing.mjs",
+    "test:e2e": "node --test scripts/e2e/"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
