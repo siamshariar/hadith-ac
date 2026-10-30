@@ -6,6 +6,8 @@
 //     country's content language
 //   - content: the language the home page asked the API for, book names, category titles,
 //     and the translation shown on Bukhari 1 and HadeethEnc 4560 (own, linked or fallback)
+//   - no source names: no page says HadeethEnc, Fawaz, hadith-api or an edition code, except
+//     HadeethEnc's source line, which reads the interface's sourceLine
 //   - no console errors
 // The international edition (ac, "international": true) has no country to compare with:
 // it is checked for readers whose browsers ask for en-US, bn-BD, vi-VN, fr-FR and ur-PK
@@ -54,6 +56,36 @@ const api = async (p) => {
 };
 const norm = (s) => String(s || "").replace(/\s+/g, " ").trim();
 // A stretch from the middle of a text: the start may be restyled ("Narrated X:" on its own line)
+// What a page names of the data sources, HadeethEnc's source line (data-source-line) aside;
+// that line must read the interface's sourceLine. Edition codes come from /hadith/editions.
+const SOURCE_NAMES = /hadeeth\s*enc|fawaz|hadith-api|jsdelivr|↗/i;
+let editionCodes = [];
+async function sourceNames(page) {
+  const ui = (await page.getAttribute("html", "lang")) || "en";
+  const line = i18n.translate(ui, "sourceLine", { source: "HadeethEnc.com" });
+  return page.evaluate(
+    ({ pattern, codes, line }) => {
+      const bad = new RegExp(pattern, "i");
+      const code = codes.length ? new RegExp(`(^|[^a-z0-9-])(${codes.join("|")})(?![a-z0-9-])`, "i") : null;
+      const found = [];
+      document.querySelectorAll("[data-source-line]").forEach((el) => {
+        if (el.textContent.trim() !== line) found.push(`source line "${el.textContent.trim()}"`);
+      });
+      const body = document.body.cloneNode(true);
+      body.querySelectorAll("[data-source-line], script, style, noscript").forEach((el) => el.remove());
+      const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const text = node.textContent.replace(/\s+/g, " ").trim();
+        if (text && (bad.test(text) || (code && code.test(text)))) found.push(text.slice(0, 80));
+      }
+      if (bad.test(document.title)) found.push(`title: ${document.title}`);
+      return found;
+    },
+    { pattern: SOURCE_NAMES.source, codes: editionCodes, line }
+  );
+}
+const namedCheck = (named) => [!named.size, named.size ? `${named.size}: ${[...named].slice(0, 3).join(" | ")}` : "none (HadeethEnc's source line aside)"];
+
 const snippet = (s) => {
   const t = norm(s);
   return t.length > 100 ? t.slice(40, 100) : t;
@@ -106,9 +138,11 @@ async function checkCountry(browser, code, languages) {
   const errors = [];
   page.on("console", (m) => m.type() === "error" && errors.push(m.text().slice(0, 160)));
   page.on("pageerror", (e) => errors.push(String(e).slice(0, 160)));
+  const named = new Set();
   const open = async (p) => {
     const res = await page.goto(BASE + p, { waitUntil: "networkidle", timeout: 120000 });
     if (!res || res.status() !== 200) throw new Error(`${p}: HTTP ${res && res.status()}`);
+    (await sourceNames(page)).forEach((text) => named.add(`${p}: ${text}`));
     return norm(await page.innerText("body"));
   };
 
@@ -168,6 +202,7 @@ async function checkCountry(browser, code, languages) {
     if (d.title) check(`${p} title`, text.includes(norm(d.title).slice(0, 50)), norm(d.title).slice(0, 40));
   }
 
+  check("no source names", ...namedCheck(named));
   check("no console errors", !errors.length, errors.slice(0, 2).join(" / "));
   await context.close();
   return results;
@@ -201,8 +236,10 @@ async function checkInternational(browser, code, languages) {
     .map((l) => l.code);
   const contexts = [];
 
-  // a browser context for one reader; console errors fail the "no console errors" check
+  // a browser context for one reader; console errors fail the "no console errors" check, and
+  // source names the "no source names" one
   const errors = [];
+  const named = new Set();
   async function reader(locale, { cookies = [], viewport } = {}) {
     const context = await browser.newContext({ locale, ...(viewport ? { viewport } : {}) });
     contexts.push(context);
@@ -213,6 +250,7 @@ async function checkInternational(browser, code, languages) {
     const open = async (p) => {
       const res = await page.goto(BASE + p, { waitUntil: "networkidle", timeout: 120000 });
       if (!res || res.status() !== 200) throw new Error(`${p}: HTTP ${res && res.status()}`);
+      (await sourceNames(page)).forEach((text) => named.add(`${locale} ${p}: ${text}`));
       return norm(await page.innerText("body"));
     };
     const props = async () => JSON.parse(await page.textContent("#__NEXT_DATA__")).props.pageProps;
@@ -366,6 +404,7 @@ async function checkInternational(browser, code, languages) {
     for (const context of contexts) await context.close().catch(() => {});
   }
 
+  check("no source names", ...namedCheck(named));
   check("no console errors", !errors.length, errors.slice(0, 2).join(" / ") || `${contexts.length} browser contexts`);
   return results;
 }
@@ -377,6 +416,7 @@ async function main() {
     process.exit(2);
   }
   const languages = await api("/hadith/languages");
+  editionCodes = (await api("/hadith/editions")).map((edition) => edition.code.replace(/[^a-z0-9-]/gi, ""));
   execFileSync("git", ["-C", root, "worktree", "add", "--detach", WORKTREE, "HEAD"], { stdio: "ignore" });
   fs.symlinkSync(path.join(root, "node_modules"), path.join(WORKTREE, "node_modules"));
   const browser = await pw.chromium.launch();
