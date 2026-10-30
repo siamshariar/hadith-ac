@@ -25,15 +25,22 @@ import HadithCard, { HadithList } from "../components/hadith/HadithCard";
 import { HighlightProvider } from "../components/hadith/Highlight";
 import { GoToHadith } from "../components/home/search";
 import SearchIcon from "../components/icons/Search";
+import TuneIcon from "../components/icons/Tune";
 import styles from "../components/content/Page.module.scss";
 import searchStyles from "../components/home/search.module.scss";
 
 // One GET form: text, collection and language. Changing a filter re-runs
-// the search; everything lives in the URL.
-function SearchForm({ query, book, books, languages }) {
+// the search; everything lives in the URL. On phones the filters (and "go
+// to hadith" once there are results) fold into a "Bộ lọc" panel so the
+// results start on the first screen; from 768px the panel is always open.
+// The selects sit outside the <form> element (form="search-form") so the
+// panel can also hold the separate go-to form.
+function SearchForm({ query, book, books, languages, goTo }) {
   const router = useRouter();
-  const { t, lang } = useLocale();
+  const { t, lang, formatNumber } = useLocale();
   const [value, setValue] = useState(query);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const active = (book ? 1 : 0) + (router.query.lang ? 1 : 0);
 
   const go = (overrides = {}) => {
     const q = (overrides.q ?? value).trim();
@@ -47,62 +54,93 @@ function SearchForm({ query, book, books, languages }) {
   };
 
   return (
-    <form
-      action="/search"
-      method="get"
-      role="search"
-      className={styles.searchForm}
-      onSubmit={(event) => {
-        event.preventDefault();
-        go();
-      }}
-    >
-      <div className={searchStyles.search}>
-        <span className={searchStyles.icon} aria-hidden="true">
-          <SearchIcon />
-        </span>
-        <input
-          type="search"
-          name="q"
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          placeholder={t("searchPlaceholderLong")}
-          aria-label={t("search")}
-          minLength={MIN_SEARCH_LENGTH}
-          autoComplete="off"
-          enterKeyHint="search"
-        />
-        <button type="submit">{t("searchButton")}</button>
+    <div className={styles.searchForm}>
+      <form
+        id="search-form"
+        action="/search"
+        method="get"
+        role="search"
+        onSubmit={(event) => {
+          event.preventDefault();
+          go();
+        }}
+      >
+        <div className={searchStyles.search}>
+          <span className={searchStyles.icon} aria-hidden="true">
+            <SearchIcon />
+          </span>
+          <input
+            type="search"
+            name="q"
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            placeholder={t("searchPlaceholderLong")}
+            aria-label={t("search")}
+            minLength={MIN_SEARCH_LENGTH}
+            autoComplete="off"
+            enterKeyHint="search"
+          />
+          <button type="submit">{t("searchButton")}</button>
+        </div>
+      </form>
+
+      <button
+        type="button"
+        className={searchStyles.filterToggle}
+        aria-expanded={filtersOpen ? "true" : "false"}
+        aria-controls="search-filters"
+        onClick={() => setFiltersOpen((open) => !open)}
+      >
+        <TuneIcon />
+        <span>{t("filters")}</span>
+        {active > 0 && <span className={searchStyles.filterCount}>{formatNumber(active)}</span>}
+        <span className={searchStyles.filterChevron} aria-hidden="true" />
+      </button>
+
+      <div id="search-filters" className={`${searchStyles.filterPanel} ${filtersOpen ? searchStyles.filterPanelOpen : ""}`}>
+        <div className={styles.filters}>
+          {books.length > 0 && (
+            <label className={styles.filter}>
+              <span>{t("books")}</span>
+              <select
+                name="book"
+                form="search-form"
+                value={book}
+                onChange={(event) => go({ book: event.target.value })}
+                className={styles.select}
+              >
+                <option value="">{t("searchAllBooks")}</option>
+                {books.map((item) => (
+                  <option key={item.slug} value={item.slug}>
+                    {shortBookName(item)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {languages.length > 0 && (
+            <label className={styles.filter}>
+              <span>{t("searchLanguage")}</span>
+              <select
+                name="lang"
+                form="search-form"
+                value={lang}
+                onChange={(event) => go({ lang: event.target.value })}
+                className={styles.select}
+              >
+                {languages.map((language) => (
+                  <option key={language.code} value={language.code}>
+                    {language.nativeName}
+                    {language.nativeName !== language.name ? ` (${language.name})` : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
+        {goTo}
       </div>
-      <div className={styles.filters}>
-        {books.length > 0 && (
-          <label className={styles.filter}>
-            <span>{t("books")}</span>
-            <select name="book" value={book} onChange={(event) => go({ book: event.target.value })} className={styles.select}>
-              <option value="">{t("searchAllBooks")}</option>
-              {books.map((item) => (
-                <option key={item.slug} value={item.slug}>
-                  {shortBookName(item)}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        {languages.length > 0 && (
-          <label className={styles.filter}>
-            <span>{t("searchLanguage")}</span>
-            <select name="lang" value={lang} onChange={(event) => go({ lang: event.target.value })} className={styles.select}>
-              {languages.map((language) => (
-                <option key={language.code} value={language.code}>
-                  {language.nativeName}
-                  {language.nativeName !== language.name ? ` (${language.name})` : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-      </div>
-    </form>
+    </div>
   );
 }
 
@@ -124,6 +162,15 @@ export default function Search({ query, book, results, books, languages, notFoun
     totalHadiths > 0 &&
     languageInfo.totalTranslated < totalHadiths;
 
+  // "Hiển thị 21–40 trong 252 kết quả"
+  const shown =
+    results && results.hadiths.length > 0
+      ? {
+          from: (results.pagination.page - 1) * results.pagination.perPage + 1,
+          to: (results.pagination.page - 1) * results.pagination.perPage + results.hadiths.length,
+        }
+      : null;
+
   // Keep the query, book filter and any ?lang= override across pages.
   const baseQuery = { q: query, book: book || undefined, lang: router.query.lang || undefined };
 
@@ -131,7 +178,7 @@ export default function Search({ query, book, results, books, languages, notFoun
     <>
       <Meta
         title={query ? `${t("search")}: ${query}` : t("search")}
-        description="Search hadiths by translation or Arabic text."
+        description={t("searchTips")}
         url={`${server}/search`}
         image={`${server}/img/s_logo.png`}
         type="website"
@@ -150,11 +197,14 @@ export default function Search({ query, book, results, books, languages, notFoun
           book={book || ""}
           books={bookList}
           languages={languages || []}
+          goTo={query ? <GoToHadith /> : null}
         />
 
-        <div className={styles.goRow}>
-          <GoToHadith />
-        </div>
+        {!query && (
+          <div className={styles.goRow}>
+            <GoToHadith />
+          </div>
+        )}
 
         {notFound && (
           <p className={`${styles.notice} ${styles.warning}`} role="status">
@@ -172,12 +222,25 @@ export default function Search({ query, book, results, books, languages, notFoun
 
         {results && (
           <section aria-labelledby="search-results" aria-busy={loading ? "true" : undefined}>
-            <div className={styles.sectionHead}>
-              <h2 id="search-results" className={styles.sectionTitle} aria-live="polite">
-                {results.pagination.total > 0
-                  ? t("searchResults", { count: formatNumber(results.pagination.total), query })
-                  : t("searchNoResults", { query })}
-              </h2>
+            {/* Heading and "Hiển thị 1–20 trong 252 kết quả", announced
+                after each search or page change. */}
+            <div aria-live="polite">
+              <div className={styles.sectionHead}>
+                <h2 id="search-results" className={styles.sectionTitle}>
+                  {results.pagination.total > 0 ? t("searchResultsFor", { query }) : t("searchNoResults", { query })}
+                </h2>
+              </div>
+              {results.pagination.total > 0 && (
+                <p className={searchStyles.resultCount}>
+                  {shown
+                    ? t("searchShowing", {
+                        from: formatNumber(shown.from),
+                        to: formatNumber(shown.to),
+                        total: formatNumber(results.pagination.total),
+                      })
+                    : t("searchResults", { count: formatNumber(results.pagination.total), query })}
+                </p>
+              )}
             </div>
 
             <p className={`${styles.meta} ${styles.searchedIn}`}>
@@ -212,7 +275,9 @@ export default function Search({ query, book, results, books, languages, notFoun
                 <HadithList
                   hadiths={results.hadiths}
                   loading={loading}
-                  renderCard={(hadith) => <HadithCard key={hadith.id} hadith={hadith} book={bookMap[hadith.bookSlug]} />}
+                  renderCard={(hadith) => (
+                    <HadithCard key={hadith.id} hadith={hadith} book={bookMap[hadith.bookSlug]} showContext />
+                  )}
                 />
               </HighlightProvider>
             )}

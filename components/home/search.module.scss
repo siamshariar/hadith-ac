@@ -138,3 +138,88 @@
   flex-basis: 180px;
   max-width: 260px;
 }
+
+// Search page: "Bộ lọc" toggle and panel. Phones start folded; from 768px
+// the panel is always open and the toggle goes away.
+.filterToggle {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--bdr13);
+  border-radius: 22px;
+  background: var(--bg11);
+  color: var(--txt11);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--txt12);
+  }
+
+  &[aria-expanded="true"] .filterChevron {
+    transform: rotate(-135deg);
+    margin-top: 4px;
+  }
+}
+
+.filterCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--theme-color);
+  color: #fff;
+  font-size: var(--text-xs);
+}
+
+.filterChevron {
+  width: 7px;
+  height: 7px;
+  margin-top: -3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.filterPanel {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filterPanelOpen {
+  display: flex;
+}
+
+// 44px selects on touch screens
+.filterPanel select {
+  min-height: 44px;
+}
+
+@media only screen and (min-width: 768px) {
+  .filterToggle {
+    display: none;
+  }
+  .filterPanel {
+    display: flex;
+  }
+}
+
+// "Hiển thị 1–20 trong 252 kết quả"
+.resultCount {
+  margin-bottom: 4px;
+  color: var(--txt11);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
