@@ -39,8 +39,9 @@ The country decides:
 - the default content language (the reader can pick another; the cookie `hadith_lang`
   and `?lang=` override it);
 - the interface language, which is the same for every reader of that site;
-- `<html lang>`, `og:locale`, and the default site name, logo, ribbon colours (`accent`) and
-  contact email.
+- `<html lang>`, `og:locale`, and the default site name, logo, accent colours (`accent`) and
+  contact email. The accent belongs to the logo: the interface draws it only under the
+  wordmark of an edition without a logo (docs/hadith-design-system.md).
 
 The international edition (`ac`) is the exception: there both languages follow the reader
 (section 2.1).
@@ -72,7 +73,7 @@ database has no `ac` localization or country, and the site does not need one.
 - **Home page:** "Hadith in all languages" and a directory of every language, linking to
   `/?lang=xx`.
 - **Brand:** `public/img/logo_ac.png` and `logo_ac_dark.png` (rebuilt by
-  `python3 scripts/logo-ac.py`), the teal-blue-indigo ribbon, and `s_logo_ac.png` as the
+  `python3 scripts/logo-ac.py`) in its teal-blue-indigo accent, and `s_logo_ac.png` as the
   share image.
 
 Pages depend on the request's `Accept-Language` and cookies, so the site sends
