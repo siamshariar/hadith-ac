@@ -173,7 +173,8 @@ module.exports = spec(module, 'language menu', (h) => {
       // the static 404 page switches to Bengali in the browser
       await h.goto(page, '/no-such-page');
       await waitForH1(page, bn('notFoundTitle'));
-      assert.equal(await htmlLang(page), 'bn');
+      // <html lang> follows in an effect right after that render (LocaleContext)
+      await until(async () => (await htmlLang(page)) === 'bn', '<html lang> in Bengali');
 
       // a language without a catalog: the Vietnamese interface, on purpose, and the menu says so
       await h.goto(page, `/books/${BUKHARI}`);
