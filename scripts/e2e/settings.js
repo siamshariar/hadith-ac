@@ -264,8 +264,9 @@ module.exports = spec(module, 'settings', (h) => {
     const tr = await interfaceStrings('en');
     const { page, context } = await h.open(t, '/settings');
     const select = page.getByRole('combobox', { name: 'Ngôn ngữ' });
-    // every language of the API, Arabic (the original) included
-    assert.equal(await select.locator('option').count(), (await api('/languages')).length);
+    // every language of the API, Arabic (the original) included; the list loads in the browser
+    const total = (await api('/languages')).length;
+    await until(async () => (await select.locator('option').count()) === total, `the ${total} languages listed`);
     await select.selectOption('en');
     await until(async () => (await context.cookies()).some((c) => c.name === 'hadith_lang' && c.value === 'en'), 'cookie saved');
     // the settings page itself, at once

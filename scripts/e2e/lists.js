@@ -3,7 +3,7 @@
 // lists (language chips, subcategories, pagination) and the category tree.
 'use strict';
 
-const { BREADCRUMB_NAV, api, assert, loc, norm, spec, until, waitForH1, waitForText, viNumber } = require('./harness');
+const { BREADCRUMB_NAV, api, assert, loc, norm, readableCategories, spec, until, waitForH1, waitForText, viNumber } = require('./harness');
 
 const cardIds = (page) =>
   page.locator('article[id^="hadith-"]').evaluateAll((cards) => cards.map((card) => Number(card.id.replace('hadith-', ''))));
@@ -238,14 +238,16 @@ module.exports = spec(module, 'lists', (h) => {
   });
 
   h.test('category tree page: top-level categories with their children and counts', async (t) => {
-    const [home, all] = await Promise.all([api(`/home${loc()}`), api(`/categories${loc()}`)]);
+    const [home, every] = await Promise.all([api(`/home${loc()}`), api(`/categories${loc()}`)]);
+    // the lists leave out the categories with nothing to read in Vietnamese
+    const all = readableCategories(every, 'vi');
     const { page } = await h.open(t, '/categories');
     await waitForH1(page, 'Danh mục');
     assert.deepEqual(await metaLine(page), [`${viNumber(all.length)} danh mục`]);
     const top = all.filter((c) => c.parentId == null);
     const heads = await page.locator('main ol > li > div > a').evaluateAll((links) => links.map((a) => a.getAttribute('href')));
     assert.deepEqual(heads, top.map((c) => `/categories/${c.slug}`), 'top-level categories in order');
-    for (const parent of home.categories) {
+    for (const parent of home.categories.filter((c) => all.some((a) => a.id === c.id))) {
       const list = page.getByRole('list', { name: `Danh mục con: ${parent.title}` });
       // the count as shown ("6/76"); the visually hidden sentence after it is for screen readers
       const children = await list.locator('a').evaluateAll((links) => links.map((a) => [decodeURIComponent(a.getAttribute('href')), a.querySelector('span[aria-hidden="true"]').textContent.trim()]));

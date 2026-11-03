@@ -7,14 +7,16 @@
 const {
   api,
   assert,
+  bookName,
   cleanText,
+  interfaceStrings,
   lettered,
   loc,
   meta,
   readClipboard,
   sleep,
-  stored,
   spec,
+  stored,
   translatorOf,
   until,
   waitForH1,
@@ -31,10 +33,10 @@ const BUKHARI = 'sahih-al-bukhari';
 const SOURCE_LINE = 'Nguồn: HadeethEnc.com';
 const label = (text, entry) => [text, translatorOf(entry.author, entry.edition)].filter(Boolean).join(' · ');
 
-function expectedCitation(hadith, permalink, site) {
+function expectedCitation(hadith, permalink, site, name = hadith.book.name) {
   const book = hadith.book;
   const topic = book.source === 'hadeethenc';
-  const lines = [`${book.name} ${lettered(hadith.referenceNumber)}`];
+  const lines = [`${name} ${lettered(hadith.referenceNumber)}`];
   if (!topic && hadith.inBookReference) {
     lines.push(`Vị trí trong sách: Chương ${hadith.inBookReference.chapterNo}, Hadith ${hadith.inBookReference.position}`);
   }
@@ -50,10 +52,10 @@ function expectedCitation(hadith, permalink, site) {
   return lines.join('\n');
 }
 
-function expectedText(hadith, permalink) {
+function expectedText(hadith, permalink, name = hadith.book.name) {
   const book = hadith.book;
   const topic = book.source === 'hadeethenc';
-  const parts = [`${book.name} ${lettered(hadith.referenceNumber)}`];
+  const parts = [`${name} ${lettered(hadith.referenceNumber)}`];
   if (hadith.title) parts.push(cleanText(hadith.title));
   parts.push(`[Nguyên văn tiếng Ả Rập]\n${cleanText(hadith.arabic)}`);
   const own = hadith.translation;
@@ -94,16 +96,18 @@ module.exports = spec(module, 'hadith actions', (h) => {
       const henc = await api(`/hadiths/${cases[1].linkedTranslation.hadithId}${loc()}`);
       cases.push(henc);
       const { page } = await h.open(t, null);
+      const vi = await interfaceStrings('vi');
       for (const hadith of cases) {
+        const name = bookName('vi', hadith.book, vi); // the topic collection: by the interface
         const citable = `/books/${hadith.book.slug}/hadiths/${lettered(hadith.referenceNumber)}`;
         await h.goto(page, citable);
         const { canonical } = await meta(page);
         const site = canonical.slice(0, canonical.length - citable.length);
         assert.equal(canonical, `${site}${citable}`, 'canonical is the citable URL');
         const header = page.locator('article > header');
-        assert.equal(await copyFrom(page, header, 'Copy tất cả'), expectedText(hadith, canonical), `${citable}: copied text`);
+        assert.equal(await copyFrom(page, header, 'Copy tất cả'), expectedText(hadith, canonical, name), `${citable}: copied text`);
         await sleep(300);
-        assert.equal(await copyFrom(page, header, 'Copy trích dẫn'), expectedCitation(hadith, canonical, site), `${citable}: copied citation`);
+        assert.equal(await copyFrom(page, header, 'Copy trích dẫn'), expectedCitation(hadith, canonical, site, name), `${citable}: copied citation`);
         await sleep(300);
         assert.equal(await copyFrom(page, header, 'Copy liên kết'), canonical, `${citable}: copied link`);
       }

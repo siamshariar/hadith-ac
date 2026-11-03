@@ -4,7 +4,7 @@
 // shown against the API.
 'use strict';
 
-const { BASE, BREADCRUMB_NAV, api, assert, cleanText, interfaceStrings, lettered, loc, meta, norm, spec, until, waitForH1, waitForText } = require('./harness');
+const { BASE, BREADCRUMB_NAV, api, assert, bookName, cleanText, interfaceStrings, lettered, loc, meta, norm, spec, until, waitForH1, waitForText } = require('./harness');
 
 // Translations are compared without whitespace: the English narrator line
 // ("Narrated 'Umar:") is set on its own line, which adds or removes a space
@@ -116,7 +116,9 @@ module.exports = spec(module, 'hadith page', (h) => {
       await h.waitForPath(page, (url) => url.pathname === `/books/${BUKHARI}/hadiths/3`, 'related hadith');
       await waitForH1(page, 'Sahih al-Bukhari 3');
 
-      const back = page.locator('p[class*="alsoIn"]').getByRole('link', { name: `${henc.book.name} ${henc.referenceNumber}` });
+      // the topic collection is named by the interface, never by its source
+      const vi = await interfaceStrings('vi');
+      const back = page.locator('p[class*="alsoIn"]').getByRole('link', { name: `${bookName('vi', henc.book, vi)} ${henc.referenceNumber}` });
       assert.equal(await back.getAttribute('href'), `/books/hadeethenc/hadiths/${henc.referenceNumber}`);
       await back.click();
       await h.waitForPath(page, (url) => url.pathname === `/books/hadeethenc/hadiths/${henc.referenceNumber}`, 'back to the topic collection');

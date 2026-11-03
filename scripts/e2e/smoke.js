@@ -3,7 +3,7 @@
 // collection -> chapter -> hadith and back up through the breadcrumbs.
 'use strict';
 
-const { BREADCRUMB_NAV, api, assert, breadcrumbs, cleanText, lettered, loc, meta, norm, spec, waitForH1, viNumber } = require('./harness');
+const { BREADCRUMB_NAV, api, assert, bookName, breadcrumbs, cleanText, interfaceStrings, lettered, loc, meta, norm, spec, waitForH1, viNumber } = require('./harness');
 
 const SITE = 'Hadith tiếng Việt | Hadith.vn';
 
@@ -17,6 +17,7 @@ async function pages() {
   ]);
   const henc = await api(`/hadiths/${bukhari3.linkedTranslation.hadithId}${loc()}`);
   const hencTitle = cleanText(henc.title);
+  const vi = await interfaceStrings('vi');
   return [
     ['/', 'Hadith tiếng Việt', 'Trang chủ'],
     ['/books', 'Bộ sưu tập hadith', 'Bộ sưu tập hadith'],
@@ -25,7 +26,7 @@ async function pages() {
     [`/books/${bukhari.slug}/hadiths/1`, 'Sahih al-Bukhari 1', 'Sahih al-Bukhari 1'],
     ['/books/sahih-muslim/hadiths/8a', 'Sahih Muslim 8a', 'Sahih Muslim 8a'],
     // the title is cut at 70 characters (components/hadith/HadithPage)
-    [`/hadiths/${henc.id}`, norm(hencTitle), norm(`${hencTitle.slice(0, 70)} - ${henc.book.name} ${henc.referenceNumber}`)],
+    [`/hadiths/${henc.id}`, norm(hencTitle), norm(`${hencTitle.slice(0, 70)} - ${bookName('vi', henc.book, vi)} ${henc.referenceNumber}`)],
     ['/categories', 'Danh mục', 'Danh mục'],
     [`/categories/${creed.slug}`, creed.title, creed.title],
     [`/categories/${creed.slug}/hadiths`, creed.title, `Hadith trong danh mục: ${creed.title}`],

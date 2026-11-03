@@ -110,13 +110,15 @@ module.exports = spec(module, 'language menu', (h) => {
     async (t) => {
       const bn = await interfaceStrings('bn');
       const vi = await interfaceStrings('vi');
-      const [book, chapter1, chapter2, abuDawud] = await Promise.all([
+      const [book, chapter1, chapter2, books] = await Promise.all([
         api(`/books/bukhari${loc('bn')}`),
         api(`/books/bukhari/chapters/1${loc('bn')}?perPage=1`),
         api(`/books/bukhari/chapters/2${loc('bn')}?perPage=1`),
-        api(`/books/abudawud${loc('bn')}`),
+        api(`/books${loc('bn')}`),
       ]);
       const names = namesOf('bn');
+      // a book the names (lib/names, or the fixture's two) do not have, nor the interface
+      const unnamed = books.find((b) => !(names.books || {})[b.slug] && b.slug !== 'hadeethenc');
       const fixture = NAMES_FIXTURE && names.books && names.books[BUKHARI];
       const name = (names.books || {})[BUKHARI] || book.name;
 
@@ -136,9 +138,9 @@ module.exports = spec(module, 'language menu', (h) => {
       const chapterRows = (await page.locator('#book-chapters + ol li').allInnerTexts()).map(norm);
       assert.ok(chapterRows[0].includes(norm(book.chapters[0].name)), `chapter 1 keeps the API name: ${chapterRows[0]}`);
       if (h.desktop) {
-        const sidebar = (await page.locator('aside [class*="summary_root"] a').allInnerTexts()).map(norm);
+        const sidebar = (await page.locator('aside div[class*="sidebar_branch"] > a').allInnerTexts()).map(norm);
         assert.ok(sidebar.some((text) => text.startsWith(name)), 'the sidebar names the book');
-        assert.ok(sidebar.some((text) => text.startsWith(abuDawud.name)), 'a book the names do not have keeps the API name');
+        assert.ok(sidebar.some((text) => text.startsWith(unnamed.name)), `a book the names do not have keeps the API name (${unnamed.slug})`);
       }
       if (!fixture) t.diagnostic('NAMES_FIXTURE is not set: the names expected are those of lib/names/bn.json, else the API');
 

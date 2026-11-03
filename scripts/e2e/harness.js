@@ -145,6 +145,21 @@ function namesOf(lang) {
   return namesCache.get(lang);
 }
 const isTopicCollection = (book) => [book.slug, book.code, book.source].includes('hadeethenc');
+
+// The categories the lists show for content in `lang`: those with something to read in it
+// and their ancestors (lib/api.js readableCategories, which Node cannot import: its paths
+// are the bundler's). Arabic, the original, keeps them all.
+function readableCategories(categories, lang) {
+  if (lang === 'ar') return categories;
+  const byId = new Map(categories.map((c) => [c.id, c]));
+  const kept = new Set();
+  categories
+    .filter((c) => c.totalTranslated == null || c.totalTranslated > 0)
+    .forEach((c) => {
+      for (let node = c; node && !kept.has(node.id); node = byId.get(node.parentId)) kept.add(node.id);
+    });
+  return categories.filter((c) => kept.has(c.id));
+}
 const bookName = (lang, book, tr = null) =>
   (isTopicCollection(book) && tr ? tr('topicCollection') : null) || (namesOf(lang).books || {})[book.slug] || book.name;
 
@@ -416,6 +431,7 @@ module.exports = {
   norm,
   pathOf,
   readClipboard,
+  readableCategories,
   run,
   scrollTo,
   sleep,

@@ -12,6 +12,7 @@ const {
   api,
   assert,
   cleanText,
+  interfaceStrings,
   loc,
   meta,
   norm,
@@ -201,10 +202,13 @@ module.exports = spec(module, 'translations', (h) => {
   h.test(
     'a language with no text gets one line; the topic collection\'s linked translation is labelled as such',
     async (t) => {
+      // ?lang=en: English content, so an English interface (it follows the content language)
+      const en = await interfaceStrings('en');
+      const vietnamese = { language: en.language('vi') };
       // Bukhari 1 has no Vietnamese text of any kind
       const { page } = await h.open(t, `/books/${BUKHARI}/hadiths/1?lang=en&tr=vi`);
       const block = page.locator('section[class*="translationBlock"]');
-      await waitForText(block.locator('p[data-language="vi"]'), 'Chưa có bản dịch tiếng Việt cho hadith này');
+      await waitForText(block.locator('p[data-language="vi"]'), en('extraMissing', vietnamese));
       assert.equal(await block.locator('div[data-language="vi"]').count(), 0);
 
       // Bukhari 3: only the topic collection's translation of the same wording
@@ -213,18 +217,18 @@ module.exports = spec(module, 'translations', (h) => {
       assert.ok(entry && entry.linked, 'the API links Bukhari 3 to the topic collection');
       await h.goto(page, `/books/${BUKHARI}/hadiths/3?lang=en&tr=vi`);
       const linked = page.locator('section[class*="translationBlock"] div[data-language="vi"]');
-      await waitForText(linked.locator('span[class*="linkedBadge"]'), 'Bản dịch tiếng Việt từ bộ hadith theo chủ đề');
-      assert.equal(await linked.getByRole('link', { name: /Xem giải thích đầy đủ/ }).getAttribute('href'), `/hadiths/${entry.linked.hadithId}`);
-      assert.match(norm(await linked.locator('p[class*="linkedNote"]').textContent()), /^Hadith này chưa có bản dịch riêng bằng ngôn ngữ này\./);
+      await waitForText(linked.locator('span[class*="linkedBadge"]'), en('topicTranslation', vietnamese));
+      assert.equal(await linked.getByRole('link', { name: en('linkedTranslationLink') }).getAttribute('href'), `/hadiths/${entry.linked.hadithId}`);
+      assert.equal(norm(await linked.locator('p[class*="linkedNote"]').textContent()), norm(en('topicTranslationNote')));
       // the source names no translator; no edition, no link out; its source line closes it
       assert.equal(await linked.locator('[class*="creditName"]').count(), 0);
       assert.equal(await linked.locator('a[href^="http"]').count(), 0);
-      assert.deepEqual((await linked.locator('p[data-source-line]').allTextContents()).map(norm), ['Nguồn: HadeethEnc.com']);
+      assert.deepEqual((await linked.locator('p[data-source-line]').allTextContents()).map(norm), [en('sourceLine', { source: 'HadeethEnc.com' })]);
       // the reference block links to the topic collection's hadith
-      const rows = await page.locator('section[aria-label="Tham chiếu"] dl > div').evaluateAll((items) =>
+      const rows = await page.locator(`section[aria-label="${en('refLabel')}"] dl > div`).evaluateAll((items) =>
         items.map((row) => [row.querySelector('dt').textContent.trim(), row.querySelector('dd').textContent.replace(/\s+/g, ' ').trim()])
       );
-      assert.deepEqual(rows[rows.length - 1], ['Bản dịch tiếng Việt từ bộ hadith theo chủ đề', 'Xem giải thích đầy đủ →']);
+      assert.deepEqual(rows[rows.length - 1], [en('topicTranslation', vietnamese), `${en('linkedTranslationLink')} →`]);
     },
     { smoke: true }
   );

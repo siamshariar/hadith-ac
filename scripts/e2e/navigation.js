@@ -3,7 +3,7 @@
 // header search, back-to-top and the phone header that hides on scroll.
 'use strict';
 
-const { BASE, api, assert, loc, norm, scrollTo, sleep, spec, until, waitForH1, waitForText, viNumber } = require('./harness');
+const { BASE, api, assert, loc, norm, readableCategories, scrollTo, sleep, spec, until, waitForH1, waitForText, viNumber } = require('./harness');
 
 const BUKHARI = 'sahih-al-bukhari';
 
@@ -125,12 +125,15 @@ module.exports = spec(module, 'navigation', (h) => {
       await until(async () => (await bookLinks.count()) === books.length, 'clearing the filter shows all');
 
       // categories mode
-      const [creed, all] = await Promise.all([api(`/categories/the-creed${loc()}`), api(`/categories${loc()}`)]);
+      const [creed, every] = await Promise.all([api(`/categories/the-creed${loc()}`), api(`/categories${loc()}`)]);
+      // the tree lists the categories with something to read in Vietnamese
+      const all = readableCategories(every, 'vi');
+      const shown = new Set(all.map((c) => c.id));
       await h.goto(page, `/categories/${creed.slug}`);
       const tree = page.locator('aside').getByRole('navigation', { name: 'Danh mục' });
       await until(async () => (await tree.locator('a[aria-current="page"]').count()) === 1, 'current category marked');
       assert.equal(await tree.locator('a[aria-current="page"]').getAttribute('href'), `/categories/${creed.slug}`);
-      for (const child of creed.children) {
+      for (const child of creed.children.filter((c) => shown.has(c.id))) {
         // (slugs can be Arabic: hrefs are percent-encoded)
         assert.equal(await tree.locator(`a[href^="/categories/${encodeURIComponent(child.slug)}"]`).count(), 1, `child ${child.slug} shown in the open branch`);
       }
