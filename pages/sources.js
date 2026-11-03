@@ -37,7 +37,7 @@ const COPY = {
       "Khi một hadith chưa có bản dịch bằng ngôn ngữ bạn chọn, bản dịch tiếng Anh được hiển thị kèm nhãn rõ ràng; nếu không có cả bản tiếng Anh, chỉ hiển thị nguyên văn tiếng Ả Rập.",
       "Liên kết giữa các bộ sưu tập chỉ được tạo khi lời văn tiếng Ả Rập trùng khớp chính xác. Hadith chưa có bản dịch riêng có thể được đọc qua bản dịch của bộ hadith theo chủ đề cho cùng lời văn; bản dịch đó được ghi nhãn riêng, không bao giờ trình bày như bản dịch của chính hadith.",
       "Đánh giá độ xác thực chỉ hiển thị kèm tên người đánh giá, đúng như đã được đưa ra. Sahih al-Bukhari, Sahih Muslim và ba bộ 40 hadith không có đánh giá theo từng hadith, nên ở đó không có đánh giá nào. Mỗi hadith của bộ hadith theo chủ đề mang một đánh giá do chính bộ này đưa ra.",
-      "Số hadith là số tham chiếu dùng để trích dẫn; với Sahih Muslim là số Abdul-Baqi (8, 8a, 8.01 ...). “Vị trí trong sách” là thứ tự của hadith trong chương, theo thứ tự của bộ sưu tập.",
+      "Số hadith là số tham chiếu dùng để trích dẫn; với Sahih Muslim là số Abdul-Baqi (8, 8a, 8.01 …). “Vị trí trong sách” là thứ tự của hadith trong chương, theo thứ tự của bộ sưu tập.",
     ],
     coverageTitle: "Mức độ có {language}",
     coverage: ({ language, topic, topicOwn, topicTotal, bookOwn, linked, readable, total, linkedBooks }) =>
@@ -76,7 +76,7 @@ const COPY = {
       "When a hadith has no translation in the chosen language, the English translation is shown and clearly labelled; without English either, only the Arabic is shown.",
       "Collections are linked only when the Arabic wording matches exactly. A hadith with no translation of its own can be read through the topic collection's translation of the same wording, labelled as such and never presented as the hadith's own translation.",
       "Grades are shown only with the grader's name, exactly as they were given. Sahih al-Bukhari, Sahih Muslim and the three forty-hadith books have no per-hadith grades, so none are shown there. Each hadith of the topic collection carries the one grade the collection gives it.",
-      "Hadith numbers are the reference numbers people cite; for Sahih Muslim the Abdul-Baqi numbers (8, 8a, 8.01 ...). The in-book reference is the hadith's position in its book, in the collection's order.",
+      "Hadith numbers are the reference numbers people cite; for Sahih Muslim the Abdul-Baqi numbers (8, 8a, 8.01 …). The in-book reference is the hadith's position in its book, in the collection's order.",
     ],
     coverageTitle: "{language} coverage",
     coverage: ({ language, topic, topicOwn, topicTotal, bookOwn, linked, readable, total, linkedBooks }) =>
@@ -117,7 +117,7 @@ const COPY = {
       "কোনো হাদিসের অনুবাদ বাছাই করা ভাষায় না থাকলে ইংরেজি অনুবাদ স্পষ্ট লেবেলসহ দেখানো হয়; ইংরেজিও না থাকলে শুধু আরবি পাঠ দেখানো হয়।",
       "আরবি শব্দাবলি হুবহু মিললেই কেবল গ্রন্থগুলোর মধ্যে সংযোগ করা হয়। নিজস্ব অনুবাদ নেই এমন হাদিস একই শব্দাবলির বিষয়ভিত্তিক সংকলনের অনুবাদের মাধ্যমে পড়া যায়; তা আলাদা লেবেলসহ দেখানো হয়, কখনো হাদিসটির নিজস্ব অনুবাদ হিসেবে নয়।",
       "হাদিসের মান কেবল মান-নির্ধারকের নামসহ দেখানো হয়, ঠিক যেভাবে তা দেওয়া হয়েছে। Sahih al-Bukhari, Sahih Muslim এবং চল্লিশ হাদিসের তিনটি সংকলনে প্রতিটি হাদিসের আলাদা মান নেই, তাই সেখানে কোনো মান দেখানো হয় না। বিষয়ভিত্তিক সংকলনের প্রতিটি হাদিসে সংকলনটির দেওয়া একটি মান থাকে।",
-      "হাদিস নম্বর হলো উদ্ধৃতিতে ব্যবহৃত রেফারেন্স নম্বর; Sahih Muslim-এর ক্ষেত্রে আবদুল বাকির নম্বর (8, 8a, 8.01 ...)। “গ্রন্থে অবস্থান” হলো গ্রন্থের ক্রম অনুযায়ী অধ্যায়ে হাদিসটির অবস্থান।",
+      "হাদিস নম্বর হলো উদ্ধৃতিতে ব্যবহৃত রেফারেন্স নম্বর; Sahih Muslim-এর ক্ষেত্রে আবদুল বাকির নম্বর (8, 8a, 8.01 …)। “গ্রন্থে অবস্থান” হলো গ্রন্থের ক্রম অনুযায়ী অধ্যায়ে হাদিসটির অবস্থান।",
     ],
     coverageTitle: "{language} ভাষায় প্রাপ্যতা",
     coverage: ({ language, topic, topicOwn, topicTotal, bookOwn, linked, readable, total, linkedBooks }) =>

@@ -117,7 +117,7 @@ module.exports = spec(module, 'navigation', (h) => {
         'sidebar marks the new chapter'
       );
 
-      const filter = page.locator('aside').getByRole('textbox', { name: 'Bộ sưu tập hadith' });
+      const filter = page.locator('aside').getByRole('searchbox', { name: 'Bộ sưu tập hadith' });
       await filter.fill('muslim');
       await until(async () => (await bookLinks.count()) === 1, 'filter leaves one collection');
       assert.equal(await bookLinks.first().getAttribute('href'), '/books/sahih-muslim');
@@ -134,7 +134,7 @@ module.exports = spec(module, 'navigation', (h) => {
         // (slugs can be Arabic: hrefs are percent-encoded)
         assert.equal(await tree.locator(`a[href^="/categories/${encodeURIComponent(child.slug)}"]`).count(), 1, `child ${child.slug} shown in the open branch`);
       }
-      await page.locator('aside').getByRole('textbox', { name: 'Danh mục' }).fill('giao ly');
+      await page.locator('aside').getByRole('searchbox', { name: 'Danh mục' }).fill('giao ly');
       const matches = all.filter((c) => /giao ly/.test(c.title.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd').toLowerCase()));
       await until(async () => (await tree.locator('a').count()) === matches.length, `filter shows the ${matches.length} matching categories`);
     },

@@ -182,7 +182,9 @@ module.exports = spec(module, 'search', (h) => {
       await pager.getByRole('link', { name: /Sau/ }).click();
       await h.waitForPath(page, (url) => url.searchParams.get('page') === '3', 'next page');
       await expectCountLine(page, p3);
-      assert.deepEqual(await cardCitations(page), p3.hadiths.map((hadith) => String(hadith.id)));
+      // the count line reads the same on every page: wait for page 3's cards themselves
+      const third = JSON.stringify(p3.hadiths.map((hadith) => String(hadith.id)));
+      await until(async () => JSON.stringify(await cardCitations(page)) === third, "page 3's cards");
 
       await pager.getByRole('link', { name: /Trước/ }).click();
       await h.waitForPath(page, (url) => url.searchParams.get('page') === '2', 'previous page');

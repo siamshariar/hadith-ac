@@ -31,7 +31,8 @@ export default function FooterWeb() {
           </nav>
 
           <p className={styles.copyright}>
-            <span>&copy; {new Date().getFullYear()} </span>
+            {/* the server (UTC) and the reader's clock can be in different years */}
+            <span suppressHydrationWarning>&copy; {new Date().getFullYear()} </span>
             <Link href="/about">{site.siteName}</Link>
             <span>. {t("allRightsReserved")}</span>
           </p>

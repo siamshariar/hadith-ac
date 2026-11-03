@@ -146,7 +146,7 @@ function Details({ details }) {
           <h2 id="hadith-sources" className={styles.sectionTitle}>
             {t("sources")}
           </h2>
-          <div className={styles.reference} dir="rtl" lang="ar">
+          <div className={styles.reference} dir="rtl" lang="ar" translate="no">
             {cleanText(details.reference)}
           </div>
         </section>

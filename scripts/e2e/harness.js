@@ -267,9 +267,12 @@ function run(specs) {
 
 // ------------------------------------------------------------------ DOM helpers
 
+// The breadcrumb trail, named in the interface language (t("breadcrumb")): vi, bn, en.
+const BREADCRUMB_NAV = ['Đường dẫn', 'পৃষ্ঠার পথ', 'Breadcrumb'].map((name) => `nav[aria-label="${name}"]`).join(', ');
+
 // Breadcrumb labels and links, in order.
 async function breadcrumbs(page) {
-  return page.locator('nav[aria-label="Breadcrumb"] li').evaluateAll((items) =>
+  return page.locator(BREADCRUMB_NAV).locator('li').evaluateAll((items) =>
     items.map((li) => {
       const link = li.querySelector('a');
       return { label: li.textContent.replace(/\s+/g, ' ').trim(), href: link ? link.getAttribute('href') : null };
@@ -342,6 +345,7 @@ async function scrollTo(page, y) {
 module.exports = {
   API,
   BASE,
+  BREADCRUMB_NAV,
   PROFILES,
   api,
   assert,

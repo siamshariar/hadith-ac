@@ -44,6 +44,7 @@ run([
   require('./translations'),
   require('./actions'),
   require('./settings'),
+  require('./keyboard'),
   require('./brand'),
   require('./errors'),
   require('./platform'),

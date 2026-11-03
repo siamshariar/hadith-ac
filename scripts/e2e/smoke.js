@@ -3,7 +3,7 @@
 // collection -> chapter -> hadith and back up through the breadcrumbs.
 'use strict';
 
-const { api, assert, breadcrumbs, cleanText, lettered, loc, meta, norm, spec, waitForH1, viNumber } = require('./harness');
+const { BREADCRUMB_NAV, api, assert, breadcrumbs, cleanText, lettered, loc, meta, norm, spec, waitForH1, viNumber } = require('./harness');
 
 const SITE = 'Hadith tiếng Việt | Hadith.vn';
 
@@ -107,7 +107,7 @@ module.exports = spec(module, 'smoke', (h) => {
         { label: `Hadith ${first.referenceNumber}`, href: null },
       ]);
 
-      const crumbs = page.locator('nav[aria-label="Breadcrumb"]');
+      const crumbs = page.locator(BREADCRUMB_NAV);
       await crumbs.getByRole('link', { name: 'Chương 1' }).click();
       await h.waitForPath(page, (url) => url.pathname === `/books/${bukhari.slug}/chapters/1`, 'breadcrumb to the chapter');
       await waitForH1(page, `1. ${chapter.chapter.name}`);

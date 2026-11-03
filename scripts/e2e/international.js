@@ -237,7 +237,7 @@ module.exports = spec(module, 'international (ac)', (h) => {
   );
 
   h.test(
-    'ac: the international ribbon and the dark logo',
+    'ac: the international accent and the dark logo (no ribbon under the header)',
     async (t) => {
       const settings = JSON.stringify({
         view: { arabic: true, translation: true, tafseer: true },
@@ -257,6 +257,8 @@ module.exports = spec(module, 'international (ac)', (h) => {
         const header = [...document.querySelectorAll('div[class*="Header_header"]')].find(visible);
         const logo = header && [...header.querySelectorAll('a[aria-label] img')].find(visible);
         return {
+          // the site's accent (config/countries.json), for a wordmark without a logo
+          accent: getComputedStyle(document.documentElement).getPropertyValue('--brand-ribbon').trim(),
           ribbon: getComputedStyle(header, '::after').backgroundImage,
           logo: logo && new URL(logo.currentSrc || logo.src).pathname,
           loaded: logo && logo.complete && logo.naturalWidth === 2020,
@@ -264,7 +266,8 @@ module.exports = spec(module, 'international (ac)', (h) => {
         };
       });
       assert.equal(brand.dark, true);
-      assert.match(brand.ribbon, /^linear-gradient\(90deg, rgb\(13, 148, 136\), rgb\(37, 99, 235\) 50%, rgb\(79, 70, 229\)\)$/, 'teal, blue, indigo');
+      assert.match(brand.accent, /^linear-gradient\(90deg, #0D9488, #2563EB 50%, #4F46E5\)$/i, 'teal, blue, indigo');
+      assert.equal(brand.ribbon, 'none', 'the logo carries the accent; the header has no ribbon');
       assert.equal(brand.logo, '/img/logo_ac_dark.png');
       assert.equal(brand.loaded, true);
       const share = await page.getAttribute('meta[property="og:image"]', 'content');

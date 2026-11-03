@@ -187,6 +187,14 @@ module.exports = spec(module, 'settings', (h) => {
       async () => /PDMSIslam/.test(await arabicText(page).evaluate((el) => getComputedStyle(el).fontFamily)),
       'Arabic font applied'
     );
+    // the translation's font too (its setter was once missing from the settings context)
+    await settings.getByText('Chọn phông chữ bản dịch').click();
+    await settings.getByRole('radio', { name: 'Times New Roman' }).check();
+    await until(
+      async () => /TimesNewRoman/.test(await translationText(page).first().evaluate((el) => getComputedStyle(el).fontFamily)),
+      'translation font applied'
+    );
+    assert.equal((await stored(page, 'settings')).fontFamily.translation, 'TimesNewRoman');
 
     await settings.getByText('Chọn giao diện').click();
     await settings.getByRole('button', { name: 'Tối', exact: true }).click();
@@ -212,6 +220,7 @@ module.exports = spec(module, 'settings', (h) => {
     const reset = await stored(page, 'settings');
     assert.equal(reset.fontSize.arabic, 28);
     assert.equal(reset.fontFamily.arabic, 'Amiri');
+    assert.equal(reset.fontFamily.translation, 'BeVietnamPro');
     if (h.desktop) {
       await page.keyboard.press('Escape');
     } else {

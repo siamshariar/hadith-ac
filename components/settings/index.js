@@ -1,7 +1,7 @@
 "use client";
 
 import { fonts, themes } from "../../lib/settings";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { SettingsContext } from "../../contexts/SettingsContext";
 import { DEFAULT_LANGUAGE, browserLanguages, compareLanguages, matchLanguage, readLanguageCookie } from "../../lib/language";
 import Accordion from "@mui/material/Accordion";
@@ -17,7 +17,6 @@ import ErrorState from "../core/error";
 import { useLocale } from "../../contexts/LocaleContext";
 import useApi from "../../hooks/useApi";
 import { getLanguages } from "../../lib/api";
-import Switcher from "../core/switcher";
 import UpIcon from "../icons/ChevronUp";
 import DownIcon from "../icons/ChevronDown";
 import PlusIcon from "../icons/Plus";
@@ -406,12 +405,51 @@ const Note = () => {
   );
 };
 
+// Reset, then ten seconds to take it back. Reset stays put and does nothing while the
+// offer lasts (a double click can't undo itself); the status line says what happened,
+// with Undo beside it. Focus never drops to the page when Undo goes.
+const UNDO_MS = 10000;
+
 const Reset = () => {
   const { t } = useLocale();
-  const { resetSettings } = useContext(SettingsContext);
+  const { resetSettings, restoreSettings } = useContext(SettingsContext);
+  const [previous, setPrevious] = useState(null);
+  const resetButton = useRef(null);
+  const undoButton = useRef(null);
+
+  useEffect(() => {
+    if (!previous) return undefined;
+    const timer = window.setTimeout(() => {
+      if (document.activeElement === undoButton.current && resetButton.current) resetButton.current.focus();
+      setPrevious(null);
+    }, UNDO_MS);
+    return () => window.clearTimeout(timer);
+  }, [previous]);
+
+  const reset = () => {
+    if (!previous) setPrevious(resetSettings());
+  };
+  const undo = () => {
+    restoreSettings(previous);
+    if (resetButton.current) resetButton.current.focus();
+    setPrevious(null);
+  };
+
   return (
-    <Button className={styles.btn_reset} onClick={resetSettings} disableRipple>
-      {t("resetSettings")}
-    </Button>
+    <div className={styles.reset}>
+      <Button ref={resetButton} className={styles.btn_reset} onClick={reset} disableRipple>
+        {t("resetSettings")}
+      </Button>
+      <span className={styles.reset_status} role="status">
+        {previous && (
+          <>
+            {t("settingsResetDone")}{" "}
+            <button ref={undoButton} type="button" className={styles.btn_undo} onClick={undo}>
+              {t("undo")}
+            </button>
+          </>
+        )}
+      </span>
+    </div>
   );
 };

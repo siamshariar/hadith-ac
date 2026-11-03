@@ -30,6 +30,8 @@ export default function StoredList({ kind, controller }) {
   const Icon = isPin ? PinIcon : AutoStoriesIcon;
 
   const open = (event, href) => {
+    // Cmd, Ctrl or Shift: a new tab or window, the browser's to open
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     if (controller) controller(false)(event);
     router.push(href);

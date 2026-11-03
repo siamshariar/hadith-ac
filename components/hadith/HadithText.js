@@ -9,11 +9,12 @@ import ChevronDownIcon from "../icons/ChevronDown";
 import { Highlighted } from "./Highlight";
 import styles from "./hadith.module.scss";
 
-// Arabic is always present and always rendered right-to-left.
+// Arabic is always present and always rendered right-to-left. It is the original:
+// a browser's page translation must never replace it (translate="no").
 export function ArabicText({ text, clamped = false }) {
   if (!text) return null;
   return (
-    <div className={`${styles.arabic} ${clamped ? styles.clampArabic : ""}`} dir="rtl" lang="ar">
+    <div className={`${styles.arabic} ${clamped ? styles.clampArabic : ""}`} dir="rtl" lang="ar" translate="no">
       <Highlighted text={cleanText(text)} field="arabic" />
     </div>
   );

@@ -17,7 +17,7 @@ export default function Categories({ categories, total, error }) {
     <>
       <Meta
         title={t("categories")}
-        description="Hadith categories: creed, jurisprudence, virtues and manners, the Quran and its sciences, and more."
+        description={t("categoriesDescription")}
         url={`${server}/categories`}
         image={shareImage}
         type="website"

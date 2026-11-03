@@ -37,7 +37,7 @@ export default function Category({ category, preview, previewFiltered, books, er
     <>
       <Meta
         title={category.title}
-        description={`${category.title} (${category.titleArabic || ""}): ${total} hadiths.`}
+        description={`${category.title}${category.titleArabic ? ` (${category.titleArabic})` : ""}: ${formatNumber(total)} ${t("hadiths")}.`}
         url={`${server}${categoryPath(category)}`}
         image={shareImage}
         type="website"
@@ -47,7 +47,6 @@ export default function Category({ category, preview, previewFiltered, books, er
         <Breadcrumbs items={categoryCrumbs(category, t)} />
 
         <header className={styles.header}>
-          <p className={styles.eyebrow}>{t("categories")}</p>
           <h1 className={styles.title}>{category.title}</h1>
           {category.titleArabic && (
             <p className={styles.titleArabic} dir="rtl" lang="ar">

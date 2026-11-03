@@ -3,7 +3,7 @@
 // lists (language chips, subcategories, pagination) and the category tree.
 'use strict';
 
-const { api, assert, loc, norm, spec, until, waitForH1, waitForText, viNumber } = require('./harness');
+const { BREADCRUMB_NAV, api, assert, loc, norm, spec, until, waitForH1, waitForText, viNumber } = require('./harness');
 
 const cardIds = (page) =>
   page.locator('article[id^="hadith-"]').evaluateAll((cards) => cards.map((card) => Number(card.id.replace('hadith-', ''))));
@@ -142,7 +142,7 @@ module.exports = spec(module, 'lists', (h) => {
     // no position in a chapter for these
     assert.equal(await page.locator('article[id^="hadith-"] span[class*="inBook"]').count(), 0);
     assert.equal(await page.getByRole('combobox', { name: 'Chọn chương' }).inputValue(), '-1');
-    const crumbs = await page.locator('nav[aria-label="Breadcrumb"] li').allTextContents();
+    const crumbs = await page.locator(BREADCRUMB_NAV).locator('li').allTextContents();
     assert.equal(norm(crumbs[crumbs.length - 1]), 'Chưa xếp chương');
     assert.ok(book.chapters.some((c) => c.chapterNo === -1));
 
@@ -247,7 +247,8 @@ module.exports = spec(module, 'lists', (h) => {
     assert.deepEqual(heads, top.map((c) => `/categories/${c.slug}`), 'top-level categories in order');
     for (const parent of home.categories) {
       const list = page.getByRole('list', { name: `Danh mục con: ${parent.title}` });
-      const children = await list.locator('a').evaluateAll((links) => links.map((a) => [decodeURIComponent(a.getAttribute('href')), a.lastElementChild.textContent.trim()]));
+      // the count as shown ("6/76"); the visually hidden sentence after it is for screen readers
+      const children = await list.locator('a').evaluateAll((links) => links.map((a) => [decodeURIComponent(a.getAttribute('href')), a.querySelector('span[aria-hidden="true"]').textContent.trim()]));
       assert.deepEqual(
         children,
         all.filter((c) => c.parentId === parent.id).map((c) => [`/categories/${c.slug}`, `${viNumber(c.totalTranslated)}/${viNumber(c.totalHadith)}`]),

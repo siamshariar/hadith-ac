@@ -24,7 +24,7 @@ export default function ContinueReading() {
         <AutoStoriesIcon />
       </span>
       <span className={styles.body}>
-        <span className={styles.eyebrow}>{t("continueReading")}</span>
+        <span className={styles.label}>{t("continueReading")}</span>
         <span className={styles.title} dir="auto">
           {label}
         </span>

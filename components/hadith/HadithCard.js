@@ -47,7 +47,10 @@ function CardContext({ hadith, book }) {
 // - showContext: book › chapter above the citation (search results);
 // - inBookReference: { chapterNo, position } when the API item has none
 //   (the chapter page knows each hadith's position).
-export default function HadithCard({ hadith, book, showContext = false, inBookReference, isBookmarkPage, updateBookmarksData }) {
+// `headingLevel`: 2 where the cards sit right under the page's h1 (a chapter, a
+// category's list, a bookmark folder); 3 under a section heading (search results).
+export default function HadithCard({ hadith, book, showContext = false, inBookReference, isBookmarkPage, updateBookmarksData, headingLevel = 3 }) {
+  const Title = headingLevel === 2 ? "h2" : "h3";
   const { t } = useLocale();
   const href = citablePath(hadith, book);
   const inBook = isCategoryBook(book) ? null : inBookText(hadith.inBookReference || inBookReference, t);
@@ -71,12 +74,12 @@ export default function HadithCard({ hadith, book, showContext = false, inBookRe
       </header>
 
       {hadith.title && (
-        <h3 className={styles.title} dir="auto">
+        <Title className={styles.title} dir="auto">
           {/* HadeethEnc titles are in the language of its translation */}
           <Link href={href}>
             <Highlighted text={cleanText(hadith.title)} field={hadith.translation && hadith.translation.languageCode} />
           </Link>
-        </h3>
+        </Title>
       )}
 
       {/* Arabic and translation side by side when the card is wide enough

@@ -51,7 +51,7 @@ export default function CategoryHadiths({ data, books, direct, filtered, counts,
     <>
       <Meta
         title={`${t("hadithsInCategory")}: ${category.title}`}
-        description={`${category.title}: ${pagination.total} hadiths.`}
+        description={`${category.title}: ${formatNumber(pagination.total)} ${t("hadiths")}.`}
         url={`${server}${pageHref(basePath, query, pagination.page)}`}
         image={shareImage}
         type="website"
@@ -61,13 +61,13 @@ export default function CategoryHadiths({ data, books, direct, filtered, counts,
         <Breadcrumbs items={crumbs} />
 
         <header className={styles.header}>
-          <p className={styles.eyebrow}>{t("hadithsInCategory")}</p>
           <h1 className={styles.title}>{category.title}</h1>
           {category.titleArabic && (
             <p className={styles.titleArabic} dir="rtl" lang="ar">
               {category.titleArabic}
             </p>
           )}
+          <p className={styles.subtitle}>{t("hadithsInCategory")}</p>
           <p className={styles.meta}>
             <span>
               {formatNumber(allCount)} {t("hadiths")}
@@ -145,7 +145,7 @@ export default function CategoryHadiths({ data, books, direct, filtered, counts,
             hadiths={hadiths}
             loading={loading}
             picker={{ translations }}
-            renderCard={(hadith) => <HadithCard key={hadith.id} hadith={hadith} book={books[hadith.bookSlug]} />}
+            renderCard={(hadith) => <HadithCard key={hadith.id} hadith={hadith} book={books[hadith.bookSlug]} headingLevel={2} />}
           />
         )}
 

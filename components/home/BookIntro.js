@@ -30,7 +30,6 @@ export default function BookIntro({ book, chapterCount, counts, editions = [] })
 
   return (
     <header className={styles.intro}>
-      <p className={styles.eyebrow}>{t("books")}</p>
       <div className={styles.titleRow}>
         <h1 className={styles.title}>{book.name}</h1>
         {book.nameArabic && (

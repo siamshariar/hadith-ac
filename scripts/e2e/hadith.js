@@ -4,7 +4,7 @@
 // shown against the API.
 'use strict';
 
-const { BASE, api, assert, cleanText, lettered, loc, meta, norm, spec, until, waitForH1, waitForText } = require('./harness');
+const { BASE, BREADCRUMB_NAV, api, assert, cleanText, lettered, loc, meta, norm, spec, until, waitForH1, waitForText } = require('./harness');
 
 // Translations are compared without whitespace: the English narrator line
 // ("Narrated 'Umar:") is set on its own line, which adds or removes a space
@@ -213,7 +213,7 @@ module.exports = spec(module, 'hadith page', (h) => {
       assert.equal(muslim.referenceNumber, '8.01');
       await waitForH1(page, 'Sahih Muslim 8a');
       assert.equal(norm(await page.getByText('Số hadith:').textContent()), 'Số hadith: 8a');
-      const crumbs = await page.locator('nav[aria-label="Breadcrumb"] li').allTextContents();
+      const crumbs = await page.locator(BREADCRUMB_NAV).locator('li').allTextContents();
       assert.equal(norm(crumbs[crumbs.length - 1]), 'Hadith 8a');
       assert.equal(norm(await arabicBlock(page).innerText()), norm(cleanText(muslim.arabic)));
 
@@ -252,7 +252,7 @@ module.exports = spec(module, 'hadith page', (h) => {
     assert.equal(norm(info.title), `${reference} | Hadith tiếng Việt | Hadith.vn`, 'the title names the record, not just the collection');
     assert.ok(info.canonical.endsWith(`/hadiths/${second.id}`), `canonical by id: ${info.canonical}`);
     assert.equal(await page.getByText('Số hadith:').count(), 0, 'no number to show');
-    const crumbs = await page.locator('nav[aria-label="Breadcrumb"] li').allTextContents();
+    const crumbs = await page.locator(BREADCRUMB_NAV).locator('li').allTextContents();
     assert.equal(norm(crumbs[crumbs.length - 1]), 'Hadith');
     const rows = await page.locator('section[aria-label="Tham chiếu"] dl > div').evaluateAll((items) =>
       items.map((row) => [row.querySelector('dt').textContent.trim(), row.querySelector('dd').textContent.trim()])

@@ -20,7 +20,7 @@ export default function Books({ books, error }) {
     <>
       <Meta
         title={t("books")}
-        description="Hadith collections: Sahih al-Bukhari, Sahih Muslim, the Sunan, Muwatta Malik, the forty-hadith books and hadiths by topic."
+        description={t("booksDescription")}
         url={`${server}/books`}
         image={shareImage}
         type="website"
