@@ -76,8 +76,10 @@ The visual system is fixed and documented. Follow it; do not restyle from habit.
   names.
 - No data-source names in the interface. The one exception is HadeethEnc's source line
   under its content, which its terms require.
-- Interface strings live in `lib/i18n.js` and `lib/locales/*.js`. A new string needs every
-  catalog; `npm run i18n:missing` checks.
+- Interface strings live in `lib/locales/*.js`, one catalog per language (English is the
+  fallback and the one in the bundle; the others load with the page). A new string needs
+  every catalog, with plural forms where the count is a number; `npm run i18n:missing`
+  checks. The interface follows the content language when it has a catalog.
 
 ## Verify before calling UI work done
 

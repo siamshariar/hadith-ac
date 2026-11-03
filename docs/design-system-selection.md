@@ -318,7 +318,8 @@ The issues the audit left open, reviewed on 2026-11-03:
 | The go-to placeholders ("e.g. Bukhari 1, Muslim 8a") don't end in "…" | **Kept.** They are examples of what to type, not an unfinished sentence |
 | The bookmark tabs are not in the URL, so the back button and links can't reach a tab | **Open.** It changes the bookmarks page's URLs. Recommended: `?tab=pins` with `router.replace`, the bookmarks tab without a parameter |
 | English strings use straight apostrophes | **Open**, for a copy pass over the English catalog. New strings use ’ |
-| The 13 draft catalogs, not wired in on this branch, lack 14 keys from `own-data` | **At the `l10n-core` merge**, with its translation conflicts |
+| The 13 draft catalogs lack 14 keys from `own-data` | **Merged with `l10n-core`** (branch `integration/design-l10n`). They also lack 14 of `l10n-core`'s count and label templates: 28 strings each, shown in English until drafted and reviewed |
+| On WebKit, the international edition's language menu test sometimes finds English after a reload (1 run in 3; on `l10n-core`'s own builds too). A scripted replay of the same steps passes | **Open.** Check on a real Safari before launch |
 
 ### Diff review before the first commit
 
