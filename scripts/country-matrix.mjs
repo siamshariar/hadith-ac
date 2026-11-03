@@ -296,7 +296,9 @@ async function checkInternational(browser, code, languages) {
     contexts.push(context);
     if (cookies.length) await context.addCookies(cookies.map((cookie) => ({ ...cookie, url: BASE })));
     const page = await context.newPage();
-    page.on("console", (m) => m.type() === "error" && errors.push(`${locale}: ${m.text().slice(0, 160)}`));
+    // the not-found page answers 404 on purpose: only that document's 404 is expected
+    const expected = (m) => /status of 404/.test(m.text()) && /\/no-such-page$/.test((m.location() || {}).url || "");
+    page.on("console", (m) => m.type() === "error" && !expected(m) && errors.push(`${locale}: ${m.text().slice(0, 160)}`));
     page.on("pageerror", (e) => errors.push(`${locale}: ${String(e).slice(0, 160)}`));
     const open = async (p) => {
       const res = await page.goto(BASE + p, { waitUntil: "networkidle", timeout: 120000 });
@@ -356,7 +358,8 @@ async function checkInternational(browser, code, languages) {
       );
       const wrong = entries.filter((e) => {
         const l = byCode.get(e.code);
-        return !l || e.href !== `/?lang=${e.code}` || !e.text.includes(norm(l.nativeName)) || !e.text.includes(i18n.formatNumber(l.totalTranslated, want.ui));
+        // normalised as the text is: French groups digits with a narrow no-break space
+        return !l || e.href !== `/?lang=${e.code}` || !e.text.includes(norm(l.nativeName)) || !e.text.includes(norm(i18n.formatNumber(l.totalTranslated, want.ui)));
       });
       check(
         `${tag} language directory`,
