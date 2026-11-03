@@ -1,0 +1,339 @@
+// The language menu of the header (LanguageMenu.js). Written with logical properties
+// (inline-start / -end) so that it needs nothing more for a right-to-left interface.
+
+.button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: var(--txt11);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+
+  svg {
+    flex: 0 0 auto;
+    fill: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+// "🌐 Tiếng Việt ▾": a pill like the translations chip, 44px tall.
+.desktop {
+  height: 44px;
+  padding-block: 0;
+  padding-inline: 12px 14px;
+  border: 1px solid var(--bdr11);
+  border-radius: 999px;
+  font-size: 14px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--txt12);
+  }
+
+  &:hover,
+  &[aria-expanded="true"] {
+    border-color: var(--theme-color);
+    background: var(--accent-soft);
+  }
+}
+
+// A long name ("Bahasa Melayu") is cut rather than pushing the header icons away.
+.name {
+  max-width: 11em;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+
+// ▾
+.caret {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin: 0 2px 3px 2px;
+  border-right: 2px solid var(--txt12);
+  border-bottom: 2px solid var(--txt12);
+  transform: rotate(45deg);
+}
+
+// The globe alone: a 44 x 44 tap area around a 24px glyph, like the other
+// phone header icons (components/mobile/Header.module.scss).
+.phone {
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--txt12);
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  &:active {
+    background: var(--accent-soft);
+  }
+}
+
+// A row of the phone menu (components/mobile/MobileNav.js), like its links.
+.menu {
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  color: var(--txt11);
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: start;
+  white-space: normal;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    margin-inline-end: 8px;
+    fill: var(--txt11);
+  }
+
+  &:hover {
+    color: var(--main-color);
+
+    svg {
+      fill: var(--main-color);
+    }
+  }
+}
+
+.text {
+  color: inherit;
+}
+
+// ---------------------------------------------------------------- the panel
+
+.paper {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important;
+  background: var(--bg11) !important;
+  background-image: none !important;
+  color: var(--txt11) !important;
+}
+
+// Desktop: under the button, the filter on top and the list scrolling below it.
+.popover {
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  max-height: min(560px, calc(100vh - 96px)) !important;
+  margin-top: 6px;
+  border: 1px solid var(--bdr11);
+  border-radius: 12px !important;
+}
+
+// Phones and tablets: a full-height sheet, however short the list (MUI's paper is as tall
+// as its content).
+.sheet {
+  height: 100% !important;
+  border-radius: 14px 14px 0 0;
+}
+
+.head {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 6px;
+  padding-inline: 16px 6px;
+  border-bottom: 1px solid var(--bdr11);
+}
+
+.title {
+  color: var(--txt11);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--txt12);
+  cursor: pointer;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: var(--bg22);
+    color: var(--txt11);
+  }
+}
+
+.searchRow {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--bdr11);
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 24px;
+  display: flex;
+  transform: translateY(-50%);
+  pointer-events: none;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--txt13);
+  }
+}
+
+.search {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding-block: 0;
+  padding-inline: 42px 12px;
+  border: 1px solid var(--bdr13);
+  border-radius: 999px;
+  background: var(--bg12);
+  color: var(--txt11);
+  font: inherit;
+  font-size: 16px; // no zoom on focus in iOS Safari
+  appearance: none;
+
+  &::placeholder {
+    color: var(--txt13);
+  }
+
+  &:focus-visible {
+    border-color: var(--theme-color);
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
+  }
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 4px 0 calc(8px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+}
+
+// One language: its own name, then its name in the interface and its count; a check on the
+// current one.
+.item {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px !important;
+  padding: 8px 16px !important;
+  white-space: normal !important;
+
+  &:global(.Mui-selected),
+  &:global(.Mui-selected:hover) {
+    background: var(--accent-soft) !important;
+  }
+}
+
+// Fills the row, so that the check sits at its end; each line as wide as its text, so
+// that a right-to-left name starts where the others do.
+.names {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+}
+
+.native {
+  color: var(--txt11);
+  font-family: var(--font-trans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+// Amiri's Arabic is small for its size: as the hadith text does (--font-arabic)
+.arabic {
+  font-family: var(--font-arabic);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.sub {
+  color: var(--txt12);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+// "Interface in Tiếng Việt": quiet, under the current language without a catalog.
+.note {
+  color: var(--txt13);
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.check {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--main-color);
+  }
+}
+
+.empty {
+  padding: 12px 16px;
+  color: var(--txt12);
+  font-size: 14px;
+}
+
+.loading {
+  padding: 8px 16px;
+}
+
+@media print {
+  .button {
+    display: none !important;
+  }
+}

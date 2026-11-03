@@ -33,7 +33,7 @@ function CardContext({ hadith, book }) {
         ›
       </span>
       <Link href={chapterPath(book.slug, chapterNo)}>
-        {chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapterNo}`}
+        {chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : t("chapterNumber", { number: chapterNo })}
       </Link>
     </p>
   );

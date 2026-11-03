@@ -26,7 +26,7 @@ import SearchIcon from "../icons/Search";
 import { useLocale } from "../../contexts/LocaleContext";
 import useSubmitBusy from "../../hooks/useSubmitBusy";
 import HeaderLogo from "./HeaderLogo";
-import InterfaceSwitcher from "../core/InterfaceSwitcher";
+import LanguageMenu from "../core/LanguageMenu";
 
 // Compact search box (GET /search?q=, so it also works before hydration).
 function HeaderSearch() {
@@ -63,10 +63,9 @@ function HeaderSearch() {
 
 // Desktop header (1024px and up): the colour logo (the dark one in the dark
 // theme) and the two ways into the library, books and categories, as words;
-// on the right search, the theme and the menu. The home and search pages have
-// their own search box, so the header only links to /search there. An
-// international site adds its interface menu ("English ▾",
-// components/core/InterfaceSwitcher).
+// on the right the language menu ("Tiếng Việt ▾", components/core/LanguageMenu),
+// search, the theme and the menu. The home and search pages have their own
+// search box, so the header only links to /search there.
 const SECTIONS = [
   { href: "/books", label: "books" },
   { href: "/categories", label: "categories" },
@@ -163,7 +162,7 @@ export default function HeaderWeb({ page }) {
               </IconButton>
             )}
 
-            <InterfaceSwitcher variant="desktop" className={styles.interface} />
+            <LanguageMenu variant="desktop" className={styles.language} />
 
             <IconButton
               className={styles.btn}

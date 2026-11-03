@@ -50,8 +50,8 @@ export default function CategoryHadiths({ data, books, direct, filtered, counts,
   return (
     <>
       <Meta
-        title={`${t("hadithsInCategory")}: ${category.title}`}
-        description={`${category.title}: ${formatNumber(pagination.total)} ${t("hadiths")}.`}
+        title={t("labelValue", { label: t("hadithsInCategory"), value: category.title })}
+        description={`${category.title}: ${t("hadithCount", { count: pagination.total })}.`}
         url={`${server}${pageHref(basePath, query, pagination.page)}`}
         image={shareImage}
         type="website"
@@ -70,7 +70,7 @@ export default function CategoryHadiths({ data, books, direct, filtered, counts,
           <p className={styles.subtitle}>{t("hadithsInCategory")}</p>
           <p className={styles.meta}>
             <span>
-              {formatNumber(allCount)} {t("hadiths")}
+              {t("hadithCount", { count: allCount })}
             </span>
             {lang !== "ar" && translatedCount != null && (
               <span>{t("countTranslated", { count: formatNumber(translatedCount), language })}</span>

@@ -184,7 +184,7 @@ export default function Search({ query, book, results, books, languages, notFoun
   return (
     <>
       <Meta
-        title={query ? `${t("search")}: ${query}` : t("search")}
+        title={query ? t("labelValue", { label: t("search"), value: query }) : t("search")}
         description={t("searchTips")}
         url={`${server}/search`}
         image={shareImage}
@@ -357,7 +357,14 @@ export async function getServerSideProps(context) {
         book,
         results,
         notFound,
-        books: books.map(({ slug, code, name, source, totalHadith }) => ({ slug, code, name, source, totalHadith })),
+        books: books.map(({ slug, code, name, nameEnglish, source, totalHadith }) => ({
+          slug,
+          code,
+          name,
+          nameEnglish: nameEnglish || null,
+          source,
+          totalHadith,
+        })),
         // the deployment's language first, then English, then by name
         languages: languages
           .filter((language) => language.code !== "ar")

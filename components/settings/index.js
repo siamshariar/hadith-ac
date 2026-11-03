@@ -48,21 +48,22 @@ export default function SettingsContent() {
   );
 }
 
-// Content language: populated from /hadith/languages, saved in a cookie so
-// server-rendered pages use it as {localizationCode}. Arabic is not offered
-// here because the Arabic text is always shown. The translations panel of
-// the hadith pages saves the same cookie, so the value is read from it. An
-// international site that knows no preference yet shows the browser's
-// language, the one its pages pick (lib/language.js).
+// The language, as the header's language menu sets it (components/core/LanguageMenu):
+// every language of /hadith/languages, saved in a cookie so server-rendered pages use it as
+// {localizationCode}, for the translation, the book names and, when there is a
+// catalog for it, the interface (lib/language.js interfaceFor). The translations panel of
+// the hadith pages saves the same cookie, so the value is read from it. An international
+// site that knows no preference yet shows the browser's language, the one its pages pick
+// (lib/language.js).
 const Language = () => {
-  const { t, preferredLang, setLanguage, formatNumber } = useLocale();
+  const { t, preferredLang, setLanguage } = useLocale();
   const { data, error, loading, retry } = useApi("languages", () => getLanguages());
   const [saved, setSaved] = useState(null);
   useEffect(() => {
     setSaved(readLanguageCookie());
   }, []);
 
-  const languages = (Array.isArray(data) ? data : []).filter((language) => language.code !== "ar").sort(compareLanguages);
+  const languages = (Array.isArray(data) ? [...data] : []).sort(compareLanguages);
   const current =
     saved ||
     preferredLang ||
@@ -74,7 +75,7 @@ const Language = () => {
 
   return (
     <div className={`${styles.block} ${styles.language}`}>
-      <div className={styles.title}>{t("contentLanguage")}</div>
+      <div className={styles.title}>{t("language")}</div>
       <div className={styles.list}>
         {loading && !languages.length ? (
           <Skeleton height={40} />
@@ -88,15 +89,18 @@ const Language = () => {
               setSaved(event.target.value);
               setLanguage(event.target.value);
             }}
-            aria-label={t("contentLanguage")}
+            aria-label={t("language")}
           >
-            {languages.map((language) => (
-              <option key={language.code} value={language.code}>
-                {language.nativeName}
-                {language.nativeName !== language.name ? ` (${language.name})` : ""}
-                {` - ${t("translatedCount", { count: formatNumber(language.totalTranslated) })}`}
-              </option>
-            ))}
+            {languages.map((language) => {
+              const count = language.totalTranslated || 0;
+              return (
+                <option key={language.code} value={language.code}>
+                  {language.nativeName}
+                  {language.nativeName !== language.name ? ` (${language.name})` : ""}
+                  {` - ${language.code === "ar" ? t("languageOriginal", { count }) : t("translatedCount", { count })}`}
+                </option>
+              );
+            })}
           </select>
         )}
         <p className={styles.language_note}>{t("contentLanguageNote")}</p>
@@ -398,7 +402,7 @@ const Note = () => {
   return (
     <div className={`${styles.block} ${styles.note}`}>
       <p className={styles.note_text}>
-        <span>{t("settingsNoteLabel")}: </span>
+        <span>{t("labelColon", { label: t("settingsNoteLabel") })} </span>
         {t("settingsNote")}
       </p>
     </div>

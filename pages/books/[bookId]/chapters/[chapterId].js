@@ -25,7 +25,7 @@ const toggleOnSpace = (event) => {
 };
 
 const chapterLabel = (chapter, t) =>
-  chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : `${t("chapter")} ${chapter.chapterNo}`;
+  chapter.chapterNo === UNASSIGNED_CHAPTER ? t("unassignedChapter") : t("chapterNumber", { number: chapter.chapterNo });
 
 // Keys that change a closed select's value as they go down (Chrome, Edge and Firefox on
 // Windows and Linux), with typed letters and digits: browsing, not choosing.
@@ -173,7 +173,7 @@ export default function Chapter({ data, chapters, neighbours, onlyReadable, read
           )}
           <p className={styles.meta}>
             <span>
-              {formatNumber(chapter.totalHadith)} {t("hadiths")}
+              {t("hadithCount", { count: chapter.totalHadith })}
             </span>
             {pagination.lastPage > 1 && (
               <span>

@@ -42,7 +42,7 @@ function AlsoIn({ related, keepLang }) {
   if (!related || !related.length) return null;
   return (
     <p className={styles.alsoIn}>
-      <span className={styles.alsoInLabel}>{t("alsoIn")}:</span>{" "}
+      <span className={styles.alsoInLabel}>{t("labelColon", { label: t("alsoIn") })}</span>{" "}
       {related.map((item, index) => (
         <Fragment key={item.id}>
           {index > 0 && ", "}
@@ -97,7 +97,7 @@ function Details({ details }) {
 
       {details.attribution && (
         <p className={styles.attribution} lang={code} dir={dir}>
-          <span className={styles.attributionLabel}>{t("attribution")}:</span> {cleanText(details.attribution)}
+          <span className={styles.attributionLabel}>{t("labelColon", { label: t("attribution") })}</span> {cleanText(details.attribution)}
         </p>
       )}
 
@@ -211,7 +211,7 @@ export default function HadithDetail({ hadith, translations }) {
   const chapterText = showChapter
     ? chapter.chapterNo === UNASSIGNED_CHAPTER
       ? t("unassignedChapter")
-      : `${t("chapter")} ${chapter.chapterNo}: ${chapter.name}`
+      : t("chapterNumberName", { number: chapter.chapterNo, name: chapter.name })
     : null;
   // HadeethEnc is browsed by category: its first one stands for the chapter.
   const category = categoryBook && hadith.categories && hadith.categories[0];
@@ -257,7 +257,7 @@ export default function HadithDetail({ hadith, translations }) {
         <div className={styles.facts}>
           {hadith.referenceNumber && (
             <span className={styles.fact}>
-              {t("hadithNumber")}: <strong>{lettered(hadith.referenceNumber)}</strong>
+              {t("labelColon", { label: t("hadithNumber") })} <strong>{lettered(hadith.referenceNumber)}</strong>
             </span>
           )}
           <GradeBadge grades={namedGrades(hadith, book)} gradeText={hadith.gradeText} />

@@ -5,7 +5,7 @@ import Document, { Html, Head, Main, NextScript } from "next/document";
 import { ServerStyleSheets } from "@mui/styles";
 
 import { GA_TRACKING_ID } from "../lib/gtag";
-import { INTERFACE_DIRECTION, INTERFACE_LANGUAGE, INTERNATIONAL, isInterfaceLanguage } from "../lib/language";
+import { SITE_INTERFACE, interfaceDirection, isInterfaceLanguage } from "../lib/language";
 import { accentGradient } from "../lib/sites";
 import { fontStacks } from "../lib/settings";
 
@@ -39,14 +39,13 @@ class CustomDocument extends Document {
   }
 
   render() {
-    // The deployment's interface language (lib/language.js), whatever the content
-    // language: content blocks carry their own lang and dir. An international site's
-    // pages say which interface the reader got (lib/api loadPage); its static pages are
-    // in the default one until LocaleContext switches them.
+    // The interface language, which follows the content language (lib/language.js
+    // interfaceFor), and its direction: each page says which interface it is in (lib/api
+    // loadPage, loadStaticPage). Content blocks carry their own lang and dir.
     const pageProps = (this.props.__NEXT_DATA__ && this.props.__NEXT_DATA__.props && this.props.__NEXT_DATA__.props.pageProps) || {};
-    const lang = INTERNATIONAL && isInterfaceLanguage(pageProps.uiLang) ? pageProps.uiLang : INTERFACE_LANGUAGE;
+    const lang = isInterfaceLanguage(pageProps.uiLang) ? pageProps.uiLang : SITE_INTERFACE;
     return (
-      <Html lang={lang} dir={INTERFACE_DIRECTION} style={ribbonStyle}>
+      <Html lang={lang} dir={interfaceDirection(lang)} style={ribbonStyle}>
         <Head>
           {/* Global Site Tag (gtag.js) - Google Analytics, only when an ID is configured
               (next.config.js accepts letters, digits and dashes only) */}

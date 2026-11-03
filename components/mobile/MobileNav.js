@@ -2,8 +2,7 @@ import { useState, useContext, useEffect, useRef } from "react";
 import Link from "next/link";
 import Drawer from "@mui/material/Drawer";
 import HeaderLogo from "../web/HeaderLogo";
-import InterfaceSwitcher from "../core/InterfaceSwitcher";
-import { INTERNATIONAL } from "../../lib/language";
+import LanguageMenu from "../core/LanguageMenu";
 import SettingsModal from "./settings-modal";
 import CategoryModal from "./CategoryModal";
 import MenuBookIcon from "../icons/MenuBook";
@@ -239,11 +238,9 @@ export default function MobileNav({ navOpen, navControl, selectedCategoryId }) {
 
                 </Link>
               </li>
-              {INTERNATIONAL && (
-                <li>
-                  <InterfaceSwitcher variant="menu" />
-                </li>
-              )}
+              <li>
+                <LanguageMenu variant="menu" />
+              </li>
               {/* <li>
 								<Link href="/pin">
 									<a onClick={handlePinModal(true)}>
