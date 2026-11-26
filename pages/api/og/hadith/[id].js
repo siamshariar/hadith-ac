@@ -1,4 +1,4 @@
-import { ImageResponse } from "next/server";
+import { ImageResponse } from "next/og";
 import { SITE_LANGUAGE, getHadith } from "../../../../lib/api";
 import { referenceText } from "../../../../lib/citation";
 import { shareImage, SHARE_IMAGE_SIZE } from "../../../../lib/config";
@@ -21,20 +21,37 @@ const DRAWABLE = /^[\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script
 const LOGO_RATIO = 2020 / 343; // the logos' size (public/img/logo*.png)
 const t = (key, vars) => translate(SITE_INTERFACE, key, vars);
 
+const get = (url) =>
+  fetch(url).then((response) => {
+    if (!response.ok) throw new Error(`${url}: ${response.status}`);
+    return response.arrayBuffer();
+  });
+
 let fonts = null;
 const loadFonts = (origin) => {
   if (!fonts) {
-    const get = (file) =>
-      fetch(`${origin}/fonts/og/${file}`).then((response) => {
-        if (!response.ok) throw new Error(`font ${file}: ${response.status}`);
-        return response.arrayBuffer();
-      });
-    fonts = Promise.all([get("NotoSans-Regular.ttf"), get("NotoSans-Bold.ttf"), get("NotoNaskhArabic-Regular.ttf")]).catch((error) => {
+    const font = (file) => get(`${origin}/fonts/og/${file}`);
+    fonts = Promise.all([font("NotoSans-Regular.ttf"), font("NotoSans-Bold.ttf"), font("NotoNaskhArabic-Regular.ttf")]).catch((error) => {
       fonts = null;
       throw error;
     });
   }
   return fonts;
+};
+
+// The logo's bytes, given to the image as they are: the card's drawing library does not fetch an
+// image at a private address (its protection against SSRF), which a site's own address can be,
+// and a picture it cannot fetch breaks the whole response. No logo: the site's name in letters.
+let logo = null;
+const loadLogo = (origin) => {
+  if (!site.logo) return Promise.resolve(null);
+  if (!logo) {
+    logo = get(`${origin}${site.logo}`).catch(() => {
+      logo = null;
+      return null;
+    });
+  }
+  return logo;
 };
 
 // The source text as the page shows it (lib/hadith cleanText): line breaks and tags out,
@@ -94,8 +111,9 @@ export default async function handler(request) {
   const host = new URL(shareImage).host;
 
   let fontData;
+  let logoData;
   try {
-    fontData = await loadFonts(url.origin);
+    [fontData, logoData] = await Promise.all([loadFonts(url.origin), loadLogo(url.origin)]);
   } catch (_) {
     return fallback();
   }
@@ -107,8 +125,8 @@ export default async function handler(request) {
       <div style={{ display: "flex", flexDirection: "column", width, height, background: "#ffffff", fontFamily: "Noto Sans" }}>
         <div style={{ display: "flex", flexDirection: "column", flexGrow: 1, padding: "56px 72px 40px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {site.logo ? (
-              <img src={`${url.origin}${site.logo}`} width={Math.round(logoHeight * LOGO_RATIO)} height={logoHeight} alt="" />
+            {logoData ? (
+              <img src={logoData} width={Math.round(logoHeight * LOGO_RATIO)} height={logoHeight} alt="" />
             ) : (
               <div style={{ display: "flex", color: "#1a3a1f", fontSize: 48, fontWeight: 700 }}>{site.siteName}</div>
             )}
