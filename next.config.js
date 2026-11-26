@@ -136,6 +136,11 @@ module.exports = (phase) => {
       // cache confusion), so there is nothing of it to attack.
       unoptimized: true,
     },
+    // The share card route (pages/api/og/hadith/[id].js) reads its fonts and the logos from
+    // public/, which is not part of a function unless named here.
+    outputFileTracingIncludes: {
+      "/api/og/hadith/*": ["./public/fonts/og/*.ttf", "./public/img/logo*.png"],
+    },
     async headers() {
       return [
         {
