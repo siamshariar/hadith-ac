@@ -1,6 +1,6 @@
 # Deploying hadith-vn
 
-hadith-vn is a Next.js 13.5 site (Pages Router) that reads everything from the hadith
+hadith-vn is a Next.js 16 site (Pages Router, built with webpack) that reads everything from the hadith
 endpoints of the Quran API. The same code serves every country. Each country is a
 separate build, run by its own Node.js process behind nginx.
 
