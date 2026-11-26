@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { ImageResponse } from "next/og";
 import { SITE_LANGUAGE, getHadith } from "../../../../lib/api";
 import { referenceText } from "../../../../lib/citation";
@@ -13,24 +15,22 @@ import { accentGradient, site } from "../../../../lib/sites";
 // address: a card carries the site's name, so nobody may put other words on one.
 // Satori draws text without shaping, so a card is drawn only for a text in Latin, Cyrillic or
 // Greek letters (Noto Sans; ﷺ from Noto Naskh Arabic, public/fonts/og). For anything else, or
-// a hadith with no text in the language, or the API away, it sends the site's card instead.
-export const config = { runtime: "edge" };
+// A Node.js function, not an Edge one: with Next 16's card renderer the Edge function is over
+// Vercel's 1 MB limit, and Next 16 deprecates the Edge runtime. The fonts and the logo are read
+// from the function's own files (next.config.js outputFileTracingIncludes), not fetched: no
+// network, and nothing depends on the address the card was asked for at.
 
 const { width, height } = SHARE_IMAGE_SIZE;
 const DRAWABLE = /^[\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Common}\p{Script=Inherited}ﷺ]*$/u;
 const LOGO_RATIO = 2020 / 343; // the logos' size (public/img/logo*.png)
 const t = (key, vars) => translate(SITE_INTERFACE, key, vars);
 
-const get = (url) =>
-  fetch(url).then((response) => {
-    if (!response.ok) throw new Error(`${url}: ${response.status}`);
-    return response.arrayBuffer();
-  });
+const publicFile = (file) => readFile(path.join(process.cwd(), "public", file));
 
 let fonts = null;
-const loadFonts = (origin) => {
+const loadFonts = () => {
   if (!fonts) {
-    const font = (file) => get(`${origin}/fonts/og/${file}`);
+    const font = (file) => publicFile(`fonts/og/${file}`);
     fonts = Promise.all([font("NotoSans-Regular.ttf"), font("NotoSans-Bold.ttf"), font("NotoNaskhArabic-Regular.ttf")]).catch((error) => {
       fonts = null;
       throw error;
@@ -39,17 +39,19 @@ const loadFonts = (origin) => {
   return fonts;
 };
 
-// The logo's bytes, given to the image as they are: the card's drawing library does not fetch an
-// image at a private address (its protection against SSRF), which a site's own address can be,
-// and a picture it cannot fetch breaks the whole response. No logo: the site's name in letters.
+// The logo as a data URI, so the card's renderer has nothing to fetch (it refuses images at
+// private addresses, and a picture it cannot load breaks the whole card). No logo: the site's
+// name in letters.
 let logo = null;
-const loadLogo = (origin) => {
+const loadLogo = () => {
   if (!site.logo) return Promise.resolve(null);
   if (!logo) {
-    logo = get(`${origin}${site.logo}`).catch(() => {
-      logo = null;
-      return null;
-    });
+    logo = publicFile(site.logo.replace(/^\/+/, ""))
+      .then((bytes) => `data:image/png;base64,${bytes.toString("base64")}`)
+      .catch(() => {
+        logo = null;
+        return null;
+      });
   }
   return logo;
 };
@@ -87,12 +89,12 @@ function fit(text) {
   return { text: `${(space > max * 0.7 ? cut.slice(0, space) : cut).replace(/[\s,;:.–-]+$/, "")}…`, size };
 }
 
-const fallback = () =>
-  new Response(null, { status: 307, headers: { Location: shareImage, "Cache-Control": "public, max-age=300" } });
-
-export default async function handler(request) {
-  const url = new URL(request.url);
-  const id = decodeURIComponent(url.pathname.split("/").pop() || "");
+export default async function handler(req, res) {
+  const fallback = () => {
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.redirect(307, shareImage);
+  };
+  const id = String(req.query.id || "");
   if (!/^\d{1,9}$/.test(id)) return fallback();
 
   let hadith;
@@ -113,14 +115,14 @@ export default async function handler(request) {
   let fontData;
   let logoData;
   try {
-    [fontData, logoData] = await Promise.all([loadFonts(url.origin), loadLogo(url.origin)]);
+    [fontData, logoData] = await Promise.all([loadFonts(), loadLogo()]);
   } catch (_) {
     return fallback();
   }
   const [regular, bold, naskh] = fontData;
   const logoHeight = 52;
 
-  return new ImageResponse(
+  const card = new ImageResponse(
     (
       <div style={{ display: "flex", flexDirection: "column", width, height, background: "#ffffff", fontFamily: "Noto Sans" }}>
         <div style={{ display: "flex", flexDirection: "column", flexGrow: 1, padding: "56px 72px 40px" }}>
@@ -160,7 +162,15 @@ export default async function handler(request) {
         { name: "Noto Sans", data: bold, weight: 700, style: "normal" },
         { name: "Noto Naskh Arabic", data: naskh, weight: 400, style: "normal" },
       ],
-      headers: { "Cache-Control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400" },
     }
   );
+  let png;
+  try {
+    png = Buffer.from(await card.arrayBuffer());
+  } catch (_) {
+    return fallback();
+  }
+  res.setHeader("Content-Type", "image/png");
+  res.setHeader("Cache-Control", "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400");
+  res.status(200).send(png);
 }
